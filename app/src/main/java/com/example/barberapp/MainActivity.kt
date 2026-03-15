@@ -10,6 +10,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import android.view.Menu
 import android.view.MenuItem
 import com.example.barberapp.databinding.ActivityMainBinding
+import com.google.firebase.Firebase
 
 class MainActivity : AppCompatActivity() {
 
