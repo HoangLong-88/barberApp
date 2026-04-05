@@ -5,10 +5,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.ComposeView
-import androidx.navigation.fragment.findNavController
+import com.example.barberapp.admin.view.AdminDashboardScreen // Thêm dòng import này
 import com.example.barberapp.databinding.FragmentFirstBinding
 
 /**
@@ -36,17 +34,13 @@ class FirstFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val composeView = view.findViewById<ComposeView>(R.id.composeView)
         composeView.setContent {
-            Greeting("babe")
+            // Hiển thị AdminDashboardScreen trực tiếp để test
+            AdminDashboardScreen()
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    @Composable
-    fun Greeting(name: String){
-        Text(text = "Hello $name")
     }
 }
