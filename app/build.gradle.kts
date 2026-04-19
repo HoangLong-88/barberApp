@@ -61,4 +61,5 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.9.0")
     debugImplementation("androidx.compose.ui:ui-tooling:1.6.7")
     implementation("androidx.compose.material:material-icons-extended:1.6.7")
+    implementation("androidx.navigation:navigation-compose:2.7.7")
 }

@@ -1,45 +1,84 @@
-package com.example.barberapp.ui
+package com.example.barberapp.View.UI
 
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
-
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.animation.core.EaseInOutSine
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.*
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.*
-
-import com.example.barberapp.utilities.BackgroundDark
-import com.example.barberapp.utilities.TextPrimary
-import com.example.barberapp.utilities.TextSecondary
-import com.example.barberapp.utilities.TextHint
-import com.example.barberapp.utilities.GoldDark
-import com.example.barberapp.utilities.GoldLight
-import com.example.barberapp.utilities.GoldPrimary
-import com.example.barberapp.utilities.BorderColor
-import com.example.barberapp.utilities.GoogleBtnBg
-import com.example.barberapp.utilities.SurfaceDark
-import com.example.barberapp.utilities.InputDark
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.barberapp.View.UI.Customer.MainActivity
+import com.example.barberapp.View.utils.BackgroundDark
+import com.example.barberapp.View.utils.BorderColor
+import com.example.barberapp.View.utils.GoldDark
+import com.example.barberapp.View.utils.GoldLight
+import com.example.barberapp.View.utils.GoldPrimary
+import com.example.barberapp.View.utils.GoogleBtnBg
+import com.example.barberapp.View.utils.InputDark
+import com.example.barberapp.View.utils.SurfaceDark
+import com.example.barberapp.View.utils.TextHint
+import com.example.barberapp.View.utils.TextPrimary
+import com.example.barberapp.View.utils.TextSecondary
 
 class LoginActivity : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?){
@@ -48,6 +87,9 @@ class LoginActivity : AppCompatActivity(){
             LoginScreen(
                 onRegister = {
                     startActivity(Intent(this, SignUpActivity::class.java))
+                },
+                onLogin = { _,_,_ ->
+                    startActivity(Intent(this, MainActivity::class.java))
                 }
             )
         }
@@ -285,7 +327,7 @@ fun LoginScreen(
                         color = Color(0xFF1A1000),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        letterSpacing = 0.5.sp
+                        letterSpacing = 0.5.sp,
                     )
                 }
             }
