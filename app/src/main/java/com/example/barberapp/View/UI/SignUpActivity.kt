@@ -1,7 +1,6 @@
-package com.example.barberapp.ui
+package com.example.barberapp.View.UI
 
 import android.os.Bundle
-import android.os.PersistableBundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.*
@@ -24,17 +23,15 @@ import androidx.compose.ui.text.input.*
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
 
-import com.example.barberapp.utilities.BackgroundDark
-import com.example.barberapp.utilities.TextPrimary
-import com.example.barberapp.utilities.TextSecondary
-import com.example.barberapp.utilities.TextHint
-import com.example.barberapp.utilities.GoldDark
-import com.example.barberapp.utilities.GoldLight
-import com.example.barberapp.utilities.GoldPrimary
-import com.example.barberapp.utilities.BorderColor
-import com.example.barberapp.utilities.GoogleBtnBg
-import com.example.barberapp.utilities.SurfaceDark
-import com.example.barberapp.utilities.InputDark
+import com.example.barberapp.View.utils.BackgroundDark
+import com.example.barberapp.View.utils.TextPrimary
+import com.example.barberapp.View.utils.TextSecondary
+import com.example.barberapp.View.utils.TextHint
+import com.example.barberapp.View.utils.GoldDark
+import com.example.barberapp.View.utils.GoldLight
+import com.example.barberapp.View.utils.GoldPrimary
+import com.example.barberapp.View.utils.BorderColor
+import com.example.barberapp.View.utils.InputDark
 
 
 
