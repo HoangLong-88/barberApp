@@ -13,3 +13,9 @@
 .externalNativeBuild
 .cxx
 local.properties
+<<<<<<< HEAD
+=======
+app/google-services.json
+/.idea/deviceManager.xml
+.idea/
+>>>>>>> test
