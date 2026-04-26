@@ -1,4 +1,4 @@
-package com.example.babershop.model
+package com.example.babershop.customeHuan.model
 
 data class User(
     val name: String,

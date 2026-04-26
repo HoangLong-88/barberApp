@@ -1,4 +1,4 @@
-package com.example.babershop.view
+package com.example.babershop.customeHuan.view
 
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.PaddingValues

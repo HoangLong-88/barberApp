@@ -1,4 +1,4 @@
-package com.example.babershop.ui.theme
+package com.example.babershop.customeHuan.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

@@ -1,4 +1,4 @@
-package com.example.babershop.ui.theme
+package com.example.babershop.customeHuan.theme
 
 import androidx.compose.ui.graphics.Color
 

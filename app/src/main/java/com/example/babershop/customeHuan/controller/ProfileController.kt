@@ -1,14 +1,14 @@
-package com.example.babershop.controller
+package com.example.babershop.customeHuan.controller
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.example.babershop.model.User
+import com.example.babershop.customeHuan.model.User
 
 class ProfileController {
     // Khởi tạo user với dữ liệu mẫu ban đầu
     var user by mutableStateOf(
-        User(
+        _root_ide_package_.com.example.babershop.customeHuan.model.User(
             name = "Tran Huan",
             email = "huan123@gmail.com",
             phone = "090xxxxxxx",

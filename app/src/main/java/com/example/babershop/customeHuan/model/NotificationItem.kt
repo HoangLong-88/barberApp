@@ -1,4 +1,4 @@
-package com.example.babershop.model
+package com.example.babershop.customeHuan.model
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector

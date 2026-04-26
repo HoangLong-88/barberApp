@@ -1,4 +1,4 @@
-package com.example.babershop.view
+package com.example.babershop.customeHuan.view
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

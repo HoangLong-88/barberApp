@@ -1,4 +1,4 @@
-package com.example.babershop.view
+package com.example.babershop.customeHuan.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -10,9 +10,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-// IMPORT MỚI
-import com.example.babershop.model.BookingItem
-import com.example.babershop.controller.BookingController
+import com.example.babershop.customeHuan.model.BookingItem
+import com.example.babershop.customeHuan.controller.BookingController
 
 @Composable
 fun BookingsScreen(controller: BookingController = remember { BookingController() }) {
