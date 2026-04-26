@@ -51,7 +51,7 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
-    
+
     // Compose Dependencies
     implementation("androidx.compose.ui:ui:1.6.7")
     implementation("androidx.compose.runtime:runtime:1.6.7") // Thêm dòng này để sửa lỗi ComposableFunction0

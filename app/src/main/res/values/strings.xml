@@ -1,4 +1,7 @@
 <resources>
+<<<<<<< HEAD
+    <string name="app_name">BaberShop</string>
+=======
     <string name="app_name">barberApp</string>
     <string name="action_settings">Settings</string>
     <!-- Strings used for fragments for navigation -->
@@ -10,4 +13,5 @@
     <string name="lorem_ipsum">
        Hello World!
     </string>
+>>>>>>> test
 </resources>
