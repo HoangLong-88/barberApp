@@ -1,4 +1,4 @@
-package com.example.barberapp.View.UI.component
+package com.example.barberapp.View.component
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
@@ -6,6 +6,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -17,7 +18,7 @@ import com.example.barberapp.View.utils.TextSecondary
 private data class NavItem(
     val route: String,
     val label: String,
-    val icon: androidx.compose.ui.graphics.vector.ImageVector
+    val icon: ImageVector
 )
 private val navItems = listOf(
     NavItem("home",         "Home",          Icons.Outlined.Home),

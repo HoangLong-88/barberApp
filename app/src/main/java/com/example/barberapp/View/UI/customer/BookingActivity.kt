@@ -1,9 +1,5 @@
-package com.example.barberapp.View.UI.Customer
+package com.example.barberapp.View.UI.customer
 
-import android.content.Intent
-import android.os.Bundle
-import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -23,21 +19,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.barberapp.View.UI.component.SharedBottomNavBar
+import com.example.barberapp.View.component.SharedBottomNavBar
 import com.example.barberapp.View.utils.BackgroundColor
 import com.example.barberapp.View.utils.CancelledBg
 import com.example.barberapp.View.utils.CancelledText
 import com.example.barberapp.View.utils.CompletedBg
 import com.example.barberapp.View.utils.CompletedText
 import com.example.barberapp.View.utils.FilterInactive
-import com.example.barberapp.View.utils.GoldAccent
 import com.example.barberapp.View.utils.PendingBg
 import com.example.barberapp.View.utils.PendingText
 import com.example.barberapp.View.utils.PrimaryYellow

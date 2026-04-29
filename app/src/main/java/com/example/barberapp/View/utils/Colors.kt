@@ -1,5 +1,8 @@
 package com.example.barberapp.View.utils
 
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 // ─── Color Palette ───────────────────────────────────────────────────────────
@@ -51,3 +54,16 @@ public val CancelledIconFg = Color(0xFFE53935)
 // ─── Profile type tints ─────────────────────────────────────────────────
 public val GoldAccent = Color(0xFFF5A623)
 public val LogoutRed = Color(0xFFE53935)
+
+// ─── TextField Colors ─────────────────────────────────────────────────────────
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun barbershopTextFieldColors() = OutlinedTextFieldDefaults.colors(
+    focusedBorderColor    = GoldPrimary,
+    unfocusedBorderColor  = BorderColor,
+    focusedContainerColor = InputDark,
+    unfocusedContainerColor = InputDark,
+    cursorColor           = GoldPrimary,
+    focusedLabelColor     = GoldPrimary,
+    unfocusedLabelColor   = TextSecondary,
+)

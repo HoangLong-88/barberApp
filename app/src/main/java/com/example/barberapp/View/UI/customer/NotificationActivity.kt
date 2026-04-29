@@ -1,8 +1,5 @@
-package com.example.barberapp.View.UI.Customer
+package com.example.barberapp.View.UI.customer
 
-import android.os.Bundle
-import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -51,7 +48,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.barberapp.Model.data.AppNofitifcation
 import com.example.barberapp.Model.types.NotifType
-import com.example.barberapp.View.UI.component.SharedBottomNavBar
+import com.example.barberapp.View.component.SharedBottomNavBar
 import com.example.barberapp.View.utils.BackgroundColor
 import com.example.barberapp.View.utils.CancelledIconBg
 import com.example.barberapp.View.utils.CancelledIconFg

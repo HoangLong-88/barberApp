@@ -1,4 +1,4 @@
-package com.example.barberapp.View.UI.Customer
+package com.example.barberapp.View.UI.customer
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost

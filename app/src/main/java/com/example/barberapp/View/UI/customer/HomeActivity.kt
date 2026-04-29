@@ -1,8 +1,5 @@
-package com.example.barberapp.View.UI.Customer
+package com.example.barberapp.View.UI.customer
 
-import android.os.Bundle
-import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -28,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.barberapp.View.UI.component.SharedBottomNavBar
+import com.example.barberapp.View.component.SharedBottomNavBar
 import com.example.barberapp.View.utils.BackgroundDark
 import com.example.barberapp.View.utils.BottomNavBg
 import com.example.barberapp.View.utils.CardBg
