@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "883723885626",
+    "project_id": "babershop-fccbd",
+    "storage_bucket": "babershop-fccbd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:883723885626:android:c8a472c4dbc8462af2e903",
+        "android_client_info": {
+          "package_name": "com.example.babershop"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUqAZ5mXqrAcYeOfDBOcGlM2xPlmjGBW4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
