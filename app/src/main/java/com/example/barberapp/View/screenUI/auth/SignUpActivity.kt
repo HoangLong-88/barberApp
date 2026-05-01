@@ -1,4 +1,4 @@
-package com.example.barberapp.View.UI
+package com.example.barberapp.View.screenUI.auth
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 import com.example.barberapp.View.utils.BackgroundDark
 import com.example.barberapp.View.utils.TextPrimary
@@ -32,14 +33,27 @@ import com.example.barberapp.View.utils.GoldLight
 import com.example.barberapp.View.utils.GoldPrimary
 import com.example.barberapp.View.utils.BorderColor
 import com.example.barberapp.View.utils.InputDark
+import com.example.barberapp.ViewModel.auth.AuthVM
 
 
-
-class SignUpActivity: AppCompatActivity() {
+class SignUpActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            RegisterScreen()
+            val authVM: AuthVM = viewModel()
+            val uiState = authVM.uiState
+            RegisterScreen(
+                onLogin = { finish() },
+                onBack = { finish() },
+                onCreateAccount = { username, email, phone, password ->
+                    authVM.signUp(username,email,phone,password)
+                }
+            )
+            LaunchedEffect(uiState.isSuccess) {
+                if (uiState.isSuccess){
+                    finish()
+                }
+            }
         }
     }
 }
@@ -57,13 +71,15 @@ fun RegisterScreen(
     ) -> Unit = { _, _, _, _ -> },
     onLogin: () -> Unit = {},
 ) {
-    var fullName         by remember { mutableStateOf("") }
-    var email            by remember { mutableStateOf("") }
-    var phone            by remember { mutableStateOf("") }
-    var password         by remember { mutableStateOf("") }
-    var confirmPassword  by remember { mutableStateOf("") }
-    var passwordVisible  by remember { mutableStateOf(false) }
-    var confirmVisible   by remember { mutableStateOf(false) }
+    val authVM: AuthVM = viewModel()
+    val state = authVM.uiState
+    var userName by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmVisible by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -119,8 +135,8 @@ fun RegisterScreen(
             RegisterFieldLabel("Full Name")
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
-                value = fullName,
-                onValueChange = { fullName = it },
+                value = userName,
+                onValueChange = { userName = it },
                 placeholder = { Text("John Doe", color = TextHint, fontSize = 14.sp) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
@@ -257,15 +273,28 @@ fun RegisterScreen(
             Spacer(Modifier.height(32.dp))
 
             // ── Create Account Button ──────────────────────────────────────
-            val isFormValid = fullName.isNotBlank()
+            val isFormValid = userName.isNotBlank()
                     && email.isNotBlank()
                     && phone.isNotBlank()
                     && password.isNotBlank()
                     && password == confirmPassword
+            if (state.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    color = GoldPrimary
+                )
+            }
+            state.error?.let { errorMsg ->
+                Text(
+                    text = errorMsg,
+                    color = Color.Red,
+                    modifier = Modifier.padding(vertical = 8.dp).align(Alignment.CenterHorizontally)
+                )
+            }
 
             Button(
                 onClick = {
-                    if (isFormValid) onCreateAccount(fullName, email, phone, password)
+                    if (isFormValid) onCreateAccount(userName, email, phone, password)
                 },
                 enabled = isFormValid,
                 modifier = Modifier
@@ -364,14 +393,14 @@ private fun registerTextFieldColors(
     focusedBorder: Color = GoldPrimary,
     unfocusedBorder: Color = BorderColor,
 ) = OutlinedTextFieldDefaults.colors(
-    focusedBorderColor      = focusedBorder,
-    unfocusedBorderColor    = unfocusedBorder,
-    focusedContainerColor   = InputDark,
+    focusedBorderColor = focusedBorder,
+    unfocusedBorderColor = unfocusedBorder,
+    focusedContainerColor = InputDark,
     unfocusedContainerColor = InputDark,
-    cursorColor             = GoldPrimary,
-    focusedLabelColor       = GoldPrimary,
-    unfocusedLabelColor     = TextSecondary,
-    disabledContainerColor  = InputDark,
+    cursorColor = GoldPrimary,
+    focusedLabelColor = GoldPrimary,
+    unfocusedLabelColor = TextSecondary,
+    disabledContainerColor = InputDark,
 )
 
 // ─── Preview ──────────────────────────────────────────────────────────────────
