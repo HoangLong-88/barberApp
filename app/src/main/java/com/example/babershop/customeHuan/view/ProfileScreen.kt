@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
-import com.example.babershop.controller.ProfileController
+import com.example.babershop.customeHuan.controller.ProfileController
 
 @Composable
 fun ProfileScreen(

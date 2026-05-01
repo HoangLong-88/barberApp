@@ -11,7 +11,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BarberApp">
         <activity
-            android:name=".View.UI.auth.LoginActivity"
+            android:name=".View.screenUI.auth.LoginActivity"
             android:exported="true"
             android:theme="@style/Theme.BarberApp">
             <intent-filter>
@@ -20,8 +20,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".View.UI.auth.SignUpActivity"/>
-        <activity android:name=".View.UI.customer.MainActivity"/>
+        <activity android:name=".View.screenUI.auth.SignUpActivity"/>
+        <activity android:name=".View.screenUI.customer.MainActivity"/>
     </application>
 
 </manifest>

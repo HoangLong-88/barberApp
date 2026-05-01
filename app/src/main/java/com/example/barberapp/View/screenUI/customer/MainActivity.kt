@@ -1,4 +1,4 @@
-package com.example.barberapp.View.UI.customer
+package com.example.barberapp.View.screenUI.customer
 
 import android.os.Bundle
 import androidx.activity.compose.setContent

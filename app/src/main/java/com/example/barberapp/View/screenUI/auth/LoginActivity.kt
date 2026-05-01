@@ -1,4 +1,4 @@
-package com.example.barberapp.View.UI.auth
+package com.example.barberapp.View.screenUI.auth
 
 import android.content.Intent
 import android.os.Bundle
@@ -61,7 +61,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.barberapp.View.UI.customer.MainActivity
+import com.example.barberapp.View.screenUI.customer.MainActivity
 import com.example.barberapp.View.component.FieldLabel
 import com.example.barberapp.View.component.ScissorsIcon
 import com.example.barberapp.View.service.auth.onAuthUIService
@@ -266,7 +266,7 @@ fun LoginScreen(
                 }
             }
             if(uiState.isSuccess){
-                Text("Đăng nhập thành công!", color = Color.Red)
+                Text("Đăng nhập thành công!", color = Color.Green)
             }
             uiState.error?.let {
                 Text("Error: $it", color = Color.Red)

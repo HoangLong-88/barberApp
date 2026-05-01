@@ -1,5 +1,6 @@
 package com.example.babershop.customeHuan.view
 
+// DÒNG IMPORT QUAN TRỌNG ĐỂ HẾT LỖI NAVCONTROLLER
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,10 +13,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-// DÒNG IMPORT QUAN TRỌNG ĐỂ HẾT LỖI NAVCONTROLLER
 import androidx.navigation.NavController
-import com.example.babershop.model.NotificationItem
-import com.example.babershop.controller.NotificationController
+import com.example.babershop.customeHuan.controller.NotificationController
+import com.example.babershop.customeHuan.model.NotificationItem
 
 @Composable
 fun NotificationsScreen(

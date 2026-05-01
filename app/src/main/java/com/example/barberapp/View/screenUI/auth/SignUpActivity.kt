@@ -1,4 +1,4 @@
-package com.example.barberapp.View.UI.auth
+package com.example.barberapp.View.screenUI.auth
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -33,7 +33,6 @@ import com.example.barberapp.View.utils.GoldLight
 import com.example.barberapp.View.utils.GoldPrimary
 import com.example.barberapp.View.utils.BorderColor
 import com.example.barberapp.View.utils.InputDark
-import com.example.barberapp.ViewModel.auth.AuthUIState
 import com.example.barberapp.ViewModel.auth.AuthVM
 
 

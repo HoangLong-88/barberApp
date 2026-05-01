@@ -2,13 +2,20 @@ package com.example.barberapp.View.component
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AccessTime
+import androidx.compose.material.icons.outlined.Cancel
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.example.barberapp.Model.types.NotifType
 import com.example.barberapp.View.utils.GoldPrimary
 
 // ─── Scissors SVG Icon (Canvas-drawn) ────────────────────────────────────────
@@ -80,4 +87,10 @@ fun ScissorsIcon(alpha: Float = 1f) {
             style = Stroke(width = 4f)
         )
     }
+}
+fun notifIcon(type: NotifType): ImageVector = when (type) {
+    NotifType.Confirmed -> Icons.Outlined.CheckCircle
+    NotifType.Reminder -> Icons.Outlined.AccessTime
+    NotifType.Offer -> Icons.Outlined.LocalOffer
+    NotifType.Cancelled -> Icons.Outlined.Cancel
 }
