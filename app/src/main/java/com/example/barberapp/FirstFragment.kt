@@ -6,7 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
-import com.example.barberapp.admin.view.AdminDashboardScreen // Thêm dòng import này
+import com.example.barberapp.admin.view.AdminDashboardScreen
+import com.example.barberapp.staff.view.StaffScreen // Đổi sang StaffScreen để test
 import com.example.barberapp.databinding.FragmentFirstBinding
 
 /**
@@ -15,26 +16,21 @@ import com.example.barberapp.databinding.FragmentFirstBinding
 class FirstFragment : Fragment() {
 
     private var _binding: FragmentFirstBinding? = null
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         _binding = FragmentFirstBinding.inflate(inflater, container, false)
         return binding.root
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val composeView = view.findViewById<ComposeView>(R.id.composeView)
         composeView.setContent {
-            // Hiển thị AdminDashboardScreen trực tiếp để test
+            // Tạm thời hiển thị StaffScreen để thiết kế giao diện
             AdminDashboardScreen()
         }
     }

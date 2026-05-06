@@ -17,20 +17,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.barberapp.admin.controller.AdminController
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.barberapp.admin.model.BookingItem
 import com.example.barberapp.admin.model.ServiceItem
 import com.example.barberapp.admin.model.ShopItem
 import com.example.barberapp.admin.model.UserItem
+import com.example.barberapp.admin.viewmodel.AdminViewModel
 
 @Composable
-fun AdminDashboardScreen() {
-    val controller = remember { AdminController() }
-    val currentTab by controller.currentTab
-    val selectedUserFilter by controller.selectedUserFilter
-    val selectedDateFilter by controller.selectedDateFilter
-    val selectedShopForService by controller.selectedShopForService
-    val searchQuery by controller.searchQuery
+fun AdminDashboardScreen(viewModel: AdminViewModel = viewModel()) {
+    val currentTab by viewModel.currentTab
+    val selectedUserFilter by viewModel.selectedUserFilter
+    val selectedDateFilter by viewModel.selectedDateFilter
+    val selectedShopForService by viewModel.selectedShopForService
+    val searchQuery by viewModel.searchQuery
     
     Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFF121212)) {
         Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
@@ -39,10 +39,10 @@ fun AdminDashboardScreen() {
 
             // Main Tabs
             LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                item { TabButton("Tiệm", Icons.Default.Home, currentTab == "Tiệm") { controller.currentTab.value = "Tiệm" } }
-                item { TabButton("Tài khoản", Icons.Default.Person, currentTab == "Tài khoản") { controller.currentTab.value = "Tài khoản" } }
-                item { TabButton("Dịch vụ", Icons.Default.Build, currentTab == "Dịch vụ") { controller.currentTab.value = "Dịch vụ" } }
-                item { TabButton("Lịch booking", Icons.Default.DateRange, currentTab == "Lịch booking") { controller.currentTab.value = "Lịch booking" } }
+                item { TabButton("Tiệm", Icons.Default.Home, currentTab == "Tiệm") { viewModel.setCurrentTab("Tiệm") } }
+                item { TabButton("Tài khoản", Icons.Default.Person, currentTab == "Tài khoản") { viewModel.setCurrentTab("Tài khoản") } }
+                item { TabButton("Dịch vụ", Icons.Default.Build, currentTab == "Dịch vụ") { viewModel.setCurrentTab("Dịch vụ") } }
+                item { TabButton("Lịch booking", Icons.Default.DateRange, currentTab == "Lịch booking") { viewModel.setCurrentTab("Lịch booking") } }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -51,7 +51,7 @@ fun AdminDashboardScreen() {
             if (currentTab == "Tiệm" || currentTab == "Dịch vụ") {
                 SearchBarCustom(
                     query = searchQuery,
-                    onQueryChange = { controller.searchQuery.value = it }
+                    onQueryChange = { viewModel.setSearchQuery(it) }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
@@ -62,11 +62,11 @@ fun AdminDashboardScreen() {
                     Text("Chọn tiệm để quản lý dịch vụ:", color = Color.Gray, fontSize = 12.sp)
                     Spacer(modifier = Modifier.height(8.dp))
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        items(controller.shops) { shop ->
+                        items(viewModel.shops) { shop ->
                             FilterChipCustom(
                                 label = shop.name,
                                 isSelected = selectedShopForService?.id == shop.id,
-                                onClick = { controller.selectedShopForService.value = shop }
+                                onClick = { viewModel.setSelectedShopForService(shop) }
                             )
                         }
                     }
@@ -75,11 +75,11 @@ fun AdminDashboardScreen() {
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     when (currentTab) {
-                        "Tiệm" -> Text("Danh sách tiệm (${controller.shops.size})", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        "Tiệm" -> Text("Danh sách tiệm (${viewModel.shops.size})", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                         "Tài khoản" -> {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 listOf("Tất cả", "KH", "NV", "QL").forEach { label ->
-                                    FilterChipCustom(label, selectedUserFilter == label) { controller.selectedUserFilter.value = label }
+                                    FilterChipCustom(label, selectedUserFilter == label) { viewModel.setSelectedUserFilter(label) }
                                 }
                             }
                         }
@@ -87,7 +87,7 @@ fun AdminDashboardScreen() {
                         "Lịch booking" -> {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 listOf("Tất cả", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat").forEach { day ->
-                                    FilterChipCustom(day, selectedDateFilter == day) { controller.selectedDateFilter.value = day }
+                                    FilterChipCustom(day, selectedDateFilter == day) { viewModel.setSelectedDateFilter(day) }
                                 }
                             }
                         }
@@ -97,9 +97,9 @@ fun AdminDashboardScreen() {
                         IconButton(
                             onClick = {
                                 when (currentTab) {
-                                    "Tiệm" -> { controller.shopToEdit.value = null; controller.showAddShopDialog.value = true }
-                                    "Tài khoản" -> { controller.userToEdit.value = null; controller.showAddUserDialog.value = true }
-                                    "Dịch vụ" -> { controller.serviceToEdit.value = null; controller.showAddServiceDialog.value = true }
+                                    "Tiệm" -> { viewModel.shopToEdit.value = null; viewModel.showAddShopDialog.value = true }
+                                    "Tài khoản" -> { viewModel.userToEdit.value = null; viewModel.showAddUserDialog.value = true }
+                                    "Dịch vụ" -> { viewModel.serviceToEdit.value = null; viewModel.showAddServiceDialog.value = true }
                                 }
                             },
                             modifier = Modifier.size(36.dp).background(Color(0xFFEBC14F), RoundedCornerShape(8.dp))
@@ -114,18 +114,18 @@ fun AdminDashboardScreen() {
             Box(modifier = Modifier.weight(1f)) {
                 when (currentTab) {
                     "Tiệm" -> {
-                        val filteredShops = controller.shops.filter { 
+                        val filteredShops = viewModel.shops.filter { 
                             it.name.contains(searchQuery, ignoreCase = true) || it.address.contains(searchQuery, ignoreCase = true)
                         }
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             items(filteredShops, key = { it.id }) { shop ->
-                                ShopCard(shop, onEdit = { controller.shopToEdit.value = shop; controller.showAddShopDialog.value = true }, onDelete = { controller.itemToDelete.value = shop })
+                                ShopCard(shop, onEdit = { viewModel.shopToEdit.value = shop; viewModel.showAddShopDialog.value = true }, onDelete = { viewModel.itemToDelete.value = shop })
                             }
                         }
                     }
                     "Tài khoản" -> {
-                        val filtered = if (selectedUserFilter == "Tất cả") controller.users 
-                                      else controller.users.filter { 
+                        val filtered = if (selectedUserFilter == "Tất cả") viewModel.users 
+                                      else viewModel.users.filter { 
                                           when(selectedUserFilter) { 
                                               "KH" -> it.role == "customer"
                                               "NV" -> it.role == "employee"
@@ -135,32 +135,31 @@ fun AdminDashboardScreen() {
                                       }
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             items(filtered, key = { it.id }) { user ->
-                                UserCard(user, onEdit = { controller.userToEdit.value = user; controller.showAddUserDialog.value = true }, onDelete = { controller.itemToDelete.value = user })
+                                UserCard(user, onEdit = { viewModel.userToEdit.value = user; viewModel.showAddUserDialog.value = true }, onDelete = { viewModel.itemToDelete.value = user })
                             }
                         }
                     }
                     "Dịch vụ" -> {
-                        // Lọc dịch vụ theo Tiệm và Tìm kiếm
-                        val shopServices = controller.services.filter { 
+                        val shopServices = viewModel.services.filter { 
                             it.shopId == selectedShopForService?.id && 
                             it.name.contains(searchQuery, ignoreCase = true)
                         }
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             items(shopServices, key = { it.id }) { service ->
-                                ServiceCard(service, onEdit = { controller.serviceToEdit.value = service; controller.showAddServiceDialog.value = true }, onDelete = { controller.itemToDelete.value = service })
+                                ServiceCard(service, onEdit = { viewModel.serviceToEdit.value = service; viewModel.showAddServiceDialog.value = true }, onDelete = { viewModel.itemToDelete.value = service })
                             }
                         }
                     }
                     "Lịch booking" -> {
-                        val filtered = if (selectedDateFilter == "Tất cả") controller.bookings 
-                                      else controller.bookings.filter { it.dateTime.contains(selectedDateFilter) }
+                        val filtered = if (selectedDateFilter == "Tất cả") viewModel.bookings 
+                                      else viewModel.bookings.filter { it.dateTime.contains(selectedDateFilter) }
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             items(filtered, key = { it.id }) { booking ->
                                 BookingCard(
                                     booking = booking,
                                     onComplete = { /* Handle complete */ },
                                     onCancel = { /* Handle cancel */ },
-                                    onDelete = { controller.itemToDelete.value = booking }
+                                    onDelete = { viewModel.itemToDelete.value = booking }
                                 )
                             }
                         }
@@ -170,15 +169,15 @@ fun AdminDashboardScreen() {
         }
     }
 
-    ViewDialogs(controller)
+    ViewDialogs(viewModel)
 }
 
 @Composable
-fun ViewDialogs(controller: AdminController) {
-    val itemToDelete by controller.itemToDelete
-    val showAddUserDialog by controller.showAddUserDialog
-    val showAddServiceDialog by controller.showAddServiceDialog
-    val showAddShopDialog by controller.showAddShopDialog
+fun ViewDialogs(viewModel: AdminViewModel) {
+    val itemToDelete by viewModel.itemToDelete
+    val showAddUserDialog by viewModel.showAddUserDialog
+    val showAddServiceDialog by viewModel.showAddServiceDialog
+    val showAddShopDialog by viewModel.showAddShopDialog
 
     itemToDelete?.let { item ->
         ConfirmDeleteDialog(
@@ -189,26 +188,26 @@ fun ViewDialogs(controller: AdminController) {
                 else -> "Xác nhận xóa?"
             },
             message = "Hành động này không thể hoàn tác.",
-            onDismiss = { controller.itemToDelete.value = null },
-            onConfirm = { controller.deleteItem(item) }
+            onDismiss = { viewModel.itemToDelete.value = null },
+            onConfirm = { viewModel.deleteItem(item) }
         )
     }
 
     if (showAddUserDialog) {
-        AddEditUserDialog(controller.userToEdit.value, onDismiss = { controller.showAddUserDialog.value = false }) { n, e, p, r ->
-            controller.saveUser(n, e, p, r)
+        AddEditUserDialog(viewModel.userToEdit.value, onDismiss = { viewModel.showAddUserDialog.value = false }) { n, e, p, r ->
+            viewModel.saveUser(n, e, p, r)
         }
     }
 
     if (showAddServiceDialog) {
-        AddEditServiceDialog(controller.serviceToEdit.value, onDismiss = { controller.showAddServiceDialog.value = false }) { n, d, p ->
-            controller.saveService(n, d, p)
+        AddEditServiceDialog(viewModel.serviceToEdit.value, onDismiss = { viewModel.showAddServiceDialog.value = false }) { n, d, p ->
+            viewModel.saveService(n, d, p)
         }
     }
 
     if (showAddShopDialog) {
-        AddEditShopDialog(controller.shopToEdit.value, onDismiss = { controller.showAddShopDialog.value = false }) { n, a, p, pr, r, i ->
-            controller.saveShop(n, a, p, pr, r, i)
+        AddEditShopDialog(viewModel.shopToEdit.value, onDismiss = { viewModel.showAddShopDialog.value = false }) { n, a, p, pr, r, i ->
+            viewModel.saveShop(n, a, p, pr, r, i)
         }
     }
 }

@@ -1,43 +1,48 @@
-package com.example.barberapp.admin.controller
+package com.example.barberapp.admin.viewmodel
 
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.ViewModel
 import com.example.barberapp.admin.model.BookingItem
 import com.example.barberapp.admin.model.ServiceItem
 import com.example.barberapp.admin.model.ShopItem
 import com.example.barberapp.admin.model.UserItem
 import com.google.firebase.firestore.FirebaseFirestore
 
-class AdminController {
+class AdminViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
 
-    // --- State (Dữ liệu mà View sẽ quan sát) ---
-    var currentTab = mutableStateOf("Tiệm")
+    // --- State ---
+    private val _currentTab = mutableStateOf("Tiệm")
+    val currentTab: State<String> = _currentTab
+
     val users = mutableStateListOf<UserItem>()
     val services = mutableStateListOf<ServiceItem>()
     val bookings = mutableStateListOf<BookingItem>()
     val shops = mutableStateListOf<ShopItem>()
     
-    // Tìm kiếm
-    var searchQuery = mutableStateOf("")
+    private val _searchQuery = mutableStateOf("")
+    val searchQuery: State<String> = _searchQuery
     
-    // Tiệm được chọn để xem/thêm dịch vụ
-    var selectedShopForService = mutableStateOf<ShopItem?>(null)
+    private val _selectedShopForService = mutableStateOf<ShopItem?>(null)
+    val selectedShopForService: State<ShopItem?> = _selectedShopForService
     
-    var selectedUserFilter = mutableStateOf("Tất cả")
-    var selectedDateFilter = mutableStateOf("Tất cả")
+    private val _selectedUserFilter = mutableStateOf("Tất cả")
+    val selectedUserFilter: State<String> = _selectedUserFilter
+
+    private val _selectedDateFilter = mutableStateOf("Tất cả")
+    val selectedDateFilter: State<String> = _selectedDateFilter
 
     // Dialog States
-    var showAddUserDialog = mutableStateOf(false)
-    var userToEdit = mutableStateOf<UserItem?>(null)
-    var showAddServiceDialog = mutableStateOf(false)
-    var serviceToEdit = mutableStateOf<ServiceItem?>(null)
-    var showAddShopDialog = mutableStateOf(false)
-    var shopToEdit = mutableStateOf<ShopItem?>(null)
-    var itemToDelete = mutableStateOf<Any?>(null)
+    val showAddUserDialog = mutableStateOf(false)
+    val userToEdit = mutableStateOf<UserItem?>(null)
+    val showAddServiceDialog = mutableStateOf(false)
+    val serviceToEdit = mutableStateOf<ServiceItem?>(null)
+    val showAddShopDialog = mutableStateOf(false)
+    val shopToEdit = mutableStateOf<ShopItem?>(null)
+    val itemToDelete = mutableStateOf<Any?>(null)
 
-    // --- Logic xử lý (Controller) ---
-    
     init {
         fetchData()
     }
@@ -63,8 +68,8 @@ class AdminController {
                 shops.clear()
                 val fetchedShops = it.documents.mapNotNull { d -> d.toObject(ShopItem::class.java)?.copy(id = d.id) }
                 shops.addAll(fetchedShops)
-                if (selectedShopForService.value == null && fetchedShops.isNotEmpty()) {
-                    selectedShopForService.value = fetchedShops.first()
+                if (_selectedShopForService.value == null && fetchedShops.isNotEmpty()) {
+                    _selectedShopForService.value = fetchedShops.first()
                 }
             }
         }
@@ -76,11 +81,18 @@ class AdminController {
         ))
     }
 
+    // --- Actions ---
+    fun setCurrentTab(tab: String) { _currentTab.value = tab }
+    fun setSearchQuery(query: String) { _searchQuery.value = query }
+    fun setSelectedShopForService(shop: ShopItem) { _selectedShopForService.value = shop }
+    fun setSelectedUserFilter(filter: String) { _selectedUserFilter.value = filter }
+    fun setSelectedDateFilter(filter: String) { _selectedDateFilter.value = filter }
+
     fun deleteItem(item: Any) {
         when (item) {
             is UserItem -> db.collection("users").document(item.id).delete()
-            is ServiceItem -> db.collection("services").document(item.id).delete()
             is ShopItem -> db.collection("shops").document(item.id).delete()
+            is ServiceItem -> db.collection("services").document(item.id).delete()
         }
         itemToDelete.value = null
     }
@@ -94,7 +106,7 @@ class AdminController {
     }
 
     fun saveService(name: String, duration: String, price: String) {
-        val currentShopId = selectedShopForService.value?.id ?: ""
+        val currentShopId = _selectedShopForService.value?.id ?: ""
         val data = hashMapOf(
             "name" to name, 
             "duration" to duration, 
