@@ -29,7 +29,6 @@ android {
         }
     }
     compileOptions {
-        // Bật tính năng Desugaring để dùng java.time trên API thấp
         isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -44,10 +43,9 @@ android {
 }
 
 dependencies {
-    // Hỗ trợ Java Time cho API thấp sử dụng Version Catalog
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
-    // AndroidX & UI sử dụng Version Catalog
+    // AndroidX & UI
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -55,25 +53,30 @@ dependencies {
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     
-    // Firebase sử dụng Version Catalog
+    // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.ai)
     
-    // Jetpack Compose sử dụng Version Catalog
+    // Jetpack Compose
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation("androidx.compose.runtime:runtime:1.7.5") 
     debugImplementation(libs.androidx.ui.tooling)
     
-    // Thư viện khác sử dụng Version Catalog
+    // Icons & Navigation
+    implementation("androidx.compose.material:material-icons-extended:1.7.5")
+    implementation("androidx.navigation:navigation-compose:2.8.4")
+
+    // Image loading
     implementation(libs.coil.compose)
 
-    // Testing sử dụng Version Catalog
+    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
