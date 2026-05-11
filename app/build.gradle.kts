@@ -43,6 +43,7 @@ android {
 }
 
 dependencies {
+//    implementation(libs.firebase.storage.ktx)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     // AndroidX & UI
@@ -58,7 +59,9 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.ai)
-    
+    implementation(platform("com.google.firebase:firebase-bom:34.12.0"))
+    implementation("com.google.firebase:firebase-storage")
+
     // Jetpack Compose
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)

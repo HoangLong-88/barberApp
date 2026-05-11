@@ -14,15 +14,9 @@ import com.example.barberapp.View.utils.GoldPrimary
 import com.example.barberapp.ViewModel.auth.AuthVM
 
 @Composable
-fun onAuthUIService(
-    authVM: AuthVM = viewModel(),
-    onSuccess: () -> Unit
-) {
-    val uiState = authVM.uiState
-    LaunchedEffect(uiState.isSuccess) {
-        if (uiState.isSuccess) {
-            onSuccess()
-        }
+fun onAuthUIService(isSuccess: Boolean, onSuccess: () -> Unit) {
+    LaunchedEffect(isSuccess) {
+        if (isSuccess) onSuccess()
     }
 }
 

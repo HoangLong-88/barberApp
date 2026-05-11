@@ -1,4 +1,4 @@
-package com.example.barberapp.View.screenUI.customer
+package com.example.barberapp.View.screenUI.customer.profile
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -8,21 +8,21 @@ import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.barberapp.View.component.MenuItemRow
 import com.example.barberapp.View.component.SharedBottomNavBar
 import com.example.barberapp.View.layout.StatsRow
 import com.example.barberapp.View.layout.UserInfoRow
 import com.example.barberapp.View.utils.BackgroundDark
 import com.example.barberapp.View.utils.TextPrimary
-import com.google.firebase.auth.FirebaseAuth
+import com.example.barberapp.ViewModel.auth.AuthVM
+import com.example.barberapp.ViewModel.customer.UserVM
 
 // ── Data models ─────────────────────────────────────────────────────────────
 data class StatItem(val value: String, val label: String)
@@ -39,26 +39,66 @@ data class MenuItem(
 fun ProfileScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    onLogOut: () -> Unit = {}
+    authVM: AuthVM,
+    userVM: UserVM
 ) {
-    val currentUser = FirebaseAuth.getInstance().currentUser
+    val userInfo = userVM.userData
+    if (userInfo == null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        LaunchedEffect(Unit) { userVM.fetchUserProfile() }
+        return
+    }
     val stats = listOf(
-        StatItem("12",  "Bookings"),
-        StatItem("5",   "Reviews"),
+        StatItem("12", "Bookings"),
+        StatItem("5", "Reviews"),
         StatItem("320", "Points"),
     )
-
     val menuItems = listOf(
-        MenuItem(Icons.Outlined.Edit,"Edit Profile"),
-        MenuItem(Icons.Outlined.DateRange,"My Bookings"),
-        MenuItem(Icons.Outlined.FavoriteBorder,"Favorites"),
-        MenuItem(Icons.Outlined.Notifications,"Notifications"),
-        MenuItem(Icons.AutoMirrored.Outlined.Logout, "Logout", isDestructive = true, onClick = onLogOut),
+        MenuItem(
+            Icons.Outlined.Edit, "Edit Profile",
+            onClick = {
+                navController.navigate("edit_profile") {
+                }
+            }),
+        MenuItem(
+            Icons.Outlined.DateRange, "My Bookings",
+            onClick = {
+                navController.navigate("booking") {
+                    popUpTo("profile") {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }),
+        MenuItem(
+            Icons.Outlined.FavoriteBorder, "Favorites",
+            onClick = {
+                navController.navigate("favorite") {
+                }
+            }),
+        MenuItem(
+            Icons.Outlined.Notifications, "Notifications",
+            onClick = {
+                navController.navigate("notification") {
+                    popUpTo("profile") {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }),
+        MenuItem(
+            Icons.AutoMirrored.Outlined.Logout, "Logout", isDestructive = true,
+            onClick = { authVM.logOut(navController, userVM) }
+        ),
     )
 
     Scaffold(
         containerColor = BackgroundDark,
-        bottomBar     = { SharedBottomNavBar(navController) }
+        bottomBar = { SharedBottomNavBar(navController) }
     ) { innerPadding ->
         Column(
             modifier = modifier
@@ -69,18 +109,18 @@ fun ProfileScreen(
         ) {
             // Title
             Text(
-                text       = "Profile",
-                color      = TextPrimary,
-                fontSize   = 24.sp,
+                text = "Profile",
+                color = TextPrimary,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                modifier   = Modifier.padding(bottom = 24.dp)
+                modifier = Modifier.padding(bottom = 24.dp)
             )
 
             // ── User info row ──────────────────────────────────────────────
             UserInfoRow(
-                name  = currentUser?.displayName?:"User",
-                email = currentUser?.email?:"No email",
-                phone = "090xxxxxxx"
+                name = userInfo.name ?: "Loading...",
+                email = userInfo.email ?: "Loading...",
+                phone = userInfo.phone ?: "No phone linked!"
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -102,10 +142,10 @@ fun ProfileScreen(
 }
 
 // ── Preview ───────────────────────────────────────────────────────────────────
-@Preview(showBackground = true, backgroundColor = 0xFF1C1C1C)
-@Composable
-fun ProfileScreenPreview() {
-    MaterialTheme {
-        ProfileScreen(navController = rememberNavController())
-    }
-}
+//@Preview(showBackground = true, backgroundColor = 0xFF1C1C1C)
+//@Composable
+//fun ProfileScreenPreview() {
+//    MaterialTheme {
+//        ProfileScreen(navController = rememberNavController())
+//    }
+//}

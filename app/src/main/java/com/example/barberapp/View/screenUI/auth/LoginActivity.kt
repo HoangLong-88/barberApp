@@ -61,6 +61,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.barberapp.View.screenUI.customer.MainActivity
 import com.example.barberapp.View.component.FieldLabel
 import com.example.barberapp.View.component.ScissorsIcon
@@ -71,36 +73,19 @@ import com.example.barberapp.View.utils.GoldDark
 import com.example.barberapp.View.utils.GoldLight
 import com.example.barberapp.View.utils.GoldPrimary
 import com.example.barberapp.View.utils.GoogleBtnBg
+import com.example.barberapp.View.utils.GoogleLogo
 import com.example.barberapp.View.utils.TextHint
 import com.example.barberapp.View.utils.TextPrimary
 import com.example.barberapp.View.utils.TextSecondary
 import com.example.barberapp.View.utils.barbershopTextFieldColors
 import com.example.barberapp.ViewModel.auth.AuthVM
 
-class LoginActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            LoginScreen(
-                onRegister = {
-                    startActivity(Intent(this, SignUpActivity::class.java))
-                },
-                onLogin = {
-                    startActivity(Intent(this, MainActivity::class.java))
-                }
-            )
-        }
-    }
-}
-
 // ─── Login Screen ─────────────────────────────────────────────────────────────
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    onLogin: () -> Unit = {},
-    onRegister: () -> Unit = {},
-    onGoogleLogin: () -> Unit = {},
-    authVM: AuthVM = viewModel()
+    authVM: AuthVM,
+    navController: NavController
 ) {
     val uiState = authVM.uiState
     var email by remember { mutableStateOf("") }
@@ -118,6 +103,16 @@ fun LoginScreen(
         ),
         label = "shimmer_alpha"
     )
+    onAuthUIService(
+        isSuccess = authVM.uiState.loginSuccess,
+        onSuccess = {
+            authVM.resetState()
+            navController.navigate("main_graph") {
+                popUpTo("auth_graph") { inclusive = true }
+            }
+        }
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -146,7 +141,6 @@ fun LoginScreen(
                 .padding(horizontal = 28.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            onAuthUIService(authVM, { onLogin() })
             Spacer(Modifier.height(72.dp))
 
             // ── Scissors Icon ──────────────────────────────────────────────
@@ -175,7 +169,7 @@ fun LoginScreen(
             Spacer(Modifier.height(20.dp))
 
             // ── Email Field ────────────────────────────────────────────────
-            FieldLabel("Email",13, FontWeight.Medium)
+            FieldLabel("Email", 13, FontWeight.Medium)
             Spacer(Modifier.height(8.dp))
 
             OutlinedTextField(
@@ -196,7 +190,7 @@ fun LoginScreen(
             Spacer(Modifier.height(20.dp))
 
             // ── Password Field ─────────────────────────────────────────────
-            FieldLabel("Password",13, FontWeight.Medium)
+            FieldLabel("Password", 13, FontWeight.Medium)
             Spacer(Modifier.height(8.dp))
 
             OutlinedTextField(
@@ -234,7 +228,8 @@ fun LoginScreen(
             } else {
                 Button(
                     onClick = {
-                        authVM.login(email, password)                    },
+                        authVM.login(email, password, navController)
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(54.dp),
@@ -265,7 +260,7 @@ fun LoginScreen(
                     }
                 }
             }
-            if(uiState.isSuccess){
+            if (uiState.loginSuccess) {
                 Text("Đăng nhập thành công!", color = Color.Green)
             }
             uiState.error?.let {
@@ -276,7 +271,7 @@ fun LoginScreen(
 
             // ── Google Login Button ────────────────────────────────────────
             OutlinedButton(
-                onClick = onGoogleLogin,
+                onClick = {},
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(54.dp),
@@ -318,7 +313,7 @@ fun LoginScreen(
                     color = GoldPrimary,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable { onRegister() }
+                    modifier = Modifier.clickable { navController.navigate("register") }
                 )
             }
 
@@ -338,28 +333,14 @@ fun LoginScreen(
     }
 }
 
-
-// ─── Google Logo (Colored circles) ───────────────────────────────────────────
-@Composable
-fun GoogleLogo() {
-    Box(
-        modifier = Modifier.size(20.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "G",
-            color = Color(0xFF4285F4),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
-
 // ─── Preview ──────────────────────────────────────────────────────────────────
 @Preview(showBackground = true, backgroundColor = 0xFF0F0F0F, widthDp = 375, heightDp = 812)
 @Composable
 fun LoginScreenPreview() {
     MaterialTheme {
-        LoginScreen()
+        LoginScreen(
+            navController = rememberNavController(),
+            authVM = viewModel()
+        )
     }
 }

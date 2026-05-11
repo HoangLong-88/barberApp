@@ -19,3 +19,15 @@ fun FieldLabel(text: String, fontSize: Int, fontWeight: FontWeight) {
         modifier = Modifier.fillMaxWidth()
     )
 }
+
+// ─── Field Label ──────────────────────────────────────────────────────────────
+@Composable
+fun RegisterFieldLabel(text: String) {
+    Text(
+        text = text,
+        color = TextSecondary,
+        fontSize = 13.sp,
+        fontWeight = FontWeight.Medium,
+        modifier = Modifier.fillMaxWidth()
+    )
+}
