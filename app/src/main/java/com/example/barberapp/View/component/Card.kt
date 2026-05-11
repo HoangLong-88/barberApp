@@ -44,12 +44,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.barberapp.Model.data.AppNofitifcation
-import com.example.barberapp.View.screenUI.customer.BarberShop
-import com.example.barberapp.View.screenUI.customer.Booking
-import com.example.barberapp.View.screenUI.customer.BookingStatus
-import com.example.barberapp.View.screenUI.customer.FilterTab
-import com.example.barberapp.View.screenUI.customer.StatItem
+import com.example.barberapp.Model.entities.Notification
+import com.example.barberapp.View.screenUI.customer.home.BarberShop
+import com.example.barberapp.View.screenUI.customer.bookings.Booking
+import com.example.barberapp.View.screenUI.customer.bookings.BookingStatus
+import com.example.barberapp.View.screenUI.customer.bookings.FilterTab
+import com.example.barberapp.View.screenUI.customer.profile.StatItem
 import com.example.barberapp.View.utils.BackgroundDark
 import com.example.barberapp.View.utils.CancelledBg
 import com.example.barberapp.View.utils.CancelledText
@@ -320,7 +320,7 @@ fun BarberShopCard(
 // ─── Notification Card ────────────────────────────────────────────────────────
 @Composable
 fun NotificationCard(
-    notification: AppNofitifcation,
+    notification: Notification,
     onDelete: () -> Unit
 ) {
     val (iconBg, iconFg) = notifColors(notification.type)

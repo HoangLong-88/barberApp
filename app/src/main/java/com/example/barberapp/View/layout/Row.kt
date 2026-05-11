@@ -22,7 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.barberapp.View.screenUI.customer.StatItem
+import com.example.barberapp.View.screenUI.customer.profile.StatItem
 import com.example.barberapp.View.component.StatCard
 import com.example.barberapp.View.utils.BackgroundDark
 import com.example.barberapp.View.utils.GoldAccent

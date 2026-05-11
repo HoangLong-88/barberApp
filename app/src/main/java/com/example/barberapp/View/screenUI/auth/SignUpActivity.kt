@@ -23,6 +23,10 @@ import androidx.compose.ui.text.input.*
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.barberapp.View.component.FieldLabel
+import com.example.barberapp.View.service.auth.onAuthUIService
 
 import com.example.barberapp.View.utils.BackgroundDark
 import com.example.barberapp.View.utils.TextPrimary
@@ -32,54 +36,35 @@ import com.example.barberapp.View.utils.GoldDark
 import com.example.barberapp.View.utils.GoldLight
 import com.example.barberapp.View.utils.GoldPrimary
 import com.example.barberapp.View.utils.BorderColor
-import com.example.barberapp.View.utils.InputDark
+import com.example.barberapp.View.utils.registerTextFieldColors
 import com.example.barberapp.ViewModel.auth.AuthVM
-
-
-class SignUpActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            val authVM: AuthVM = viewModel()
-            val uiState = authVM.uiState
-            RegisterScreen(
-                onLogin = { finish() },
-                onBack = { finish() },
-                onCreateAccount = { username, email, phone, password ->
-                    authVM.signUp(username,email,phone,password)
-                }
-            )
-            LaunchedEffect(uiState.isSuccess) {
-                if (uiState.isSuccess){
-                    finish()
-                }
-            }
-        }
-    }
-}
 
 // ─── Register Screen ──────────────────────────────────────────────────────────
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
-    onBack: () -> Unit = {},
-    onCreateAccount: (
-        fullName: String,
-        email: String,
-        phone: String,
-        password: String
-    ) -> Unit = { _, _, _, _ -> },
-    onLogin: () -> Unit = {},
+    authVM: AuthVM,
+    navController: NavController,
 ) {
-    val authVM: AuthVM = viewModel()
-    val state = authVM.uiState
-    var userName by remember { mutableStateOf("") }
+    val uiState = authVM.uiState
+    var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var role by remember { mutableStateOf("customer") }
+    var profileImgUrl by remember { mutableStateOf(null) }
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmVisible by remember { mutableStateOf(false) }
+    onAuthUIService(
+        isSuccess = authVM.uiState.registerSuccess,
+        onSuccess = {
+            authVM.resetState()
+            navController.navigate("login") {
+                popUpTo("register") { inclusive = true }
+            }
+        }
+    )
 
     Box(
         modifier = Modifier
@@ -96,7 +81,7 @@ fun RegisterScreen(
 
             // ── Back Button ────────────────────────────────────────────────
             IconButton(
-                onClick = onBack,
+                onClick = { navController.popBackStack() },
                 modifier = Modifier
                     .size(36.dp)
                     .offset(x = (-8).dp)
@@ -132,11 +117,11 @@ fun RegisterScreen(
             Spacer(Modifier.height(36.dp))
 
             // ── Full Name ──────────────────────────────────────────────────
-            RegisterFieldLabel("Full Name")
+            FieldLabel("Full name", 13, FontWeight.Medium)
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
-                value = userName,
-                onValueChange = { userName = it },
+                value = name,
+                onValueChange = { name = it },
                 placeholder = { Text("John Doe", color = TextHint, fontSize = 14.sp) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
@@ -152,7 +137,7 @@ fun RegisterScreen(
             Spacer(Modifier.height(18.dp))
 
             // ── Email ──────────────────────────────────────────────────────
-            RegisterFieldLabel("Email")
+            FieldLabel("Email", 13, FontWeight.Medium)
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
                 value = email,
@@ -172,7 +157,7 @@ fun RegisterScreen(
             Spacer(Modifier.height(18.dp))
 
             // ── Phone Number ───────────────────────────────────────────────
-            RegisterFieldLabel("Phone Number")
+            FieldLabel("Phone", 13, FontWeight.Medium)
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
                 value = phone,
@@ -192,7 +177,7 @@ fun RegisterScreen(
             Spacer(Modifier.height(18.dp))
 
             // ── Password ───────────────────────────────────────────────────
-            RegisterFieldLabel("Password")
+            FieldLabel("Password", 13, FontWeight.Medium)
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
                 value = password,
@@ -224,7 +209,7 @@ fun RegisterScreen(
             Spacer(Modifier.height(18.dp))
 
             // ── Confirm Password ───────────────────────────────────────────
-            RegisterFieldLabel("Confirm Password")
+            FieldLabel("Confirm Password", 13, FontWeight.Medium)
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
                 value = confirmPassword,
@@ -273,28 +258,38 @@ fun RegisterScreen(
             Spacer(Modifier.height(32.dp))
 
             // ── Create Account Button ──────────────────────────────────────
-            val isFormValid = userName.isNotBlank()
+            val isFormValid = name.isNotBlank()
                     && email.isNotBlank()
                     && phone.isNotBlank()
                     && password.isNotBlank()
                     && password == confirmPassword
-            if (state.isLoading) {
+            if (uiState.isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     color = GoldPrimary
                 )
             }
-            state.error?.let { errorMsg ->
+            uiState.error?.let { errorMsg ->
                 Text(
                     text = errorMsg,
                     color = Color.Red,
-                    modifier = Modifier.padding(vertical = 8.dp).align(Alignment.CenterHorizontally)
+                    modifier = Modifier
+                        .padding(vertical = 8.dp)
+                        .align(Alignment.CenterHorizontally)
                 )
             }
 
             Button(
                 onClick = {
-                    if (isFormValid) onCreateAccount(userName, email, phone, password)
+                    if (isFormValid) authVM.signUp(
+                        name,
+                        email,
+                        phone,
+                        password,
+                        role,
+                        profileImgUrl,
+                        navController
+                    )
                 },
                 enabled = isFormValid,
                 modifier = Modifier
@@ -353,7 +348,9 @@ fun RegisterScreen(
                     color = GoldPrimary,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable { onLogin() }
+                    modifier = Modifier.clickable {
+                        navController.popBackStack()
+                    }
                 )
             }
 
@@ -374,42 +371,15 @@ fun RegisterScreen(
     }
 }
 
-// ─── Field Label ──────────────────────────────────────────────────────────────
-@Composable
-private fun RegisterFieldLabel(text: String) {
-    Text(
-        text = text,
-        color = TextSecondary,
-        fontSize = 13.sp,
-        fontWeight = FontWeight.Medium,
-        modifier = Modifier.fillMaxWidth()
-    )
-}
-
-// ─── TextField Colors ─────────────────────────────────────────────────────────
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun registerTextFieldColors(
-    focusedBorder: Color = GoldPrimary,
-    unfocusedBorder: Color = BorderColor,
-) = OutlinedTextFieldDefaults.colors(
-    focusedBorderColor = focusedBorder,
-    unfocusedBorderColor = unfocusedBorder,
-    focusedContainerColor = InputDark,
-    unfocusedContainerColor = InputDark,
-    cursorColor = GoldPrimary,
-    focusedLabelColor = GoldPrimary,
-    unfocusedLabelColor = TextSecondary,
-    disabledContainerColor = InputDark,
-)
-
 // ─── Preview ──────────────────────────────────────────────────────────────────
-@Preview(showBackground = true, backgroundColor = 0xFF0F0F0F, widthDp = 375, heightDp = 812)
-@Composable
-fun RegisterScreenPreview() {
-    MaterialTheme {
-        RegisterScreen()
-    }
-}
+//@Preview(showBackground = true, backgroundColor = 0xFF0F0F0F, widthDp = 375, heightDp = 812)
+//@Composable
+//fun RegisterScreenPreview() {
+//    MaterialTheme {
+//        RegisterScreen(
+//            navController = rememberNavController()
+//        )
+//    }
+//}
 
 

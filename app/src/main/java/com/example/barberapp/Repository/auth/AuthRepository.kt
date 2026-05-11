@@ -1,7 +1,7 @@
-package com.example.barberapp.Repository
+package com.example.barberapp.Repository.auth
 
+import com.example.barberapp.Helper.generateUID
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 
 class AuthRepository {
@@ -19,6 +19,8 @@ class AuthRepository {
         email: String,
         phone: String,
         password: String,
+        role: String = "customer",
+        profileImgUrl: String?,
         onResult: (Boolean, String?) -> Unit
     ) {
         auth.createUserWithEmailAndPassword(
@@ -26,15 +28,14 @@ class AuthRepository {
             password
         ).addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                val user = auth.currentUser
-                val profileUpdates = userProfileChangeRequest {
-                    displayName = username
-                }
-                val userID = auth.currentUser?.uid ?: ""
+                val userID = auth.currentUser?.uid?:""
                 val userMap = hashMapOf(
-                    "username" to username,
+                    "name" to username,
                     "email" to email,
                     "phone" to phone,
+                    "password" to password,
+                    "role" to role,
+                    "profileImgUrl" to profileImgUrl,
                     "createAt" to System.currentTimeMillis()
                 )
                 db.collection("users").document(userID).set(userMap)
@@ -45,4 +46,5 @@ class AuthRepository {
             }
         }
     }
+    fun getLogOut(): Unit = auth.signOut()
 }

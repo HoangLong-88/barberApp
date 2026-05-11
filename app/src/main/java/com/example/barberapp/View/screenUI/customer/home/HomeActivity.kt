@@ -1,6 +1,5 @@
-package com.example.barberapp.View.screenUI.customer
+package com.example.barberapp.View.screenUI.customer.home
 
-import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,7 +17,6 @@ import com.example.barberapp.View.component.SharedBottomNavBar
 import com.example.barberapp.View.layout.NearbyHeader
 import com.example.barberapp.View.layout.TopHeader
 import com.example.barberapp.View.utils.BackgroundDark
-import com.example.barberapp.View.utils.GoldAccent
 
 // ── Data models ───────────────────────────────────────────────────────────────
 data class BarberShop(
