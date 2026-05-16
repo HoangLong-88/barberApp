@@ -31,9 +31,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,7 +45,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.barberapp.Model.entities.Notification
-import com.example.barberapp.View.screenUI.customer.home.BarberShop
+import com.example.barberapp.Model.entities.Shop
 import com.example.barberapp.View.screenUI.customer.bookings.Booking
 import com.example.barberapp.View.screenUI.customer.bookings.BookingStatus
 import com.example.barberapp.View.screenUI.customer.bookings.FilterTab
@@ -173,7 +173,7 @@ fun FilterTabRow(
 // ── Barber shop card ──────────────────────────────────────────────────────────
 @Composable
 fun BarberShopCard(
-    shop: BarberShop,
+    shop: Shop,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
