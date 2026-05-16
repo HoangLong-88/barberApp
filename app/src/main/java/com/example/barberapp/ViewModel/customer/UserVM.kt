@@ -43,7 +43,7 @@ class UserVM : ViewModel() {
                     phone = phone,
                     password = password,
                     role = role,
-                    profileImgUrl = downloadUrl ?: ""
+                    avatarUrl = downloadUrl ?: ""
                 )
                 // 3. Lưu object User này vào Firestore
                 userRepo.updateProfile(updatedUser) { success ->
@@ -54,7 +54,7 @@ class UserVM : ViewModel() {
         } else {
             // Nếu không thay ảnh, chỉ cập nhật text
             val currentUserData =
-                User(uid, name, email, phone, password, role, userData?.profileImgUrl)
+                User(uid, name, email, phone, password, role, userData?.avatarUrl)
             userRepo.updateProfile(currentUserData) {
                 if (it) fetchUserProfile()
                 onDone()

@@ -1,9 +1,5 @@
 package com.example.barberapp.View.screenUI.auth
 
-import android.content.Intent
-import android.os.Bundle
-import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.core.EaseInOutSine
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -23,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -63,10 +58,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.barberapp.View.screenUI.customer.MainActivity
 import com.example.barberapp.View.component.FieldLabel
 import com.example.barberapp.View.component.ScissorsIcon
-import com.example.barberapp.View.service.auth.onAuthUIService
+import com.example.barberapp.View.state.auth.checkAuthUiState
 import com.example.barberapp.View.utils.BackgroundDark
 import com.example.barberapp.View.utils.BorderColor
 import com.example.barberapp.View.utils.GoldDark
@@ -103,13 +97,10 @@ fun LoginScreen(
         ),
         label = "shimmer_alpha"
     )
-    onAuthUIService(
+    checkAuthUiState(
         isSuccess = authVM.uiState.loginSuccess,
         onSuccess = {
             authVM.resetState()
-            navController.navigate("main_graph") {
-                popUpTo("auth_graph") { inclusive = true }
-            }
         }
     )
 

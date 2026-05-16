@@ -1,8 +1,5 @@
 package com.example.barberapp.View.screenUI.auth
 
-import android.os.Bundle
-import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,13 +17,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.*
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.barberapp.View.component.FieldLabel
-import com.example.barberapp.View.service.auth.onAuthUIService
+import com.example.barberapp.View.state.auth.checkAuthUiState
 
 import com.example.barberapp.View.utils.BackgroundDark
 import com.example.barberapp.View.utils.TextPrimary
@@ -56,7 +50,7 @@ fun RegisterScreen(
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmVisible by remember { mutableStateOf(false) }
-    onAuthUIService(
+    checkAuthUiState(
         isSuccess = authVM.uiState.registerSuccess,
         onSuccess = {
             authVM.resetState()

@@ -1,4 +1,4 @@
-package com.example.barberapp.Helper
+package com.example.barberapp.Repository.helpers
 
 import kotlin.random.Random
 

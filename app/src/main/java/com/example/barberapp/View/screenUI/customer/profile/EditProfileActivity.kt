@@ -60,7 +60,7 @@ fun EditProfileScreen(
     var password by remember { mutableStateOf(userInfo.password) }
     var role by remember { mutableStateOf(userInfo.role) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-    val remotedImageUri = userInfo.profileImgUrl
+    val remotedImageUri = userInfo.avatarUrl
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri -> selectedImageUri = uri }

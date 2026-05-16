@@ -1,5 +1,6 @@
-package com.example.barberapp.staff.view
+package com.example.barberapp.View.screenUI.employee
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,11 +22,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.barberapp.staff.model.StaffBookingItem
-import com.example.barberapp.staff.model.StaffInfo
+import androidx.navigation.NavController
+import com.example.barberapp.ViewModel.auth.AuthVM
+import com.example.barberapp.ViewModel.customer.UserVM
+import com.example.barberapp.Model.entities.EmployeeBookingItem
+import com.example.barberapp.Model.entities.EmployeeInfo
 
 @Composable
-fun StaffHeader(info: StaffInfo) {
+fun EmployeeHeader(
+    info: EmployeeInfo,
+    navController: NavController,
+    authVM: AuthVM,
+    userVM: UserVM
+) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -46,13 +55,15 @@ fun StaffHeader(info: StaffInfo) {
         }
         Row {
             IconButton(onClick = {}) { Icon(Icons.Default.Notifications, null, tint = Color.White) }
-            IconButton(onClick = {}) { Icon(Icons.AutoMirrored.Filled.ExitToApp, null, tint = Color.White) }
+            IconButton(onClick = {
+                authVM.logOut(navController = navController, userVM = userVM)
+            }) { Icon(Icons.AutoMirrored.Filled.ExitToApp, null, tint = Color.White) }
         }
     }
 }
 
 @Composable
-fun StaffStats(info: StaffInfo) {
+fun EmployeeStats(info: EmployeeInfo) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         StatCard("HÔM NAY", info.appointmentsToday.toString(), "lịch hẹn", Modifier.weight(1f))
         StatCard("HOÀN THÀNH", info.completedToday.toString(), "đã xong", Modifier.weight(1f))
@@ -82,7 +93,7 @@ fun StatCard(label: String, value: String, subValue: String, modifier: Modifier,
 }
 
 @Composable
-fun BookingCardList(booking: StaffBookingItem, onConfirm: () -> Unit, onCancel: () -> Unit, onClick: () -> Unit = {}) {
+fun BookingCardList(booking: EmployeeBookingItem, onConfirm: () -> Unit, onCancel: () -> Unit, onClick: () -> Unit = {}) {
     Surface(
         color = Color(0xFF1E1E1E),
         shape = RoundedCornerShape(16.dp),
@@ -127,7 +138,7 @@ fun BookingCardList(booking: StaffBookingItem, onConfirm: () -> Unit, onCancel: 
 }
 
 @Composable
-fun TimelineRow(time: String, booking: StaffBookingItem?, onConfirm: () -> Unit, onCancel: () -> Unit, onBookingClick: (StaffBookingItem) -> Unit = {}) {
+fun TimelineRow(time: String, booking: EmployeeBookingItem?, onConfirm: () -> Unit, onCancel: () -> Unit, onBookingClick: (EmployeeBookingItem) -> Unit = {}) {
     Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
         Column(
             horizontalAlignment = Alignment.End,
@@ -154,7 +165,7 @@ fun TimelineRow(time: String, booking: StaffBookingItem?, onConfirm: () -> Unit,
                     modifier = Modifier.fillMaxWidth(),
                     color = Color.Transparent,
                     shape = RoundedCornerShape(12.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.Gray.copy(alpha = 0.1f))
+                    border = BorderStroke(1.dp, Color.Gray.copy(alpha = 0.1f))
                 ) {
                     Text(
                         "Trống",
@@ -172,7 +183,7 @@ fun TimelineRow(time: String, booking: StaffBookingItem?, onConfirm: () -> Unit,
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BookingDetailSheet(booking: StaffBookingItem, onDismiss: () -> Unit) {
+fun BookingDetailSheet(booking: EmployeeBookingItem, onDismiss: () -> Unit) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         containerColor = Color(0xFF1E1E1E),

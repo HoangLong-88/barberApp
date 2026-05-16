@@ -1,4 +1,4 @@
-package com.example.barberapp.admin.view
+package com.example.barberapp.View.screenUI.admin
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -18,9 +18,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.example.barberapp.admin.model.ServiceItem
-import com.example.barberapp.admin.model.ShopItem
-import com.example.barberapp.admin.model.UserItem
+import com.example.barberapp.Model.entities.ServiceItem
+import com.example.barberapp.Model.entities.ShopItem
+import com.example.barberapp.Model.entities.UserItem
 
 @Composable
 fun ConfirmDeleteDialog(title: String, message: String, onDismiss: () -> Unit, onConfirm: () -> Unit) {

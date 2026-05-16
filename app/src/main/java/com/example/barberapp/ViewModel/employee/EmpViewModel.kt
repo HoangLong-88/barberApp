@@ -1,19 +1,19 @@
-package com.example.barberapp.staff.viewmodel
+package com.example.barberapp.ViewModel.employee
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.example.barberapp.staff.model.DateItem
-import com.example.barberapp.staff.model.StaffBookingItem
-import com.example.barberapp.staff.model.StaffInfo
+import com.example.barberapp.Model.entities.DateItem
+import com.example.barberapp.Model.entities.EmployeeBookingItem
+import com.example.barberapp.Model.entities.EmployeeInfo
 import java.time.LocalDate
 import java.time.format.TextStyle
-import java.util.*
+import java.util.Locale
 
-class StaffViewModel : ViewModel() {
-    
+class EmpViewModel : ViewModel() {
+
     // --- UI State ---
     private val _currentTab = mutableStateOf("Lịch")
     val currentTab: State<String> = _currentTab
@@ -24,8 +24,8 @@ class StaffViewModel : ViewModel() {
     private val _selectedDate = mutableStateOf(LocalDate.now())
     val selectedDate: State<LocalDate> = _selectedDate
 
-    val staffInfo = mutableStateOf(
-        StaffInfo(
+    val employeeInfo = mutableStateOf(
+        EmployeeInfo(
             name = "Thế Anh",
             rating = 4.9,
             totalRatings = 128,
@@ -35,7 +35,7 @@ class StaffViewModel : ViewModel() {
     )
 
     val dateList = mutableStateListOf<DateItem>()
-    val bookings = mutableStateListOf<StaffBookingItem>()
+    val bookings = mutableStateListOf<EmployeeBookingItem>()
 
     // Lọc danh sách booking theo ngày đã chọn (Business Logic)
     val filteredBookings = derivedStateOf {
@@ -51,7 +51,7 @@ class StaffViewModel : ViewModel() {
         dateList.clear()
         val today = LocalDate.now()
         val vietnameseLocale = Locale("vi", "VN")
-        
+
         for (i in 0..6) {
             val date = today.plusDays(i.toLong())
             val dayOfWeek = if (date == today) "H.Nay" else {
@@ -81,14 +81,80 @@ class StaffViewModel : ViewModel() {
     private fun loadSampleBookings() {
         bookings.clear()
         val today = LocalDate.now()
-        
+
         bookings.addAll(listOf(
-            StaffBookingItem("1", "Nguyễn Văn A", "Cắt tóc nam", "100.000đ", "09:00", 30, today.toString(), "Confirmed", "0987654321", "Cắt ngắn hai bên"),
-            StaffBookingItem("2", "Trần Thị B", "Gội đầu", "150.000đ", "11:00", 45, today.toString(), "Pending", "0123456789", ""),
-            StaffBookingItem("3", "Lê Văn C", "Combo Uốn", "350.000đ", "14:00", 90, today.toString(), "Pending", "0333444555", "Uốn kiểu layer"),
-            StaffBookingItem("4", "Hoàng An", "Cạo mặt", "80.000đ", "10:00", 20, today.plusDays(1).toString(), "Pending", "0999888777", ""),
-            StaffBookingItem("5", "Minh Tuấn", "Tỉa râu", "50.000đ", "15:00", 15, today.plusDays(1).toString(), "Confirmed", "0777666555", ""),
-            StaffBookingItem("6", "Quốc Bảo", "Nhuộm tóc", "450.000đ", "09:00", 120, today.plusDays(2).toString(), "Pending", "0888777666", "Nhuộm màu xám khói")
+            EmployeeBookingItem(
+                "1",
+                "Nguyễn Văn A",
+                "Cắt tóc nam",
+                "100.000đ",
+                "09:00",
+                30,
+                today.toString(),
+                "Confirmed",
+                "0987654321",
+                "Cắt ngắn hai bên"
+            ),
+            EmployeeBookingItem(
+                "2",
+                "Trần Thị B",
+                "Gội đầu",
+                "150.000đ",
+                "11:00",
+                45,
+                today.toString(),
+                "Pending",
+                "0123456789",
+                ""
+            ),
+            EmployeeBookingItem(
+                "3",
+                "Lê Văn C",
+                "Combo Uốn",
+                "350.000đ",
+                "14:00",
+                90,
+                today.toString(),
+                "Pending",
+                "0333444555",
+                "Uốn kiểu layer"
+            ),
+            EmployeeBookingItem(
+                "4",
+                "Hoàng An",
+                "Cạo mặt",
+                "80.000đ",
+                "10:00",
+                20,
+                today.plusDays(1).toString(),
+                "Pending",
+                "0999888777",
+                ""
+            ),
+            EmployeeBookingItem(
+                "5",
+                "Minh Tuấn",
+                "Tỉa râu",
+                "50.000đ",
+                "15:00",
+                15,
+                today.plusDays(1).toString(),
+                "Confirmed",
+                "0777666555",
+                ""
+            ),
+            EmployeeBookingItem(
+                "6",
+                "Quốc Bảo",
+                "Nhuộm tóc",
+                "450.000đ",
+                "09:00",
+                120,
+                today.plusDays(2).toString(),
+                "Pending",
+                "0888777666",
+                "Nhuộm màu xám khói"
+            )
         ))
     }
 

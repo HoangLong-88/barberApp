@@ -1,9 +1,11 @@
 package com.example.barberapp.Model.entities
 
 data class Shop (
-    val id: String,
-    val name: String,
-    val address: String,
-    val rating: String,
-    val imageUrl: String
+    val id: String = "",
+    val name: String ="",
+    val address: String = "",
+    val priceRange: String = "",
+    val rating: Double = 0.0,
+    val isFavorite: Boolean = false,
+    val imageUrl: String ="",
 )

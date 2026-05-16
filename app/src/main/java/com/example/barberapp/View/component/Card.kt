@@ -49,6 +49,9 @@ import com.example.barberapp.View.screenUI.customer.home.BarberShop
 import com.example.barberapp.View.screenUI.customer.bookings.Booking
 import com.example.barberapp.View.screenUI.customer.bookings.BookingStatus
 import com.example.barberapp.View.screenUI.customer.bookings.FilterTab
+import com.example.barberapp.View.screenUI.customer.home.AvatarBg
+import com.example.barberapp.View.screenUI.customer.home.Barber
+import com.example.barberapp.View.screenUI.customer.home.CardDark
 import com.example.barberapp.View.screenUI.customer.profile.StatItem
 import com.example.barberapp.View.utils.BackgroundDark
 import com.example.barberapp.View.utils.CancelledBg
@@ -57,6 +60,7 @@ import com.example.barberapp.View.utils.CardBg
 import com.example.barberapp.View.utils.CompletedBg
 import com.example.barberapp.View.utils.CompletedText
 import com.example.barberapp.View.utils.GoldAccent
+import com.example.barberapp.View.utils.GoldPrimary
 import com.example.barberapp.View.utils.LogoutRed
 import com.example.barberapp.View.utils.PendingBg
 import com.example.barberapp.View.utils.PendingText
@@ -170,7 +174,8 @@ fun FilterTabRow(
 @Composable
 fun BarberShopCard(
     shop: BarberShop,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
 ) {
     var isFav by remember { mutableStateOf(shop.isFavorite) }
 
@@ -179,6 +184,7 @@ fun BarberShopCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(CardBg)
+            .clickable(onClick = onClick)
     ) {
         // Image placeholder with gradient overlay + heart button
         Box(
@@ -408,6 +414,71 @@ fun NotificationCard(
                     .clickable { onDelete() }
                     .align(Alignment.Top)
             )
+        }
+    }
+}
+
+@Composable
+fun BarberCard(barber: Barber) {
+    Card(
+        modifier  = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        colors    = CardDefaults.cardColors(containerColor = CardDark),
+        shape     = RoundedCornerShape(14.dp),
+        elevation = CardDefaults.cardElevation(0.dp)
+    ) {
+        Row(
+            modifier          = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Avatar — initial letter in a circle
+            Box(
+                modifier         = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(AvatarBg),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text       = barber.name.first().toString(),
+                    color      = TextPrimary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize   = 18.sp
+                )
+            }
+
+            Spacer(Modifier.width(14.dp))
+
+            // Name + specialties
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text       = barber.name,
+                    color      = TextPrimary,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize   = 15.sp
+                )
+                Spacer(Modifier.height(2.dp))
+            }
+
+            // Star + numeric rating
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector        = Icons.Default.Star,
+                    contentDescription = null,
+                    tint               = GoldPrimary,
+                    modifier           = Modifier.size(14.dp)
+                )
+                Spacer(Modifier.width(3.dp))
+                Text(
+                    text       = barber.rating.toString(),
+                    color      = GoldPrimary,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize   = 13.sp
+                )
+            }
         }
     }
 }

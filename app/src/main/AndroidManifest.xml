@@ -11,7 +11,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BarberApp">
         <activity
-            android:name=".View.screenUI.customer.MainActivity"
+            android:name=".View.screenUI.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.BarberApp">
             <intent-filter>

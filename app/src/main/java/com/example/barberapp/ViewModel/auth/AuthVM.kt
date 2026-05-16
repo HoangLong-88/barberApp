@@ -15,17 +15,21 @@ class AuthVM : ViewModel() {
 
     fun login(email: String, password: String, navController: NavController) {
         uiState = uiState.copy(isLoading = true, error = null)
-        authRepo.checkLogin(email, password) { success, errorMessage ->
-            uiState = if (success) {
-                navController.navigate("main_graph") {
-                    popUpTo("auth_graph") {
-                        inclusive = true // Destroys the auth_graph and everything in it
-                    }
+        authRepo.checkLogin(email, password) { success, errorMessage, role ->
+            uiState = (if (success) {
+                val targetGraph = when (role) {
+                    "manager" -> "admin_graph"
+                    "employee" -> "emp_graph"
+                    else -> "main_graph"
+                }
+                navController.navigate(targetGraph) {
+                    popUpTo("auth_graph") { inclusive = true }
+                    launchSingleTop = true
                 }
                 uiState.copy(isLoading = false, loginSuccess = true)
             } else {
                 uiState.copy(isLoading = false, error = errorMessage)
-            }
+            })
         }
     }
 

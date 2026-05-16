@@ -1,13 +1,13 @@
-package com.example.barberapp.admin.viewmodel
+package com.example.barberapp.ViewModel.admin
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.example.barberapp.admin.model.BookingItem
-import com.example.barberapp.admin.model.ServiceItem
-import com.example.barberapp.admin.model.ShopItem
-import com.example.barberapp.admin.model.UserItem
+import com.example.barberapp.Model.entities.BookingItem
+import com.example.barberapp.Model.entities.ServiceItem
+import com.example.barberapp.Model.entities.ShopItem
+import com.example.barberapp.Model.entities.UserItem
 import com.google.firebase.firestore.FirebaseFirestore
 
 class AdminViewModel : ViewModel() {
@@ -21,13 +21,13 @@ class AdminViewModel : ViewModel() {
     val services = mutableStateListOf<ServiceItem>()
     val bookings = mutableStateListOf<BookingItem>()
     val shops = mutableStateListOf<ShopItem>()
-    
+
     private val _searchQuery = mutableStateOf("")
     val searchQuery: State<String> = _searchQuery
-    
+
     private val _selectedShopForService = mutableStateOf<ShopItem?>(null)
     val selectedShopForService: State<ShopItem?> = _selectedShopForService
-    
+
     private val _selectedUserFilter = mutableStateOf("Tất cả")
     val selectedUserFilter: State<String> = _selectedUserFilter
 
@@ -50,7 +50,7 @@ class AdminViewModel : ViewModel() {
     private fun fetchData() {
         // Listen Users
         db.collection("users").addSnapshotListener { v, _ ->
-            v?.let { 
+            v?.let {
                 users.clear()
                 users.addAll(it.documents.mapNotNull { d -> d.toObject(UserItem::class.java)?.copy(id = d.id) })
             }
@@ -100,7 +100,7 @@ class AdminViewModel : ViewModel() {
     fun saveUser(name: String, email: String, phone: String, role: String) {
         val colorHex = when(role) { "employee" -> "#4CAF50"; "manager" -> "#9C27B0"; else -> "#2196F3" }
         val data = hashMapOf("name" to name, "email" to email, "phone" to phone, "role" to role, "roleColorHex" to colorHex)
-        if (userToEdit.value == null) db.collection("users").add(data) 
+        if (userToEdit.value == null) db.collection("users").add(data)
         else db.collection("users").document(userToEdit.value!!.id).set(data)
         showAddUserDialog.value = false
     }
@@ -108,8 +108,8 @@ class AdminViewModel : ViewModel() {
     fun saveService(name: String, duration: String, price: String) {
         val currentShopId = _selectedShopForService.value?.id ?: ""
         val data = hashMapOf(
-            "name" to name, 
-            "duration" to duration, 
+            "name" to name,
+            "duration" to duration,
             "price" to price,
             "shopId" to currentShopId
         )

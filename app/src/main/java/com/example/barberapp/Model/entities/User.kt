@@ -9,5 +9,5 @@ data class User (
     val phone: String = "",
     val password: String = "",
     val role: String = "",
-    val profileImgUrl: String? = null,
+    val avatarUrl: String? = null,
 )

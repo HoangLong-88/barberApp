@@ -1,4 +1,4 @@
-package com.example.barberapp.staff.view
+package com.example.barberapp.View.screenUI.employee
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,34 +15,43 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.barberapp.staff.model.StaffBookingItem
-import com.example.barberapp.staff.viewmodel.StaffViewModel
+import androidx.navigation.NavController
+import com.example.barberapp.ViewModel.auth.AuthVM
+import com.example.barberapp.ViewModel.customer.UserVM
+import com.example.barberapp.Model.entities.EmployeeBookingItem
+import com.example.barberapp.ViewModel.employee.EmpViewModel
 
 @Composable
-fun StaffScreen(viewModel: StaffViewModel = viewModel()) {
+fun EmployeeScreen(
+    viewModel: EmpViewModel = viewModel(),
+    navController: NavController,
+    authVM: AuthVM,
+    userVM: UserVM
+) {
     val currentTab by viewModel.currentTab
     val viewMode by viewModel.viewMode
-    val staffInfo by viewModel.staffInfo
+    val EmployeeInfo by viewModel.employeeInfo
     val filteredBookings by viewModel.filteredBookings
     
-    var selectedBookingForDetail by remember { mutableStateOf<StaffBookingItem?>(null) }
+    var selectedBookingForDetail by remember { mutableStateOf<EmployeeBookingItem?>(null) }
 
     Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFF121212)) {
         Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
-            StaffHeader(staffInfo)
-            StaffStats(staffInfo)
+            EmployeeHeader(EmployeeInfo, navController, authVM, userVM)
+            EmployeeStats(EmployeeInfo)
             
             Spacer(modifier = Modifier.height(24.dp))
 
             // Main Tabs (Lịch, Đánh giá, Hồ sơ)
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                StaffTabButton("Lịch", Icons.Default.DateRange, currentTab == "Lịch", Modifier.weight(1f)) { viewModel.setTab("Lịch") }
-                StaffTabButton("Đánh giá", Icons.Default.ThumbUp, currentTab == "Đánh giá", Modifier.weight(1f)) { viewModel.setTab("Đánh giá") }
-                StaffTabButton("Hồ sơ", Icons.Default.Person, currentTab == "Hồ sơ", Modifier.weight(1f)) { viewModel.setTab("Hồ sơ") }
+                EmployeeTabButton("Lịch", Icons.Default.DateRange, currentTab == "Lịch", Modifier.weight(1f)) { viewModel.setTab("Lịch") }
+                EmployeeTabButton("Đánh giá", Icons.Default.ThumbUp, currentTab == "Đánh giá", Modifier.weight(1f)) { viewModel.setTab("Đánh giá") }
+                EmployeeTabButton("Hồ sơ", Icons.Default.Person, currentTab == "Hồ sơ", Modifier.weight(1f)) { viewModel.setTab("Hồ sơ") }
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -116,7 +125,7 @@ fun StaffScreen(viewModel: StaffViewModel = viewModel()) {
 }
 
 @Composable
-fun CalendarSection(viewModel: StaffViewModel) {
+fun CalendarSection(viewModel: EmpViewModel) {
     LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         items(viewModel.dateList) { dateItem ->
             Surface(
@@ -134,7 +143,7 @@ fun CalendarSection(viewModel: StaffViewModel) {
 }
 
 @Composable
-fun StaffTabButton(label: String, icon: androidx.compose.ui.graphics.vector.ImageVector, isSelected: Boolean, modifier: Modifier, onClick: () -> Unit) {
+fun EmployeeTabButton(label: String, icon: ImageVector, isSelected: Boolean, modifier: Modifier, onClick: () -> Unit) {
     Surface(
         modifier = modifier,
         color = if (isSelected) Color(0xFFEBC14F) else Color(0xFF1E1E1E),

@@ -1,6 +1,6 @@
-package com.example.barberapp.staff.model
+package com.example.barberapp.Model.entities
 
-data class StaffInfo(
+data class EmployeeInfo(
     val id: String = "",
     val name: String = "",
     val avatarUrl: String = "",
@@ -10,7 +10,7 @@ data class StaffInfo(
     val completedToday: Int = 0
 )
 
-data class StaffBookingItem(
+data class EmployeeBookingItem(
     val id: String = "",
     val customerName: String = "",
     val serviceName: String = "",
