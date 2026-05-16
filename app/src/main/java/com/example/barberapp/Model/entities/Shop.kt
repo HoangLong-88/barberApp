@@ -1,7 +1,7 @@
 package com.example.barberapp.Model.entities
 
 data class Shop (
-    val id: String = "",
+    val id: Int = 0,
     val name: String ="",
     val address: String = "",
     val priceRange: String = "",

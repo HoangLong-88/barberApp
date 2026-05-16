@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Icon
@@ -16,6 +19,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.barberapp.View.utils.SearchBg
@@ -23,7 +29,12 @@ import com.example.barberapp.View.utils.TextSecondary
 
 // ── Search bar ────────────────────────────────────────────────────────────────
 @Composable
-fun SearchBar(modifier: Modifier = Modifier.Companion) {
+fun SearchBar(
+    modifier: Modifier = Modifier.Companion,
+    query: String,
+    onQueryChange: (String)-> Unit,
+    onSearch: ()-> Unit,
+    ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -39,10 +50,34 @@ fun SearchBar(modifier: Modifier = Modifier.Companion) {
             modifier = Modifier.Companion.size(20.dp)
         )
         Spacer(modifier = Modifier.Companion.width(10.dp))
-        Text(
-            text = "Search barber shop...",
-            color = TextSecondary,
-            fontSize = 14.sp
+        BasicTextField(
+            value = query,
+            onValueChange = onQueryChange,
+            modifier = Modifier.fillMaxWidth(),
+            textStyle = TextStyle(
+                color = TextSecondary,
+                fontSize = 14.sp
+            ),
+            cursorBrush = SolidColor(TextSecondary),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Search
+            ),
+            keyboardActions = KeyboardActions(
+                onSearch ={
+                    onSearch()
+                }
+            ),
+            decorationBox = {innerTextField->
+                if (query.isEmpty()){
+                    Text(
+                        text = "Search barber shop...",
+                        color = TextSecondary,
+                        fontSize = 14.sp
+                    )
+                }
+                innerTextField()
+            }
         )
     }
 }

@@ -1,15 +1,20 @@
 package com.example.barberapp.View.screenUI.customer.home
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.barberapp.Model.entities.Shop
 import com.example.barberapp.View.component.BarberShopCard
 import com.example.barberapp.View.component.PromoBanner
 import com.example.barberapp.View.component.SearchBar
@@ -17,28 +22,17 @@ import com.example.barberapp.View.component.SharedBottomNavBar
 import com.example.barberapp.View.layout.NearbyHeader
 import com.example.barberapp.View.layout.TopHeader
 import com.example.barberapp.View.utils.BackgroundDark
-
-// ── Data models ───────────────────────────────────────────────────────────────
-data class BarberShop(
-    val id: Int,
-    val name: String,
-    val address: String,
-    val priceRange: String,
-    val rating: Double,
-    val isFavorite: Boolean = false,
-    // In a real app, use imageRes: Int or imageUrl: String
-)
+import com.example.barberapp.ViewModel.customer.ShopVM
 
 // ── Screen ────────────────────────────────────────────────────────────────────
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier, navController: NavController) {
-    val shops = remember {
-        listOf(
-            BarberShop(1, "King Barber Shop", "54 Nguyen Van Linh, Da Nang", "80k – 150k", 4.8),
-            BarberShop(2, "Classic Cuts",     "12 Tran Phu, Da Nang",        "50k – 100k", 4.5),
-            BarberShop(3, "Urban Fade",       "88 Le Duan, Da Nang",         "70k – 130k", 4.7),
-        )
-    }
+fun HomeScreen(modifier: Modifier = Modifier,
+               navController: NavController,
+               shopVM: ShopVM = viewModel()
+) {
+    val searchText  by shopVM.searchText.collectAsState()
+    val shops by shopVM.filteredShops.collectAsState()
+    val focusManager = LocalFocusManager.current
 
     Scaffold(
         containerColor = BackgroundDark,
@@ -47,6 +41,12 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController) {
         LazyColumn(
             modifier            = modifier
                 .fillMaxSize()
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = {
+                        // 3. Xóa focus -> Bàn phím tự động ẩn
+                        focusManager.clearFocus()
+                    })
+                }
                 .padding(innerPadding),
             contentPadding      = PaddingValues(bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(0.dp)
@@ -57,7 +57,12 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController) {
             // Search bar
             item {
                 SearchBar(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    query = searchText,
+                    onQueryChange = shopVM::onSearchTextChange,
+                    onSearch = {
+                        println("Đang tìm kiếm Barber shop với từ khóa: $searchText")
+                    }
                 )
             }
 
