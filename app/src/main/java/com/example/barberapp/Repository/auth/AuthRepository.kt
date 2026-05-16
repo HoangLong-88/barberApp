@@ -1,16 +1,26 @@
 package com.example.barberapp.Repository.auth
 
-import com.example.barberapp.Helper.generateUID
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class AuthRepository {
     private val auth = FirebaseAuth.getInstance()
-    private val db = FirebaseFirestore.getInstance()
-    fun checkLogin(email: String, password: String, onResult: (Boolean, String?) -> Unit) {
+    private val store = FirebaseFirestore.getInstance()
+    fun checkLogin(email: String, password: String, onResult: (Boolean, String?, String?) -> Unit) {
         auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-            if (task.isSuccessful) onResult(true, null)
-            else onResult(false, task.exception?.message)
+            if (task.isSuccessful){
+                val uid = auth.currentUser?.uid
+                if (uid != null){
+                    store.collection("users").document(uid)
+                        .get().addOnSuccessListener { document->
+                            val role= document.getString("role")?:"customer"
+                            onResult(true,null,role)
+                        }.addOnFailureListener {
+                            onResult(false,"Cannot get role info!",null)
+                        }
+                }
+            }
+            else onResult(false, task.exception?.message,null)
         }
     }
 
@@ -38,7 +48,7 @@ class AuthRepository {
                     "profileImgUrl" to profileImgUrl,
                     "createAt" to System.currentTimeMillis()
                 )
-                db.collection("users").document(userID).set(userMap)
+                store.collection("users").document(userID).set(userMap)
                     .addOnSuccessListener { onResult(true, null) }
                     .addOnFailureListener { exception -> onResult(false, exception.message) }
             } else {

@@ -8,17 +8,20 @@ import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.barberapp.View.component.MenuItemRow
 import com.example.barberapp.View.component.SharedBottomNavBar
 import com.example.barberapp.View.layout.StatsRow
 import com.example.barberapp.View.layout.UserInfoRow
+import com.example.barberapp.View.state.customer.reloadCustomerInfoState
 import com.example.barberapp.View.utils.BackgroundDark
 import com.example.barberapp.View.utils.TextPrimary
 import com.example.barberapp.ViewModel.auth.AuthVM
@@ -43,13 +46,6 @@ fun ProfileScreen(
     userVM: UserVM
 ) {
     val userInfo = userVM.userData
-    if (userInfo == null) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        LaunchedEffect(Unit) { userVM.fetchUserProfile() }
-        return
-    }
     val stats = listOf(
         StatItem("12", "Bookings"),
         StatItem("5", "Reviews"),
@@ -95,6 +91,7 @@ fun ProfileScreen(
             onClick = { authVM.logOut(navController, userVM) }
         ),
     )
+    reloadCustomerInfoState(userInfo,userVM)
 
     Scaffold(
         containerColor = BackgroundDark,
@@ -118,9 +115,9 @@ fun ProfileScreen(
 
             // ── User info row ──────────────────────────────────────────────
             UserInfoRow(
-                name = userInfo.name ?: "Loading...",
-                email = userInfo.email ?: "Loading...",
-                phone = userInfo.phone ?: "No phone linked!"
+                name = userInfo?.name ?: "Loading...",
+                email = userInfo?.email ?: "Loading...",
+                phone = userInfo?.phone ?: "No phone linked!"
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -142,10 +139,14 @@ fun ProfileScreen(
 }
 
 // ── Preview ───────────────────────────────────────────────────────────────────
-//@Preview(showBackground = true, backgroundColor = 0xFF1C1C1C)
-//@Composable
-//fun ProfileScreenPreview() {
-//    MaterialTheme {
-//        ProfileScreen(navController = rememberNavController())
-//    }
-//}
+@Preview(showBackground = true, backgroundColor = 0xFF1C1C1C)
+@Composable
+fun ProfileScreenPreview() {
+    MaterialTheme {
+        ProfileScreen(
+            navController = rememberNavController(),
+            userVM = viewModel(),
+            authVM = viewModel()
+        )
+    }
+}

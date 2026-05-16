@@ -1,4 +1,4 @@
-package com.example.barberapp.admin.model
+package com.example.barberapp.Model.entities
 
 import androidx.compose.ui.graphics.Color
 
@@ -7,6 +7,7 @@ data class UserItem(
     val name: String = "",
     val email: String = "",
     val phone: String = "",
+    val password: String = "",
     val role: String = "",
     val roleColorHex: String = "#2196F3"
 ) {

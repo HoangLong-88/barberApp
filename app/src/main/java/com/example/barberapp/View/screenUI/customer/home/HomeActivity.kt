@@ -82,7 +82,8 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController) {
             items(shops) { shop ->
                 BarberShopCard(
                     shop = shop,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                    onClick = {navController.navigate("shop_details")}
                 )
             }
         }

@@ -1,4 +1,4 @@
-package com.example.barberapp.admin.view
+package com.example.barberapp.View.screenUI.admin
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,10 +21,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.example.barberapp.admin.model.BookingItem
-import com.example.barberapp.admin.model.ServiceItem
-import com.example.barberapp.admin.model.ShopItem
-import com.example.barberapp.admin.model.UserItem
+import com.example.barberapp.Model.entities.BookingItem
+import com.example.barberapp.Model.entities.ServiceItem
+import com.example.barberapp.Model.entities.ShopItem
+import com.example.barberapp.Model.entities.UserItem
 
 @Composable
 fun SearchBarCustom(query: String, onQueryChange: (String) -> Unit) {
