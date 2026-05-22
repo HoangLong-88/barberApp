@@ -1,7 +1,10 @@
 package com.example.barberapp.Model.entities
 
-data class Review (
-    val id : String ="",
-    val userID: String ="",
-    val comment: String=""
+data class Review(
+    val id: String = "",
+    val userId: String = "",
+    val userName: String = "",
+    val rating: Float = 0f,
+    val comment: String = "",
+    val timestamp: Long = 0L
 )

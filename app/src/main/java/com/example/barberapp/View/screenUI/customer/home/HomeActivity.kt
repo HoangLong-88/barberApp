@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.barberapp.Model.entities.Shop
 import com.example.barberapp.View.component.BarberShopCard
 import com.example.barberapp.View.component.PromoBanner
 import com.example.barberapp.View.component.SearchBar
@@ -22,7 +21,7 @@ import com.example.barberapp.View.component.SharedBottomNavBar
 import com.example.barberapp.View.layout.NearbyHeader
 import com.example.barberapp.View.layout.TopHeader
 import com.example.barberapp.View.utils.BackgroundDark
-import com.example.barberapp.ViewModel.customer.ShopVM
+import com.example.barberapp.ViewModel.ShopVM
 
 // ── Screen ────────────────────────────────────────────────────────────────────
 @Composable
@@ -43,7 +42,6 @@ fun HomeScreen(modifier: Modifier = Modifier,
                 .fillMaxSize()
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = {
-                        // 3. Xóa focus -> Bàn phím tự động ẩn
                         focusManager.clearFocus()
                     })
                 }
@@ -88,7 +86,7 @@ fun HomeScreen(modifier: Modifier = Modifier,
                 BarberShopCard(
                     shop = shop,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-                    onClick = {navController.navigate("shop_details")}
+                    onClick = {navController.navigate("shop_details/${shop?.id}")}
                 )
             }
         }

@@ -1,4 +1,4 @@
-package com.example.barberapp.Repository.customer
+package com.example.barberapp.Repository
 
 import android.net.Uri
 import com.example.barberapp.Model.entities.User

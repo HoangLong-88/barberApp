@@ -23,7 +23,7 @@ import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.*
 import androidx.navigation.NavController
 import com.example.barberapp.View.component.FieldLabel
-import com.example.barberapp.View.state.auth.checkAuthUiState
+import com.example.barberapp.View.state.checkAuthUiState
 
 import com.example.barberapp.View.utils.BackgroundDark
 import com.example.barberapp.View.utils.TextPrimary
@@ -34,7 +34,7 @@ import com.example.barberapp.View.utils.GoldLight
 import com.example.barberapp.View.utils.GoldPrimary
 import com.example.barberapp.View.utils.BorderColor
 import com.example.barberapp.View.utils.registerTextFieldColors
-import com.example.barberapp.ViewModel.auth.AuthVM
+import com.example.barberapp.ViewModel.AuthVM
 
 // ─── Register Screen ──────────────────────────────────────────────────────────
 @OptIn(ExperimentalMaterial3Api::class)

@@ -63,7 +63,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.barberapp.View.component.FieldLabel
 import com.example.barberapp.View.component.ScissorsIcon
-import com.example.barberapp.View.state.auth.checkAuthUiState
+import com.example.barberapp.View.state.checkAuthUiState
 import com.example.barberapp.View.utils.BackgroundDark
 import com.example.barberapp.View.utils.BorderColor
 import com.example.barberapp.View.utils.GoldDark
@@ -75,7 +75,7 @@ import com.example.barberapp.View.utils.TextHint
 import com.example.barberapp.View.utils.TextPrimary
 import com.example.barberapp.View.utils.TextSecondary
 import com.example.barberapp.View.utils.barbershopTextFieldColors
-import com.example.barberapp.ViewModel.auth.AuthVM
+import com.example.barberapp.ViewModel.AuthVM
 
 // ─── Login Screen ─────────────────────────────────────────────────────────────
 @OptIn(ExperimentalMaterial3Api::class)

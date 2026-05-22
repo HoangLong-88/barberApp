@@ -1,4 +1,4 @@
-package com.example.barberapp.ViewModel.customer
+package com.example.barberapp.ViewModel
 
 import android.net.Uri
 import androidx.compose.runtime.mutableStateOf
@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModel
 import com.example.barberapp.Model.entities.User
-import com.example.barberapp.Repository.customer.UserRepository
+import com.example.barberapp.Repository.UserRepository
 
 class UserVM : ViewModel() {
     private val userRepo = UserRepository()

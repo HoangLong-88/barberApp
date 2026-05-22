@@ -39,7 +39,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.barberapp.View.component.ProfileTextField
-import com.example.barberapp.ViewModel.customer.UserVM
+import com.example.barberapp.View.state.reloadCustomerInfoState
+import com.example.barberapp.ViewModel.UserVM
 
 
 // ── Main screen ────────────────────────────────────────────────────────────────
@@ -50,20 +51,14 @@ fun EditProfileScreen(
     userVM: UserVM = viewModel(),
 ) {
     val userInfo = userVM.userData
-    if (userInfo == null) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        LaunchedEffect(Unit) { userVM.fetchUserProfile() }
-        return
-    }
-    var username by remember { mutableStateOf(userInfo.name) }
-    var email by remember { mutableStateOf(userInfo.email) }
-    var phone by remember { mutableStateOf(userInfo.phone) }
-    var password by remember { mutableStateOf(userInfo.password) }
-    var role by remember { mutableStateOf(userInfo.role) }
+    reloadCustomerInfoState(userInfo,userVM)
+    var username by remember { mutableStateOf(userInfo?.name ?: "Loading...") }
+    var email by remember { mutableStateOf(userInfo?.email?: "Loading...") }
+    var phone by remember { mutableStateOf(userInfo?.phone?: "Loading...") }
+    var password by remember { mutableStateOf(userInfo?.password?: "Loading...") }
+    var role by remember { mutableStateOf(userInfo?.role?: "No role") }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-    val remotedImageUri = userInfo.avatarUrl
+    val remotedImageUri = userInfo?.avatarUrl
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri -> selectedImageUri = uri }

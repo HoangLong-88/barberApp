@@ -1,15 +1,34 @@
 package com.example.barberapp.View.screenUI.admin
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,8 +38,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.barberapp.Model.entities.ServiceItem
-import com.example.barberapp.Model.entities.ShopItem
+import com.example.barberapp.Model.entities.Shop
 import com.example.barberapp.Model.entities.UserItem
+import com.example.barberapp.View.component.DialogTextField
 
 @Composable
 fun ConfirmDeleteDialog(title: String, message: String, onDismiss: () -> Unit, onConfirm: () -> Unit) {
@@ -43,12 +63,12 @@ fun ConfirmDeleteDialog(title: String, message: String, onDismiss: () -> Unit, o
 }
 
 @Composable
-fun AddEditShopDialog(shop: ShopItem?, onDismiss: () -> Unit, onConfirm: (String, String, String, String, String, String) -> Unit) {
+fun AddEditShopDialog(shop: Shop?, onDismiss: () -> Unit, onConfirm: (String, String, String, String, Double, String) -> Unit) {
     var name by remember { mutableStateOf(shop?.name ?: "") }
     var address by remember { mutableStateOf(shop?.address ?: "") }
     var phone by remember { mutableStateOf(shop?.phone ?: "") }
     var priceRange by remember { mutableStateOf(shop?.priceRange ?: "") }
-    var rating by remember { mutableStateOf(shop?.rating ?: "0") }
+    var rating by remember { mutableStateOf(shop?.rating?: 0.0) }
     var imageUrl by remember { mutableStateOf(shop?.imageUrl ?: "") }
 
     Dialog(onDismissRequest = onDismiss) {
@@ -56,7 +76,7 @@ fun AddEditShopDialog(shop: ShopItem?, onDismiss: () -> Unit, onConfirm: (String
             Column(modifier = Modifier.padding(24.dp).verticalScroll(rememberScrollState())) {
                 Text(if(shop == null) "Thêm tiệm" else "Sửa tiệm", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(20.dp))
-                
+
                 DialogTextField("Tên tiệm *", name, { name = it }, "King Barber Shop")
                 Spacer(modifier = Modifier.height(16.dp))
                 DialogTextField("Địa chỉ *", address, { address = it }, "54 Nguyen Van Linh")
@@ -65,14 +85,12 @@ fun AddEditShopDialog(shop: ShopItem?, onDismiss: () -> Unit, onConfirm: (String
                 Spacer(modifier = Modifier.height(16.dp))
                 DialogTextField("Khoảng giá", priceRange, { priceRange = it }, "80k - 150k")
                 Spacer(modifier = Modifier.height(16.dp))
-                DialogTextField("Rating", rating, { rating = it }, "0")
-                Spacer(modifier = Modifier.height(16.dp))
                 DialogTextField("Image URL", imageUrl, { imageUrl = it }, "https://...")
                 
                 Spacer(modifier = Modifier.height(32.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Button(onClick = onDismiss, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C2C2C))) { Text("Hủy") }
-                    Button(onClick = { if(name.isNotBlank() && address.isNotBlank()) onConfirm(name, address, phone, priceRange, rating, imageUrl) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEBC14F))) { Text(if(shop==null) "Thêm" else "Lưu", color = Color.Black) }
+                    Button(onClick = { if(name.isNotBlank() && address.isNotBlank()) onConfirm(name, address, phone, priceRange,rating, imageUrl) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEBC14F))) { Text(if(shop==null) "Thêm" else "Lưu", color = Color.Black) }
                 }
             }
         }
@@ -105,10 +123,11 @@ fun AddEditServiceDialog(service: ServiceItem?, onDismiss: () -> Unit, onConfirm
 }
 
 @Composable
-fun AddEditUserDialog(user: UserItem?, onDismiss: () -> Unit, onConfirm: (String, String, String, String) -> Unit) {
+fun AddEditUserDialog(user: UserItem?, onDismiss: () -> Unit, onConfirm: (String, String, String,String, String) -> Unit) {
     var name by remember { mutableStateOf(user?.name ?: "") }
     var email by remember { mutableStateOf(user?.email ?: "") }
     var phone by remember { mutableStateOf(user?.phone ?: "") }
+    val password by remember { mutableStateOf(user?.password?:"") }
     var role by remember { mutableStateOf(user?.role ?: "customer") }
     var expanded by remember { mutableStateOf(false) }
     val roles = listOf("customer" to "Khách hàng", "employee" to "Nhân viên", "manager" to "Quản lý")
@@ -139,7 +158,7 @@ fun AddEditUserDialog(user: UserItem?, onDismiss: () -> Unit, onConfirm: (String
                 Spacer(modifier = Modifier.height(32.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Button(onClick = onDismiss, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C2C2C))) { Text("Hủy") }
-                    Button(onClick = { if(name.isNotBlank()) onConfirm(name, email, phone, role) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEBC14F))) { Text(if(user==null) "Thêm" else "Lưu", color = Color.Black) }
+                    Button(onClick = { if(name.isNotBlank()) onConfirm(name, email, phone, password,role) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEBC14F))) { Text(if(user==null) "Thêm" else "Lưu", color = Color.Black) }
                 }
             }
         }

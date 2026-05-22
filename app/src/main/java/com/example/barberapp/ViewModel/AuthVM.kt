@@ -1,12 +1,12 @@
-package com.example.barberapp.ViewModel.auth
+package com.example.barberapp.ViewModel
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
-import com.example.barberapp.Repository.auth.AuthRepository
-import com.example.barberapp.ViewModel.customer.UserVM
+import com.example.barberapp.Repository.AuthRepository
+import com.example.barberapp.ViewModel.UserVM
 
 class AuthVM : ViewModel() {
     private val authRepo = AuthRepository();

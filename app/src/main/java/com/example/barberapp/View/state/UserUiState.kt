@@ -1,4 +1,4 @@
-package com.example.barberapp.View.state.customer
+package com.example.barberapp.View.state
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,7 +8,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.example.barberapp.Model.entities.User
-import com.example.barberapp.ViewModel.customer.UserVM
+import com.example.barberapp.ViewModel.UserVM
 
 @Composable
 fun reloadCustomerInfoState(userInfo: User?, userVM: UserVM){

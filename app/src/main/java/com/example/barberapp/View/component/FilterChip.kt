@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -49,6 +50,21 @@ fun FilterChip(
             color = textColor,
             fontSize = 13.sp,
             fontWeight = if (isSelected) FontWeight.Companion.SemiBold else FontWeight.Companion.Normal
+        )
+    }
+}
+
+@Composable
+fun AdminFilterChipCustom(label: String, isSelected: Boolean, onClick: () -> Unit) {
+    Surface(
+        color = if (isSelected) Color(0xFFEBC14F).copy(0.3f) else Color(0xFF2C2C2C),
+        shape = RoundedCornerShape(8.dp),
+        modifier = Modifier.clickable { onClick() }) {
+        Text(
+            label,
+            color = if (isSelected) Color(0xFFEBC14F) else Color.Gray,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            fontSize = 12.sp
         )
     }
 }

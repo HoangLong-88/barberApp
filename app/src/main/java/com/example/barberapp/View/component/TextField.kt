@@ -69,3 +69,15 @@ fun ProfileTextField(
         )
     }
 }
+
+@Composable
+fun DialogTextField(label: String, value: String, onValueChange: (String) -> Unit, placeholder: String) {
+    Column {
+        Text(label, color = Color.Gray, fontSize = 12.sp)
+        TextField(
+            value = value, onValueChange = onValueChange, modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(focusedContainerColor = Color(0xFF2C2C2C), unfocusedContainerColor = Color(0xFF2C2C2C), focusedTextColor = Color.White, unfocusedTextColor = Color.White, focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent),
+            shape = RoundedCornerShape(12.dp), placeholder = { Text(placeholder, color = Color.Gray.copy(0.5f)) }, singleLine = true
+        )
+    }
+}
