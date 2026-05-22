@@ -26,8 +26,8 @@ import com.example.barberapp.View.screenUI.customer.profile.EditProfileScreen
 import com.example.barberapp.View.screenUI.customer.profile.FavoritesScreen
 import com.example.barberapp.View.screenUI.customer.profile.ProfileScreen
 import com.example.barberapp.View.screenUI.customer.reviews.WriteReviewScreen
-import com.example.barberapp.ViewModel.auth.AuthVM
-import com.example.barberapp.ViewModel.customer.UserVM
+import com.example.barberapp.ViewModel.AuthVM
+import com.example.barberapp.ViewModel.UserVM
 import com.example.barberapp.View.screenUI.admin.AdminDashboardScreen
 import com.example.barberapp.View.screenUI.employee.EmployeeScreen
 
@@ -97,8 +97,12 @@ fun AppNavHost() {
                     )
                 }
                 composable("favorite") { FavoritesScreen(navController = navController) }
-                composable("shop_details") { ShopDetailScreen(navController = navController) }
-                composable("reviews") { WriteReviewScreen() }
+                composable("shop_details/{shopId}") { backStackEntry ->
+                    val shopId = backStackEntry.arguments?.getString("shopId")?:""
+                    ShopDetailScreen(navController = navController, shopId = shopId) }
+                composable("reviews/{shopId}") {backStackEntry->
+                    val shopId = backStackEntry.arguments?.getString("shopId")?:""
+                    WriteReviewScreen() }
             }
             navigation(startDestination = "admin", route = "admin_graph") {
                 composable("admin") {

@@ -21,10 +21,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.barberapp.ViewModel.auth.AuthVM
-import com.example.barberapp.ViewModel.customer.UserVM
+import com.example.barberapp.ViewModel.AuthVM
+import com.example.barberapp.ViewModel.UserVM
 import com.example.barberapp.Model.entities.EmployeeBookingItem
-import com.example.barberapp.ViewModel.employee.EmpViewModel
+import com.example.barberapp.ViewModel.EmpViewModel
 
 @Composable
 fun EmployeeScreen(

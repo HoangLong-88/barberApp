@@ -31,12 +31,3 @@ data class BookingItem(
     val status: String = "Pending"
 )
 
-data class ShopItem(
-    val id: String = "",
-    val name: String = "",
-    val address: String = "",
-    val phone: String = "",
-    val priceRange: String = "",
-    val rating: String = "0",
-    val imageUrl: String = ""
-)

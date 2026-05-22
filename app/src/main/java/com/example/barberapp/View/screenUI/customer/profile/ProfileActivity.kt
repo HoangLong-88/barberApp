@@ -21,11 +21,11 @@ import com.example.barberapp.View.component.MenuItemRow
 import com.example.barberapp.View.component.SharedBottomNavBar
 import com.example.barberapp.View.layout.StatsRow
 import com.example.barberapp.View.layout.UserInfoRow
-import com.example.barberapp.View.state.customer.reloadCustomerInfoState
+import com.example.barberapp.View.state.reloadCustomerInfoState
 import com.example.barberapp.View.utils.BackgroundDark
 import com.example.barberapp.View.utils.TextPrimary
-import com.example.barberapp.ViewModel.auth.AuthVM
-import com.example.barberapp.ViewModel.customer.UserVM
+import com.example.barberapp.ViewModel.AuthVM
+import com.example.barberapp.ViewModel.UserVM
 
 // ── Data models ─────────────────────────────────────────────────────────────
 data class StatItem(val value: String, val label: String)
@@ -42,10 +42,11 @@ data class MenuItem(
 fun ProfileScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    authVM: AuthVM,
-    userVM: UserVM
+    authVM: AuthVM = viewModel(),
+    userVM: UserVM = viewModel()
 ) {
     val userInfo = userVM.userData
+        reloadCustomerInfoState(userInfo,userVM)
     val stats = listOf(
         StatItem("12", "Bookings"),
         StatItem("5", "Reviews"),
@@ -91,7 +92,6 @@ fun ProfileScreen(
             onClick = { authVM.logOut(navController, userVM) }
         ),
     )
-    reloadCustomerInfoState(userInfo,userVM)
 
     Scaffold(
         containerColor = BackgroundDark,

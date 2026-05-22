@@ -35,6 +35,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,78 +50,36 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.barberapp.Model.entities.Review
+import com.example.barberapp.Model.entities.Service
+import com.example.barberapp.Model.entities.Shop
 import com.example.barberapp.View.component.BarberCard
+import com.example.barberapp.ViewModel.ShopVM
 
 // ─── Color Palette ───────────────────────────────────────────────────────────
 
-private val BackgroundDark   = Color(0xFF111111)
-private val SurfaceDark      = Color(0xFF1E1E1E)
-val CardDark         = Color(0xFF252525)
-private val GoldPrimary      = Color(0xFFF5A623)
-private val GoldLight        = Color(0xFFFFC85A)
-private val TextPrimary      = Color(0xFFFFFFFF)
-private val TextSecondary    = Color(0xFFAAAAAA)
-private val TabInactive      = Color(0xFF888888)
-private val DividerColor     = Color(0xFF2E2E2E)
-val AvatarBg       = Color(0xFF2E2E2E)
+private val BackgroundDark = Color(0xFF111111)
+private val SurfaceDark = Color(0xFF1E1E1E)
+val CardDark = Color(0xFF252525)
+private val GoldPrimary = Color(0xFFF5A623)
+private val GoldLight = Color(0xFFFFC85A)
+private val TextPrimary = Color(0xFFFFFFFF)
+private val TextSecondary = Color(0xFFAAAAAA)
+private val TabInactive = Color(0xFF888888)
+private val DividerColor = Color(0xFF2E2E2E)
+val AvatarBg = Color(0xFF2E2E2E)
 
 // ─── Data Models ─────────────────────────────────────────────────────────────
 
-data class BarberService(
-    val id: Int,
-    val name: String,
-    val priceVnd: Int
-)
-
-data class Review(
-    val id: Int,
-    val author: String,
-    val rating: Int,       // 1-5
-    val comment: String
-)
-
 data class Barber(
-    val id : Int,
+    val id: Int,
     val name: String,
     val rating: Float,
 )
 
-data class ShopInfo(
-    val name: String,
-    val rating: Float,
-    val address: String,
-    val phone: String,
-    val services: List<BarberService>,
-    val reviews: List<Review>,
-    val barbers: List<Barber>
-)
-
-// ─── Sample Data ─────────────────────────────────────────────────────────────
-
-val sampleShop = ShopInfo(
-    name     = "Elite Cuts Studio",
-    rating   = 4.6f,
-    address  = "123 Tran Phu, Da Nang",
-    phone    = "0902 345 678",
-    services = listOf(
-        BarberService(1, "Hair Cut",        100_000),
-        BarberService(2, "Beard Shave",      50_000),
-        BarberService(3, "Hair Styling",    150_000),
-        BarberService(4, "Premium Styling", 250_000),
-    ),
-    barbers = listOf(
-        Barber(1, "John",   4.9f),
-        Barber(2, "Mike",    4.7f),
-        Barber(3, "David",   4.8f),
-    ),
-    reviews  = listOf(
-        Review(1, "Nguyen Van A", 5, "Great haircut and friendly barber"),
-        Review(2, "Tran Van B",   4, "Good service, clean shop"),
-        Review(3, "Le Van C",     5, "Best barber shop in Da Nang!"),
-    )
-)
 
 // ─── Tabs ────────────────────────────────────────────────────────────────────
 
@@ -133,14 +93,21 @@ private enum class ShopTab(val label: String) {
 
 @Composable
 fun ShopDetailScreen(
-    shop: ShopInfo = sampleShop,
-    onBack: () -> Unit = {},
-    onBook: (BarberService) -> Unit = {},
+    shopId: String,
+    shopVM: ShopVM = viewModel(),
+    onBook: (Service?) -> Unit = {},
     navController: NavController
 ) {
     var isFavourite by remember { mutableStateOf(false) }
     var selectedTab by remember { mutableStateOf(ShopTab.SERVICES) }
-
+    val shopState by shopVM.shop.collectAsState()
+    val reviewState by shopVM.reviews.collectAsState()
+    LaunchedEffect(shopId) {
+        shopVM.loadShopDetails(shopId)
+    }
+    val shop = shopState ?: return Box(Modifier
+        .fillMaxSize()
+        .background(BackgroundDark))
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -149,7 +116,12 @@ fun ShopDetailScreen(
         LazyColumn(modifier = Modifier.fillMaxSize()) {
 
             // ── Hero Image ────────────────────────────────────────────────
-            item { HeroSection(isFavourite, onBack, onFavClick = { isFavourite = !isFavourite }) }
+            item {
+                HeroSection(
+                    isFavourite,
+                    onBack = { navController.popBackStack() },
+                    onFavClick = { isFavourite = !isFavourite })
+            }
 
             // ── Shop Meta ─────────────────────────────────────────────────
             item { ShopMetaSection(shop) }
@@ -157,8 +129,13 @@ fun ShopDetailScreen(
             // ── Tab Row ───────────────────────────────────────────────────
             item {
                 ShopTabRow(
-                    selected  = selectedTab,
-                    onSelect  = { selectedTab = it }
+                    selected = selectedTab,
+                    onSelect = { tab ->
+                        selectedTab = tab
+                        if (tab == ShopTab.REVIEWS) {
+                            shopVM.loadShopDetails(shopId)
+                        }
+                    }
                 )
             }
 
@@ -170,15 +147,17 @@ fun ShopDetailScreen(
                     }
                     item { Spacer(Modifier.height(24.dp)) }
                 }
+
                 ShopTab.REVIEWS -> {
-                    items(shop.reviews, key = { it.id }) { review ->
+                    items(reviewState, key = { it.id }) { review ->
                         ReviewCard(review)
                     }
-                    item { WriteReviewButton({navController.navigate("reviews")}) }
+                    item { WriteReviewButton({ navController.navigate("reviews/$shopId") }) }
                     item { Spacer(Modifier.height(24.dp)) }
                 }
+
                 ShopTab.BARBERS -> {
-                    items(shop.barbers, key = {it.id}){barber->
+                    items(shop.barbers, key = { it.id }) { barber ->
                         BarberCard(barber = barber)
                     }
                     item { Spacer(Modifier.height(24.dp)) }
@@ -233,9 +212,9 @@ private fun HeroSection(
                 .background(Color(0x66000000), RoundedCornerShape(12.dp))
         ) {
             Icon(
-                imageVector    = Icons.Default.ArrowBack,
+                imageVector = Icons.Default.ArrowBack,
                 contentDescription = "Back",
-                tint           = TextPrimary
+                tint = TextPrimary
             )
         }
 
@@ -251,7 +230,7 @@ private fun HeroSection(
             Icon(
                 imageVector = if (isFavourite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                 contentDescription = "Favourite",
-                tint        = if (isFavourite) GoldPrimary else TextPrimary
+                tint = if (isFavourite) GoldPrimary else TextPrimary
             )
         }
     }
@@ -260,46 +239,67 @@ private fun HeroSection(
 // ─── Shop Meta ───────────────────────────────────────────────────────────────
 
 @Composable
-private fun ShopMetaSection(shop: ShopInfo) {
+private fun ShopMetaSection(shop: Shop) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 16.dp)
     ) {
         Text(
-            text       = shop.name,
-            color      = TextPrimary,
-            fontSize   = 22.sp,
+            text = shop.name,
+            color = TextPrimary,
+            fontSize = 22.sp,
             fontWeight = FontWeight.Bold
         )
 
         Spacer(Modifier.height(8.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.Star, contentDescription = null, tint = GoldPrimary, modifier = Modifier.size(16.dp))
+            Icon(
+                Icons.Default.Star,
+                contentDescription = null,
+                tint = GoldPrimary,
+                modifier = Modifier.size(16.dp)
+            )
             Spacer(Modifier.width(4.dp))
-            Text(text = shop.rating.toString(), color = GoldPrimary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+            Text(
+                text = shop.rating.toString(),
+                color = GoldPrimary,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 14.sp
+            )
             Spacer(Modifier.width(12.dp))
-            Icon(Icons.Default.LocationOn, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(14.dp))
+            Icon(
+                Icons.Default.LocationOn,
+                contentDescription = null,
+                tint = TextSecondary,
+                modifier = Modifier.size(14.dp)
+            )
             Spacer(Modifier.width(4.dp))
-            Text(text = shop.address, color = TextSecondary, fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(
+                text = shop.address,
+                color = TextSecondary,
+                fontSize = 13.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
 
         Spacer(Modifier.height(6.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.Phone, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(14.dp))
+            Icon(
+                Icons.Default.Phone,
+                contentDescription = null,
+                tint = TextSecondary,
+                modifier = Modifier.size(14.dp)
+            )
             Spacer(Modifier.width(6.dp))
             Text(text = shop.phone, color = TextSecondary, fontSize = 13.sp)
         }
     }
 
     Divider(color = DividerColor, thickness = 1.dp)
-}
-
-@Composable
-fun Column(modifier: Modifier, content: @Composable () -> Unit) {
-    TODO("Not yet implemented")
 }
 
 // ─── Tab Row ─────────────────────────────────────────────────────────────────
@@ -318,16 +318,16 @@ private fun ShopTabRow(
             val isActive = tab == selected
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier            = Modifier
+                modifier = Modifier
                     .weight(1f)
                     .padding(vertical = 4.dp)
             ) {
                 TextButton(onClick = { onSelect(tab) }) {
                     Text(
-                        text       = tab.label,
-                        color      = if (isActive) GoldPrimary else TabInactive,
+                        text = tab.label,
+                        color = if (isActive) GoldPrimary else TabInactive,
                         fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Normal,
-                        fontSize   = 14.sp
+                        fontSize = 14.sp
                     )
                 }
                 if (isActive) {
@@ -349,7 +349,7 @@ private fun ShopTabRow(
 
 @Composable
 private fun ServiceCard(
-    service: BarberService,
+    service: Service?,
     onBook: () -> Unit
 ) {
     Card(
@@ -357,42 +357,42 @@ private fun ServiceCard(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp),
         colors = CardDefaults.cardColors(containerColor = CardDark),
-        shape  = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(14.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
-            modifier            = Modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalAlignment   = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text       = service.name,
-                    color      = TextPrimary,
+                    text = service?.name ?: "Loading...",
+                    color = TextPrimary,
                     fontWeight = FontWeight.SemiBold,
-                    fontSize   = 15.sp
+                    fontSize = 15.sp
                 )
                 Spacer(Modifier.height(2.dp))
                 Text(
-                    text     = "Price: %,d VND".format(service.priceVnd),
-                    color    = TextSecondary,
+                    text = "Price: %,d VND".format(service?.price ?: "Loading..."),
+                    color = TextSecondary,
                     fontSize = 12.sp
                 )
             }
 
             Button(
-                onClick  = onBook,
-                shape    = RoundedCornerShape(10.dp),
-                colors   = ButtonDefaults.buttonColors(containerColor = GoldPrimary),
+                onClick = onBook,
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = GoldPrimary),
                 contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp)
             ) {
                 Text(
-                    text       = "Book",
-                    color      = Color.Black,
+                    text = "Book",
+                    color = Color.Black,
                     fontWeight = FontWeight.Bold,
-                    fontSize   = 13.sp
+                    fontSize = 13.sp
                 )
             }
         }
@@ -404,31 +404,31 @@ private fun ServiceCard(
 @Composable
 private fun ReviewCard(review: Review) {
     Card(
-        modifier  = Modifier
+        modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp),
-        colors    = CardDefaults.cardColors(containerColor = CardDark),
-        shape     = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = CardDark),
+        shape = RoundedCornerShape(14.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
-                modifier              = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment     = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text       = review.author,
-                    color      = TextPrimary,
+                    text = review.userName,
+                    color = TextPrimary,
                     fontWeight = FontWeight.SemiBold,
-                    fontSize   = 14.sp
+                    fontSize = 14.sp
                 )
                 StarRow(rating = review.rating)
             }
             Spacer(Modifier.height(4.dp))
             Text(
-                text     = review.comment,
-                color    = TextSecondary,
+                text = review.comment,
+                color = TextSecondary,
                 fontSize = 13.sp
             )
         }
@@ -438,14 +438,14 @@ private fun ReviewCard(review: Review) {
 // ─── Star Row ────────────────────────────────────────────────────────────────
 
 @Composable
-private fun StarRow(rating: Int, maxStars: Int = 5) {
+private fun StarRow(rating: Float, maxStars: Int = 5) {
     Row {
         repeat(maxStars) { index ->
             Icon(
                 imageVector = if (index < rating) Icons.Default.Star else Icons.Outlined.Star,
                 contentDescription = null,
-                tint        = GoldPrimary,
-                modifier    = Modifier.size(14.dp)
+                tint = GoldPrimary,
+                modifier = Modifier.size(14.dp)
             )
         }
     }
@@ -457,25 +457,25 @@ private fun StarRow(rating: Int, maxStars: Int = 5) {
 private fun WriteReviewButton(onClick: () -> Unit) {
     Spacer(Modifier.height(8.dp))
     Box(
-        modifier          = Modifier
+        modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
-        contentAlignment  = Alignment.Center
+        contentAlignment = Alignment.Center
     ) {
         OutlinedButton(
-            onClick  = onClick ,
+            onClick = onClick,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
-            shape    = RoundedCornerShape(14.dp),
-            colors   = ButtonDefaults.outlinedButtonColors(contentColor = GoldPrimary),
-            border   = ButtonDefaults.outlinedButtonBorder.copy()
+            shape = RoundedCornerShape(14.dp),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = GoldPrimary),
+            border = ButtonDefaults.outlinedButtonBorder.copy()
         ) {
             Text(
-                text       = "Write a Review",
-                color      = GoldPrimary,
+                text = "Write a Review",
+                color = GoldPrimary,
                 fontWeight = FontWeight.SemiBold,
-                fontSize   = 15.sp
+                fontSize = 15.sp
             )
         }
     }
@@ -483,8 +483,8 @@ private fun WriteReviewButton(onClick: () -> Unit) {
 
 // ─── Preview ─────────────────────────────────────────────────────────────────
 
-@Preview(showBackground = true, showSystemUi = true, backgroundColor = 0xFF111111)
-@Composable
-fun ShopDetailScreenPreview() {
-    ShopDetailScreen(navController = rememberNavController())
-}
+//@Preview(showBackground = true, showSystemUi = true, backgroundColor = 0xFF111111)
+//@Composable
+//fun ShopDetailScreenPreview() {
+//    ShopDetailScreen(navController = rememberNavController())
+//}

@@ -1,4 +1,4 @@
-package com.example.barberapp.Repository.auth
+package com.example.barberapp.Repository
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore

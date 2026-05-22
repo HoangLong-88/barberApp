@@ -1,4 +1,4 @@
-package com.example.barberapp.ViewModel.employee
+package com.example.barberapp.ViewModel
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf

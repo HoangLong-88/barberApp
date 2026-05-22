@@ -20,12 +20,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.barberapp.ViewModel.auth.AuthVM
-import com.example.barberapp.ViewModel.customer.UserVM
+import com.example.barberapp.ViewModel.AuthVM
+import com.example.barberapp.ViewModel.UserVM
 import com.example.barberapp.Model.entities.ServiceItem
-import com.example.barberapp.Model.entities.ShopItem
+import com.example.barberapp.Model.entities.Shop
 import com.example.barberapp.Model.entities.UserItem
-import com.example.barberapp.ViewModel.admin.AdminViewModel
+import com.example.barberapp.View.component.AdminFilterChipCustom
+import com.example.barberapp.View.component.BookingCard
+import com.example.barberapp.View.component.SearchBarCustom
+import com.example.barberapp.View.component.ServiceCard
+import com.example.barberapp.View.component.ShopCard
+import com.example.barberapp.View.component.UserCard
+import com.example.barberapp.ViewModel.AdminViewModel
 
 @Composable
 fun AdminDashboardScreen(
@@ -97,7 +103,7 @@ fun AdminDashboardScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         items(viewModel.shops) { shop ->
-                            FilterChipCustom(
+                            AdminFilterChipCustom(
                                 label = shop.name,
                                 isSelected = selectedShopForService?.id == shop.id,
                                 onClick = { viewModel.setSelectedShopForService(shop) }
@@ -123,7 +129,7 @@ fun AdminDashboardScreen(
                         "Tài khoản" -> {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 listOf("Tất cả", "KH", "NV", "QL").forEach { label ->
-                                    FilterChipCustom(
+                                    AdminFilterChipCustom(
                                         label,
                                         selectedUserFilter == label
                                     ) { viewModel.setSelectedUserFilter(label) }
@@ -149,7 +155,7 @@ fun AdminDashboardScreen(
                                     "Fri",
                                     "Sat"
                                 ).forEach { day ->
-                                    FilterChipCustom(
+                                    AdminFilterChipCustom(
                                         day,
                                         selectedDateFilter == day
                                     ) { viewModel.setSelectedDateFilter(day) }
@@ -285,21 +291,21 @@ fun ViewDialogs(viewModel: AdminViewModel) {
         ConfirmDeleteDialog(
             title = when (item) {
                 is UserItem -> "Xóa tài khoản?"
-                is ShopItem -> "Xóa tiệm?"
+                is Shop -> "Xóa tiệm?"
                 is ServiceItem -> "Xóa dịch vụ?"
                 else -> "Xác nhận xóa?"
             },
             message = "Hành động này không thể hoàn tác.",
             onDismiss = { viewModel.itemToDelete.value = null },
-            onConfirm = { viewModel.deleteItem(item) }
+            onConfirm = { viewModel.deleteItem(item)}
         )
     }
 
     if (showAddUserDialog) {
         AddEditUserDialog(
             viewModel.userToEdit.value,
-            onDismiss = { viewModel.showAddUserDialog.value = false }) { n, e, p, r ->
-            viewModel.saveUser(n, e, p, r)
+            onDismiss = { viewModel.showAddUserDialog.value = false }) { n, e, p, pw,r ->
+            viewModel.saveUser(n, e, p, pw,r)
         }
     }
 
@@ -314,7 +320,7 @@ fun ViewDialogs(viewModel: AdminViewModel) {
     if (showAddShopDialog) {
         AddEditShopDialog(
             viewModel.shopToEdit.value,
-            onDismiss = { viewModel.showAddShopDialog.value = false }) { n, a, p, pr, r, i ->
+            onDismiss = { viewModel.showAddShopDialog.value = false }) { n, a, p, pr,r, i ->
             viewModel.saveShop(n, a, p, pr, r, i)
         }
     }

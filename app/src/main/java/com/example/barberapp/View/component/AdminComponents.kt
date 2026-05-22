@@ -1,7 +1,6 @@
-package com.example.barberapp.View.screenUI.admin
+package com.example.barberapp.View.component
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,7 +22,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.barberapp.Model.entities.BookingItem
 import com.example.barberapp.Model.entities.ServiceItem
-import com.example.barberapp.Model.entities.ShopItem
+import com.example.barberapp.Model.entities.Shop
 import com.example.barberapp.Model.entities.UserItem
 
 @Composable
@@ -50,7 +49,7 @@ fun SearchBarCustom(query: String, onQueryChange: (String) -> Unit) {
 }
 
 @Composable
-fun ShopCard(shop: ShopItem, onEdit: () -> Unit, onDelete: () -> Unit) {
+fun ShopCard(shop: Shop, onEdit: () -> Unit, onDelete: () -> Unit) {
     Surface(color = Color(0xFF1E1E1E), shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
@@ -153,24 +152,5 @@ fun BookingCard(
                 IconButton(onClick = onDelete) { Icon(Icons.Default.Delete, null, tint = Color.Red.copy(0.5f), modifier = Modifier.size(20.dp)) }
             }
         }
-    }
-}
-
-@Composable
-fun FilterChipCustom(label: String, isSelected: Boolean, onClick: () -> Unit) {
-    Surface(color = if (isSelected) Color(0xFFEBC14F).copy(0.3f) else Color(0xFF2C2C2C), shape = RoundedCornerShape(8.dp), modifier = Modifier.clickable { onClick() }) {
-        Text(label, color = if (isSelected) Color(0xFFEBC14F) else Color.Gray, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), fontSize = 12.sp)
-    }
-}
-
-@Composable
-fun DialogTextField(label: String, value: String, onValueChange: (String) -> Unit, placeholder: String) {
-    Column {
-        Text(label, color = Color.Gray, fontSize = 12.sp)
-        TextField(
-            value = value, onValueChange = onValueChange, modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.colors(focusedContainerColor = Color(0xFF2C2C2C), unfocusedContainerColor = Color(0xFF2C2C2C), focusedTextColor = Color.White, unfocusedTextColor = Color.White, focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent),
-            shape = RoundedCornerShape(12.dp), placeholder = { Text(placeholder, color = Color.Gray.copy(0.5f)) }, singleLine = true
-        )
     }
 }

@@ -173,11 +173,11 @@ fun FilterTabRow(
 // ── Barber shop card ──────────────────────────────────────────────────────────
 @Composable
 fun BarberShopCard(
-    shop: Shop,
+    shop: Shop?,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
-    var isFav by remember { mutableStateOf(shop.isFavorite) }
+    var isFav by remember { mutableStateOf(shop?.isFavorite) }
 
     Column(
         modifier = modifier
@@ -230,14 +230,14 @@ fun BarberShopCard(
                     .clip(CircleShape)
                     .background(BackgroundDark.copy(alpha = 0.5f))
                     .align(Alignment.TopEnd)
-                    .clickable { isFav = !isFav },
+                    .clickable { isFav = !isFav!! },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = if (isFav) Icons.Filled.Favorite
+                    imageVector = if (isFav == true) Icons.Filled.Favorite
                     else Icons.Outlined.FavoriteBorder,
                     contentDescription = "Favorite",
-                    tint = if (isFav) LogoutRed else TextPrimary,
+                    tint = if (isFav == true) LogoutRed else TextPrimary,
                     modifier = Modifier.size(18.dp)
                 )
             }
@@ -251,7 +251,7 @@ fun BarberShopCard(
                 verticalAlignment     = Alignment.CenterVertically
             ) {
                 Text(
-                    text       = shop.name,
+                    text       = shop?.name ?: "Loading...",
                     color      = TextPrimary,
                     fontSize   = 15.sp,
                     fontWeight = FontWeight.Bold,
@@ -266,7 +266,7 @@ fun BarberShopCard(
                     )
                     Spacer(modifier = Modifier.Companion.width(3.dp))
                     Text(
-                        text       = shop.rating.toString(),
+                        text       = shop?.rating.toString(),
                         color      = TextPrimary,
                         fontSize   = 13.sp,
                         fontWeight = FontWeight.SemiBold
@@ -285,7 +285,7 @@ fun BarberShopCard(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text     = shop.address,
+                    text     = shop?.address ?: "Loading...",
                     color    = TextSecondary,
                     fontSize = 12.sp,
                     maxLines = 1,
@@ -301,7 +301,7 @@ fun BarberShopCard(
                 verticalAlignment     = Alignment.CenterVertically
             ) {
                 Text(
-                    text     = shop.priceRange,
+                    text     = shop?.priceRange ?: "Loading...",
                     color    = TextSecondary,
                     fontSize = 13.sp
                 )
@@ -419,7 +419,7 @@ fun NotificationCard(
 }
 
 @Composable
-fun BarberCard(barber: Barber) {
+fun BarberCard(barber: Barber?) {
     Card(
         modifier  = Modifier
             .fillMaxWidth()
@@ -443,7 +443,7 @@ fun BarberCard(barber: Barber) {
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text       = barber.name.first().toString(),
+                    text       = barber?.name?:"Loading...".first().toString(),
                     color      = TextPrimary,
                     fontWeight = FontWeight.Bold,
                     fontSize   = 18.sp
@@ -455,7 +455,7 @@ fun BarberCard(barber: Barber) {
             // Name + specialties
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text       = barber.name,
+                    text       = barber?.name?: "Loading...",
                     color      = TextPrimary,
                     fontWeight = FontWeight.SemiBold,
                     fontSize   = 15.sp
@@ -473,7 +473,7 @@ fun BarberCard(barber: Barber) {
                 )
                 Spacer(Modifier.width(3.dp))
                 Text(
-                    text       = barber.rating.toString(),
+                    text       = barber?.rating?.toString()?:"Loading...",
                     color      = GoldPrimary,
                     fontWeight = FontWeight.SemiBold,
                     fontSize   = 13.sp
