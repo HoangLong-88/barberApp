@@ -1,4 +1,4 @@
-package com.example.barberapp.admin.view
+package com.example.barberapp.View.screenUI.admin
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -8,7 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue // Cần thiết để dùng 'by'
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -17,12 +17,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.barberapp.admin.viewmodel.AdminViewModel
+import com.example.barberapp.ViewModel.AdminViewModel
 
 @Composable
 fun AdminProfileScreen(viewModel: AdminViewModel) {
-    // 1. Lấy dữ liệu Admin hiện tại từ ViewModel
-    // 'by' giúp bạn dùng 'admin' như một biến bình thường thay vì admin.value
     val admin by viewModel.currentAdmin
 
     Column(
@@ -31,7 +29,6 @@ fun AdminProfileScreen(viewModel: AdminViewModel) {
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 2. Ảnh đại diện (Avatar)
         Box(
             modifier = Modifier
                 .size(100.dp)
@@ -42,15 +39,13 @@ fun AdminProfileScreen(viewModel: AdminViewModel) {
             Icon(
                 Icons.Default.Person,
                 contentDescription = null,
-                tint = Color(0xFFEBC14F), // Đổi sang màu vàng cho đồng bộ
+                tint = Color(0xFFEBC14F),
                 modifier = Modifier.size(60.dp)
             )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 3. Hiển thị Tên và Email thật
-        // Nếu admin null (đang tải), ta hiện "Đang tải..."
         Text(
             text = admin?.name ?: "Đang tải...",
             color = Color.White,
@@ -65,16 +60,14 @@ fun AdminProfileScreen(viewModel: AdminViewModel) {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // 4. Các mục Menu
         ProfileMenuItem("Thông tin cá nhân", Icons.Default.Edit)
         ProfileMenuItem("Đổi mật khẩu", Icons.Default.Lock)
         ProfileMenuItem("Cài đặt thông báo", Icons.Default.Notifications)
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // 5. Nút Đăng xuất
         Button(
-            onClick = { viewModel.logout() }, // Gọi hàm logout đã viết trong ViewModel
+            onClick = { viewModel.logout() },
             modifier = Modifier.fillMaxWidth().height(50.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCF6679)),
             shape = RoundedCornerShape(12.dp)
@@ -96,7 +89,7 @@ fun ProfileMenuItem(title: String, icon: ImageVector) {
         color = Color(0xFF1E1E1E),
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-        onClick = { /* Sau này sẽ code chuyển trang ở đây */ }
+        onClick = { /* Handle navigation */ }
     ) {
         Row(
             modifier = Modifier.padding(16.dp),

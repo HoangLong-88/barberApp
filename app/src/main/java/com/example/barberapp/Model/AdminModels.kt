@@ -1,4 +1,4 @@
-package com.example.barberapp.admin.model
+package com.example.barberapp.Model
 
 import androidx.compose.ui.graphics.Color
 
@@ -18,7 +18,7 @@ data class ServiceItem(
     val name: String = "",
     val duration: String = "",
     val price: String = "",
-    val shopId: String = "" // Thêm trường này để biết dịch vụ thuộc tiệm nào
+    val shopId: String = "" 
 )
 
 data class BookingItem(

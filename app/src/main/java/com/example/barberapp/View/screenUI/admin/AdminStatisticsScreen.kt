@@ -1,4 +1,4 @@
-package com.example.barberapp.admin.view
+package com.example.barberapp.View.screenUI.admin
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.barberapp.admin.viewmodel.AdminViewModel
+import com.example.barberapp.ViewModel.AdminViewModel
 
 @Composable
 fun AdminStatisticsScreen(viewModel: AdminViewModel) {
@@ -32,7 +32,6 @@ fun AdminStatisticsScreen(viewModel: AdminViewModel) {
         verticalArrangement = Arrangement.spacedBy(20.dp),
         contentPadding = PaddingValues(bottom = 20.dp)
     ) {
-        // 1. Summary Cards
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -57,7 +56,6 @@ fun AdminStatisticsScreen(viewModel: AdminViewModel) {
             }
         }
 
-        // 2. Popular Services Section
         item {
             SectionHeader("Dịch vụ phổ biến nhất")
             Spacer(modifier = Modifier.height(12.dp))
@@ -83,7 +81,6 @@ fun AdminStatisticsScreen(viewModel: AdminViewModel) {
             }
         }
 
-        // 3. Staff Performance Section
         item {
             SectionHeader("Hiệu suất nhân viên")
             Spacer(modifier = Modifier.height(12.dp))

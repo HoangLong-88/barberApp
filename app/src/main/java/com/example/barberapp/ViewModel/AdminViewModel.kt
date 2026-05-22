@@ -1,14 +1,14 @@
-package com.example.barberapp.admin.viewmodel
+package com.example.barberapp.ViewModel
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.example.barberapp.admin.model.BookingItem
-import com.example.barberapp.admin.model.ServiceItem
-import com.example.barberapp.admin.model.ShopItem
-import com.example.barberapp.admin.model.UserItem
+import com.example.barberapp.Model.BookingItem
+import com.example.barberapp.Model.ServiceItem
+import com.example.barberapp.Model.ShopItem
+import com.example.barberapp.Model.UserItem
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth
 

@@ -6,8 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
-import com.example.barberapp.admin.view.AdminDashboardScreen
-import com.example.barberapp.staff.view.StaffScreen // Đổi sang StaffScreen để test
+import com.example.barberapp.View.screenUI.admin.AdminDashboardScreen
 import com.example.barberapp.databinding.FragmentFirstBinding
 
 /**
@@ -30,7 +29,7 @@ class FirstFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val composeView = view.findViewById<ComposeView>(R.id.composeView)
         composeView.setContent {
-            // Tạm thời hiển thị StaffScreen để thiết kế giao diện
+            // Gọi AdminDashboardScreen từ địa chỉ mới trong View.screenUI.admin
             AdminDashboardScreen()
         }
     }
