@@ -1,6 +1,7 @@
 package com.example.barberapp.admin.viewmodel
 
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -9,13 +10,18 @@ import com.example.barberapp.admin.model.ServiceItem
 import com.example.barberapp.admin.model.ShopItem
 import com.example.barberapp.admin.model.UserItem
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.auth.FirebaseAuth
 
 class AdminViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
 
     // --- State ---
     private val _currentTab = mutableStateOf("Tiệm")
     val currentTab: State<String> = _currentTab
+
+    private val _currentAdmin = mutableStateOf<UserItem?>(null) 
+    val currentAdmin: State<UserItem?> = _currentAdmin
 
     val users = mutableStateListOf<UserItem>()
     val services = mutableStateListOf<ServiceItem>()
@@ -43,8 +49,45 @@ class AdminViewModel : ViewModel() {
     val shopToEdit = mutableStateOf<ShopItem?>(null)
     val itemToDelete = mutableStateOf<Any?>(null)
 
+    // --- Statistics States ---
+    val totalRevenue = derivedStateOf {
+        bookings.filter { it.status == "Completed" }
+            .sumOf { it.serviceName.let { name -> 
+                services.find { s -> s.name == name }?.price?.replace(".", "")?.replace("đ", "")?.toLongOrNull() ?: 0L
+            } }
+    }
+
+    val totalBookingsCount = derivedStateOf { bookings.size }
+    
+    val popularServices = derivedStateOf {
+        bookings.groupBy { it.serviceName }
+            .mapValues { it.value.size }
+            .toList()
+            .sortedByDescending { it.second }
+            .take(5)
+    }
+
+    val staffPerformance = derivedStateOf {
+        bookings.groupBy { it.barberName }
+            .mapValues { it.value.size }
+            .toList()
+            .sortedByDescending { it.second }
+    }
+
     init {
         fetchData()
+        fetchCurrentAdmin()
+    }
+
+    private fun fetchCurrentAdmin() {
+        val uid = auth.currentUser?.uid
+        if (uid != null) {
+            db.collection("users").document(uid).addSnapshotListener { snapshot, _ ->
+                if (snapshot != null && snapshot.exists()) {
+                    _currentAdmin.value = snapshot.toObject(UserItem::class.java)?.copy(id = snapshot.id)
+                }
+            }
+        }
     }
 
     private fun fetchData() {
@@ -77,11 +120,18 @@ class AdminViewModel : ViewModel() {
         bookings.clear()
         bookings.addAll(listOf(
             BookingItem("1", "Nguyen Van A", "Hair Cut", "John", "Mon 17/03 - 09:00", "Completed"),
-            BookingItem("2", "Tran Van B", "Beard Shave", "Mike", "Mon 17/03 - 10:00", "Pending")
+            BookingItem("2", "Tran Van B", "Beard Shave", "Mike", "Mon 17/03 - 10:00", "Pending"),
+            BookingItem("3", "Lê Văn C", "Hair Cut", "John", "Tue 18/03 - 09:00", "Completed"),
+            BookingItem("4", "Phạm Văn D", "Massage", "Mike", "Wed 19/03 - 14:00", "Completed"),
+            BookingItem("5", "Hoàng Văn E", "Hair Cut", "Anna", "Thu 20/03 - 11:00", "Cancelled")
         ))
     }
 
     // --- Actions ---
+    fun logout() {
+        auth.signOut()
+    }
+
     fun setCurrentTab(tab: String) { _currentTab.value = tab }
     fun setSearchQuery(query: String) { _searchQuery.value = query }
     fun setSelectedShopForService(shop: ShopItem) { _selectedShopForService.value = shop }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -39,16 +40,18 @@ fun AdminDashboardScreen(viewModel: AdminViewModel = viewModel()) {
 
             // Main Tabs
             LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                item { TabButton("Thống kê", Icons.Default.Assessment, currentTab == "Thống kê") { viewModel.setCurrentTab("Thống kê") } }
                 item { TabButton("Tiệm", Icons.Default.Home, currentTab == "Tiệm") { viewModel.setCurrentTab("Tiệm") } }
                 item { TabButton("Tài khoản", Icons.Default.Person, currentTab == "Tài khoản") { viewModel.setCurrentTab("Tài khoản") } }
                 item { TabButton("Dịch vụ", Icons.Default.Build, currentTab == "Dịch vụ") { viewModel.setCurrentTab("Dịch vụ") } }
                 item { TabButton("Lịch booking", Icons.Default.DateRange, currentTab == "Lịch booking") { viewModel.setCurrentTab("Lịch booking") } }
+                item { TabButton("Profile", Icons.Default.AccountCircle, currentTab == "Profile") { viewModel.setCurrentTab("Profile") } }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Search Bar (Only for Shops and Services)
-            if (currentTab == "Tiệm" || currentTab == "Dịch vụ") {
+            // Search Bar (Hidden for Statistics)
+            if (currentTab != "Thống kê" && (currentTab == "Tiệm" || currentTab == "Dịch vụ")) {
                 SearchBarCustom(
                     query = searchQuery,
                     onQueryChange = { viewModel.setSearchQuery(it) }
@@ -91,9 +94,10 @@ fun AdminDashboardScreen(viewModel: AdminViewModel = viewModel()) {
                                 }
                             }
                         }
+                        "Thống kê" -> Text("Báo cáo kinh doanh", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     }
 
-                    if (currentTab != "Lịch booking") {
+                    if (currentTab != "Lịch booking" && currentTab != "Thống kê") {
                         IconButton(
                             onClick = {
                                 when (currentTab) {
@@ -164,6 +168,13 @@ fun AdminDashboardScreen(viewModel: AdminViewModel = viewModel()) {
                             }
                         }
                     }
+                    "Thống kê" -> {
+                        AdminStatisticsScreen(viewModel)
+                    }
+                    "Profile" -> {
+                        AdminProfileScreen(viewModel)
+                    }
+
                 }
             }
         }

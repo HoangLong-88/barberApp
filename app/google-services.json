@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "1057661484743",
+    "firebase_url": "https://barberapp-dacs3-default-rtdb.firebaseio.com",
+    "project_id": "barberapp-dacs3",
+    "storage_bucket": "barberapp-dacs3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1057661484743:android:366dd6178b3e6f75db88e2",
+        "android_client_info": {
+          "package_name": "com.example.barberapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAG0ZZqRdchMuk_Va7sbJ8L5ao59egO7gI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
