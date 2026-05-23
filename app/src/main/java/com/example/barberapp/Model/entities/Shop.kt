@@ -1,6 +1,5 @@
 package com.example.barberapp.Model.entities
 
-import com.example.barberapp.View.screenUI.customer.home.Barber
 import com.google.firebase.firestore.DocumentId
 
 data class Shop (
@@ -13,5 +12,5 @@ data class Shop (
     val isFavorite: Boolean = false,
     val imageUrl: String ="",
     val services: List<Service> = emptyList(),
-    val barbers: List<Barber> = emptyList()
+    val barbers: List<Employee> = emptyList()
 )

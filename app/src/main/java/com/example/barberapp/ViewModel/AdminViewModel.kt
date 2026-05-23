@@ -168,7 +168,7 @@ class AdminViewModel : ViewModel() {
         phone: String,
         priceRange: String,
         rating: Double,
-        imageUrl: String
+        imageUrl: String,
     ) {
         val data = hashMapOf(
             "name" to name,

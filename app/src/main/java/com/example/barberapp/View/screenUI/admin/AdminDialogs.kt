@@ -71,6 +71,7 @@ fun AddEditShopDialog(shop: Shop?, onDismiss: () -> Unit, onConfirm: (String, St
     var rating by remember { mutableStateOf(shop?.rating?: 0.0) }
     var imageUrl by remember { mutableStateOf(shop?.imageUrl ?: "") }
 
+
     Dialog(onDismissRequest = onDismiss) {
         Surface(shape = RoundedCornerShape(24.dp), color = Color(0xFF1E1E1E), modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
             Column(modifier = Modifier.padding(24.dp).verticalScroll(rememberScrollState())) {

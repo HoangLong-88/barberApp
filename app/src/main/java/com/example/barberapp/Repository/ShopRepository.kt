@@ -30,9 +30,7 @@ class ShopRepository {
             }
     }
 
-    // Hàm 2: Gọi riêng Review của Shop đó bằng Subcollection Path
     fun getReviewsForShop(shopId: String, onSuccess: (List<Review>) -> Unit) {
-        // Đường dẫn: shops -> {shopId} -> reviews
         store.collection("shops").document(shopId).collection("reviews")
             .orderBy("timestamp", Query.Direction.DESCENDING) // Sắp xếp review mới nhất lên đầu
             .get()
