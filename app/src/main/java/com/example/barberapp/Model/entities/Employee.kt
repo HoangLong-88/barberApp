@@ -2,6 +2,7 @@ package com.example.barberapp.Model.entities
 
 data class Employee(
     val id: String = "",
+    val shopId: String = "",
     val name: String = "",
     val avatarUrl: String = "",
     val rating: Double = 0.0,

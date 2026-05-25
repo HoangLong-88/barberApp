@@ -1,6 +1,7 @@
 package com.example.barberapp.Model.entities
 
 import com.google.firebase.firestore.DocumentId
+import com.google.firebase.firestore.Exclude
 
 data class Shop (
     @DocumentId val id: String = "",
@@ -11,6 +12,8 @@ data class Shop (
     val rating: Double = 0.0,
     val isFavorite: Boolean = false,
     val imageUrl: String ="",
-    val services: List<Service> = emptyList(),
-    val barbers: List<Employee> = emptyList()
+    @get:Exclude
+    var services: List<Service> = emptyList(),
+    @get:Exclude
+    var barbers: List<Employee> = emptyList()
 )

@@ -115,7 +115,7 @@ fun ShopDetailScreen(
                     onSelect = { tab ->
                         selectedTab = tab
                         if (tab == ShopTab.REVIEWS) {
-                            shopVM.loadShopDetails(shopId)
+                            shopVM.loadReviewOnly(shopId)
                         }
                     }
                 )
@@ -220,8 +220,7 @@ private fun ServiceCard(
                 )
                 Spacer(Modifier.height(2.dp))
                 Text(
-                    text = "Price: %,d VND".format(service?.price ?: "Loading..."),
-                    color = TextSecondary,
+                    text = if (service != null) "Giá: %,d VND".format(service.price) else "Loading...",                    color = TextSecondary,
                     fontSize = 12.sp
                 )
             }

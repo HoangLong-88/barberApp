@@ -20,7 +20,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.barberapp.Helps.setVNDFormatString
 import com.example.barberapp.Model.entities.BookingItem
+import com.example.barberapp.Model.entities.Service
 import com.example.barberapp.Model.entities.ServiceItem
 import com.example.barberapp.Model.entities.Shop
 import com.example.barberapp.Model.entities.UserItem
@@ -79,13 +81,13 @@ fun ShopCard(shop: Shop, onEdit: () -> Unit, onDelete: () -> Unit) {
 }
 
 @Composable
-fun ServiceCard(service: ServiceItem, onEdit: () -> Unit, onDelete: () -> Unit) {
+fun ServiceCard(service: Service?, onEdit: () -> Unit, onDelete: () -> Unit) {
     Surface(color = Color(0xFF1E1E1E), shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(service.name, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                Text("${service.duration} min", color = Color.Gray, fontSize = 14.sp)
-                Text("${service.price} VND", color = Color(0xFFEBC14F), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(service?.name?:"", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Text("${service?.duration} min", color = Color.Gray, fontSize = 14.sp)
+                Text(setVNDFormatString(service?.price?:0), color = Color(0xFFEBC14F), fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
             Row {
                 IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, null, tint = Color.Gray, modifier = Modifier.size(20.dp)) }

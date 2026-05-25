@@ -44,10 +44,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.barberapp.Model.entities.Booking
 import com.example.barberapp.Model.entities.Employee
 import com.example.barberapp.Model.entities.Notification
 import com.example.barberapp.Model.entities.Shop
-import com.example.barberapp.View.screenUI.customer.bookings.Booking
 import com.example.barberapp.View.screenUI.customer.bookings.BookingStatus
 import com.example.barberapp.View.screenUI.customer.bookings.FilterTab
 import com.example.barberapp.View.screenUI.customer.home.AvatarBg
