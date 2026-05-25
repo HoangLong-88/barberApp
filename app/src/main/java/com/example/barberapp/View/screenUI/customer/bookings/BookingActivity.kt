@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.barberapp.Model.entities.Booking
 import com.example.barberapp.View.component.BookingCard
 import com.example.barberapp.View.component.FilterTabRow
 import com.example.barberapp.View.component.SharedBottomNavBar
@@ -24,23 +25,45 @@ enum class BookingStatus { Completed, Pending, Cancelled }
 
 enum class FilterTab { All, Completed, Pending, Cancelled }
 
-data class Booking(
-    val id: Int,
-    val service: String,
-    val shop: String,
-    val dateTime: String,
-    val barber: String,
-    val price: String,
-    val status: BookingStatus
-)
-
 // ─── Sample Data ─────────────────────────────────────────────────────────────
 
 private val sampleBookings = listOf(
-    Booking(1, "Hair Cut",     "King Barber Shop",   "20 May – 17:00", "John",  "80.000 VND",  BookingStatus.Completed),
-    Booking(2, "Beard Shave",  "King Barber Shop",   "18 May – 14:00", "Mike",  "40.000 VND",  BookingStatus.Completed),
-    Booking(3, "Hair Styling", "Elite Cuts Studio",  "25 May – 10:00", "David", "150.000 VND", BookingStatus.Pending),
-    Booking(4, "Hair Cut",     "Classic Barber",     "28 May – 09:00", "John",  "70.000 VND",  BookingStatus.Cancelled),
+    Booking(
+        "1",
+        "Hair Cut",
+        "King Barber Shop",
+        "20 May – 17:00",
+        "John",
+        "80.000 VND",
+        BookingStatus.Completed
+    ),
+    Booking(
+        "2",
+        "Beard Shave",
+        "King Barber Shop",
+        "18 May – 14:00",
+        "Mike",
+        "40.000 VND",
+        BookingStatus.Completed
+    ),
+    Booking(
+        "3",
+        "Hair Styling",
+        "Elite Cuts Studio",
+        "25 May – 10:00",
+        "David",
+        "150.000 VND",
+        BookingStatus.Pending
+    ),
+    Booking(
+        "4",
+        "Hair Cut",
+        "Classic Barber",
+        "28 May – 09:00",
+        "John",
+        "70.000 VND",
+        BookingStatus.Cancelled
+    ),
 )
 
 // ─── Main Screen ─────────────────────────────────────────────────────────────
@@ -51,9 +74,9 @@ fun MyBookingsScreen(navController: NavController) {
 
     val filteredBookings = remember(selectedFilter) {
         when (selectedFilter) {
-            FilterTab.All       -> sampleBookings
+            FilterTab.All -> sampleBookings
             FilterTab.Completed -> sampleBookings.filter { it.status == BookingStatus.Completed }
-            FilterTab.Pending   -> sampleBookings.filter { it.status == BookingStatus.Pending }
+            FilterTab.Pending -> sampleBookings.filter { it.status == BookingStatus.Pending }
             FilterTab.Cancelled -> sampleBookings.filter { it.status == BookingStatus.Cancelled }
         }
     }

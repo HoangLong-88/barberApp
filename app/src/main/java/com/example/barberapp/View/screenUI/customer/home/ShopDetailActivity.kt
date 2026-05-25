@@ -17,9 +17,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Star
@@ -30,7 +27,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -43,20 +39,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.barberapp.Model.entities.Review
 import com.example.barberapp.Model.entities.Service
 import com.example.barberapp.Model.entities.Shop
 import com.example.barberapp.View.component.BarberCard
+import com.example.barberapp.View.layout.HeroSection
+import com.example.barberapp.View.layout.ShopMetaSection
 import com.example.barberapp.ViewModel.ShopVM
 
 // ─── Color Palette ───────────────────────────────────────────────────────────
@@ -64,32 +59,19 @@ import com.example.barberapp.ViewModel.ShopVM
 private val BackgroundDark = Color(0xFF111111)
 private val SurfaceDark = Color(0xFF1E1E1E)
 val CardDark = Color(0xFF252525)
-private val GoldPrimary = Color(0xFFF5A623)
+val GoldPrimary = Color(0xFFF5A623)
 private val GoldLight = Color(0xFFFFC85A)
-private val TextPrimary = Color(0xFFFFFFFF)
-private val TextSecondary = Color(0xFFAAAAAA)
+val TextPrimary = Color(0xFFFFFFFF)
+val TextSecondary = Color(0xFFAAAAAA)
 private val TabInactive = Color(0xFF888888)
-private val DividerColor = Color(0xFF2E2E2E)
+val DividerColor = Color(0xFF2E2E2E)
 val AvatarBg = Color(0xFF2E2E2E)
-
-// ─── Data Models ─────────────────────────────────────────────────────────────
-
-data class Barber(
-    val id: Int,
-    val name: String,
-    val rating: Float,
-)
-
-
-// ─── Tabs ────────────────────────────────────────────────────────────────────
 
 private enum class ShopTab(val label: String) {
     SERVICES("Services"),
     BARBERS("Barbers"),
     REVIEWS("Reviews")
 }
-
-// ─── Root Screen ─────────────────────────────────────────────────────────────
 
 @Composable
 fun ShopDetailScreen(
@@ -133,7 +115,7 @@ fun ShopDetailScreen(
                     onSelect = { tab ->
                         selectedTab = tab
                         if (tab == ShopTab.REVIEWS) {
-                            shopVM.loadShopDetails(shopId)
+                            shopVM.loadReviewOnly(shopId)
                         }
                     }
                 )
@@ -167,142 +149,6 @@ fun ShopDetailScreen(
     }
 }
 
-// ─── Hero Section ────────────────────────────────────────────────────────────
-
-@Composable
-private fun HeroSection(
-    isFavourite: Boolean,
-    onBack: () -> Unit,
-    onFavClick: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(220.dp)
-    ) {
-        // Dark gradient placeholder (replace Box with AsyncImage / Coil in production)
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(Color(0xFF2A1A0A), Color(0xFF0D0D0D))
-                    )
-                )
-        )
-
-        // Scrim so buttons stay readable
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(Color(0x80000000), Color.Transparent)
-                    )
-                )
-        )
-
-        // Back button
-        IconButton(
-            onClick = onBack,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(12.dp)
-                .size(40.dp)
-                .background(Color(0x66000000), RoundedCornerShape(12.dp))
-        ) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Back",
-                tint = TextPrimary
-            )
-        }
-
-        // Favourite button
-        IconButton(
-            onClick = onFavClick,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(12.dp)
-                .size(40.dp)
-                .background(Color(0x66000000), RoundedCornerShape(12.dp))
-        ) {
-            Icon(
-                imageVector = if (isFavourite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                contentDescription = "Favourite",
-                tint = if (isFavourite) GoldPrimary else TextPrimary
-            )
-        }
-    }
-}
-
-// ─── Shop Meta ───────────────────────────────────────────────────────────────
-
-@Composable
-private fun ShopMetaSection(shop: Shop) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 16.dp)
-    ) {
-        Text(
-            text = shop.name,
-            color = TextPrimary,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(Modifier.height(8.dp))
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                Icons.Default.Star,
-                contentDescription = null,
-                tint = GoldPrimary,
-                modifier = Modifier.size(16.dp)
-            )
-            Spacer(Modifier.width(4.dp))
-            Text(
-                text = shop.rating.toString(),
-                color = GoldPrimary,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 14.sp
-            )
-            Spacer(Modifier.width(12.dp))
-            Icon(
-                Icons.Default.LocationOn,
-                contentDescription = null,
-                tint = TextSecondary,
-                modifier = Modifier.size(14.dp)
-            )
-            Spacer(Modifier.width(4.dp))
-            Text(
-                text = shop.address,
-                color = TextSecondary,
-                fontSize = 13.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-
-        Spacer(Modifier.height(6.dp))
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                Icons.Default.Phone,
-                contentDescription = null,
-                tint = TextSecondary,
-                modifier = Modifier.size(14.dp)
-            )
-            Spacer(Modifier.width(6.dp))
-            Text(text = shop.phone, color = TextSecondary, fontSize = 13.sp)
-        }
-    }
-
-    Divider(color = DividerColor, thickness = 1.dp)
-}
-
-// ─── Tab Row ─────────────────────────────────────────────────────────────────
 
 @Composable
 private fun ShopTabRow(
@@ -345,8 +191,6 @@ private fun ShopTabRow(
     Divider(color = DividerColor, thickness = 1.dp)
 }
 
-// ─── Service Card ─────────────────────────────────────────────────────────────
-
 @Composable
 private fun ServiceCard(
     service: Service?,
@@ -376,8 +220,7 @@ private fun ServiceCard(
                 )
                 Spacer(Modifier.height(2.dp))
                 Text(
-                    text = "Price: %,d VND".format(service?.price ?: "Loading..."),
-                    color = TextSecondary,
+                    text = if (service != null) "Giá: %,d VND".format(service.price) else "Loading...",                    color = TextSecondary,
                     fontSize = 12.sp
                 )
             }
@@ -398,8 +241,6 @@ private fun ServiceCard(
         }
     }
 }
-
-// ─── Review Card ──────────────────────────────────────────────────────────────
 
 @Composable
 private fun ReviewCard(review: Review) {
@@ -435,8 +276,6 @@ private fun ReviewCard(review: Review) {
     }
 }
 
-// ─── Star Row ────────────────────────────────────────────────────────────────
-
 @Composable
 private fun StarRow(rating: Float, maxStars: Int = 5) {
     Row {
@@ -450,8 +289,6 @@ private fun StarRow(rating: Float, maxStars: Int = 5) {
         }
     }
 }
-
-// ─── Write Review Button ─────────────────────────────────────────────────────
 
 @Composable
 private fun WriteReviewButton(onClick: () -> Unit) {
@@ -480,11 +317,3 @@ private fun WriteReviewButton(onClick: () -> Unit) {
         }
     }
 }
-
-// ─── Preview ─────────────────────────────────────────────────────────────────
-
-//@Preview(showBackground = true, showSystemUi = true, backgroundColor = 0xFF111111)
-//@Composable
-//fun ShopDetailScreenPreview() {
-//    ShopDetailScreen(navController = rememberNavController())
-//}

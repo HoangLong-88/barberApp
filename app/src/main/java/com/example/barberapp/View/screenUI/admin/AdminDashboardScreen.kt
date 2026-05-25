@@ -320,8 +320,11 @@ fun ViewDialogs(viewModel: AdminViewModel) {
     if (showAddShopDialog) {
         AddEditShopDialog(
             viewModel.shopToEdit.value,
-            onDismiss = { viewModel.showAddShopDialog.value = false }) { n, a, p, pr,r, i ->
-            viewModel.saveShop(n, a, p, pr, r, i)
+            onDismiss = { viewModel.showAddShopDialog.value = false }) { n, a, p, pr,r, i,listS,listB->
+            viewModel.saveShop(
+                viewModel.shopToEdit.value?.id,n, a, p,
+                pr, r, i,listS,listB
+            )
         }
     }
 }
