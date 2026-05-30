@@ -1,37 +1,54 @@
 package com.example.barberapp.View.screenUI.admin
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.barberapp.ViewModel.AuthVM
-import com.example.barberapp.ViewModel.UserVM
 import com.example.barberapp.Model.entities.ServiceItem
 import com.example.barberapp.Model.entities.Shop
-import com.example.barberapp.Model.entities.UserItem
+import com.example.barberapp.Model.entities.User
 import com.example.barberapp.View.component.AdminFilterChipCustom
+import com.example.barberapp.View.component.AdminHeaderSection
+import com.example.barberapp.View.component.AdminTabButton
 import com.example.barberapp.View.component.BookingCard
 import com.example.barberapp.View.component.SearchBarCustom
 import com.example.barberapp.View.component.ServiceCard
 import com.example.barberapp.View.component.ShopCard
 import com.example.barberapp.View.component.UserCard
 import com.example.barberapp.ViewModel.AdminViewModel
+import com.example.barberapp.ViewModel.AuthVM
+import com.example.barberapp.ViewModel.UserVM
 
 @Composable
 fun AdminDashboardScreen(
@@ -39,45 +56,48 @@ fun AdminDashboardScreen(
     authVM: AuthVM,
     userVM: UserVM,
     navController: NavController
-    ) {
+) {
     val currentTab by viewModel.currentTab
     val selectedUserFilter by viewModel.selectedUserFilter
     val selectedDateFilter by viewModel.selectedDateFilter
     val selectedShopForService by viewModel.selectedShopForService
     val searchQuery by viewModel.searchQuery
+    val selectedShopFilterForEmployee by viewModel.selectedShopFilterForEmployee
 
     Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFF121212)) {
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)) {
-            HeaderSection(authVM,userVM,navController)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            AdminHeaderSection(authVM, userVM, navController)
             Spacer(modifier = Modifier.height(20.dp))
 
             // Main Tabs
             LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 item {
-                    TabButton(
+                    AdminTabButton(
                         "Tiệm",
                         Icons.Default.Home,
                         currentTab == "Tiệm"
                     ) { viewModel.setCurrentTab("Tiệm") }
                 }
                 item {
-                    TabButton(
+                    AdminTabButton(
                         "Tài khoản",
                         Icons.Default.Person,
                         currentTab == "Tài khoản"
                     ) { viewModel.setCurrentTab("Tài khoản") }
                 }
                 item {
-                    TabButton(
+                    AdminTabButton(
                         "Dịch vụ",
                         Icons.Default.Build,
                         currentTab == "Dịch vụ"
                     ) { viewModel.setCurrentTab("Dịch vụ") }
                 }
                 item {
-                    TabButton(
+                    AdminTabButton(
                         "Lịch booking",
                         Icons.Default.DateRange,
                         currentTab == "Lịch booking"
@@ -127,12 +147,14 @@ fun AdminDashboardScreen(
                         )
 
                         "Tài khoản" -> {
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                listOf("Tất cả", "KH", "NV", "QL").forEach { label ->
-                                    AdminFilterChipCustom(
-                                        label,
-                                        selectedUserFilter == label
-                                    ) { viewModel.setSelectedUserFilter(label) }
+                            Column {
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    listOf("Tất cả", "KH", "NV", "QL").forEach { label ->
+                                        AdminFilterChipCustom(
+                                            label,
+                                            selectedUserFilter == label
+                                        ) { viewModel.setSelectedUserFilter(label) }
+                                    }
                                 }
                             }
                         }
@@ -209,8 +231,8 @@ fun AdminDashboardScreen(
                                 ShopCard(
                                     shop,
                                     onEdit = {
-                                        viewModel.shopToEdit.value =
-                                            shop; viewModel.showAddShopDialog.value = true
+                                        viewModel.shopToEdit.value = shop
+                                        viewModel.showAddShopDialog.value = true
                                     },
                                     onDelete = { viewModel.itemToDelete.value = shop })
                             }
@@ -218,7 +240,8 @@ fun AdminDashboardScreen(
                     }
 
                     "Tài khoản" -> {
-                        val filtered = if (selectedUserFilter == "Tất cả") viewModel.users
+                        // 1. Lọc theo chức vụ (KH, NV, QL) trước
+                        var filtered = if (selectedUserFilter == "Tất cả") viewModel.users
                         else viewModel.users.filter {
                             when (selectedUserFilter) {
                                 "KH" -> it.role == "customer"
@@ -227,18 +250,85 @@ fun AdminDashboardScreen(
                                 else -> true
                             }
                         }
+
+                        // 2. Lọc phụ: Nếu đang chọn "NV" và người dùng chọn một Tiệm cụ thể, lọc tiếp theo shopId
+                        if (selectedUserFilter == "NV" && selectedShopFilterForEmployee != "Tất cả") {
+                            filtered = filtered.filter { it.shopId == selectedShopFilterForEmployee }
+                        }
+
+                        // 3. Chỉ sử dụng DUY NHẤT một LazyColumn ở đây
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            items(filtered, key = { it.id }) { user ->
-                                UserCard(
-                                    user,
-                                    onEdit = {
-                                        viewModel.userToEdit.value =
-                                            user; viewModel.showAddUserDialog.value = true
-                                    },
-                                    onDelete = { viewModel.itemToDelete.value = user })
+
+                            // --- HÀNG CHIPS PHỤ: Xuất hiện ở ĐẦU danh sách khi đang chọn lọc "NV" ---
+                            if (selectedUserFilter == "NV") {
+                                item {
+                                    Column {
+                                        Text(
+                                            text = "Lọc theo nơi làm việc:",
+                                            color = Color.Gray,
+                                            fontSize = 12.sp,
+                                            modifier = Modifier.padding(start = 4.dp, top = 4.dp)
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        LazyRow(
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            item {
+                                                AdminFilterChipCustom(
+                                                    label = "Tất cả tiệm",
+                                                    isSelected = selectedShopFilterForEmployee == "Tất cả",
+                                                    onClick = { viewModel.updateShopFilterForEmployee("Tất cả") }
+                                                )
+                                            }
+                                            items(viewModel.shops) { shop ->
+                                                AdminFilterChipCustom(
+                                                    label = shop.name,
+                                                    isSelected = selectedShopFilterForEmployee == shop.id,
+                                                    onClick = { viewModel.updateShopFilterForEmployee(shop.id) }
+                                                )
+                                            }
+                                        }
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                    }
+                                }
+                            }
+
+                            // --- HIỂN THỊ DANH SÁCH TÀI KHOẢN SAU KHI ĐÃ LỌC ---
+                            if (filtered.isEmpty()) {
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(32.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            "Không có tài khoản nào phù hợp",
+                                            color = Color.Gray,
+                                            fontSize = 14.sp
+                                        )
+                                    }
+                                }
+                            } else {
+                                items(filtered, key = { it.id }) { user ->
+                                    Column {
+                                        UserCard(
+                                            user = user,
+                                            onEdit = {
+                                                viewModel.userToEdit.value = user
+                                                viewModel.showAddUserDialog.value = true
+                                            },
+                                            onDelete = {
+                                                viewModel.itemToDelete.value = user
+                                            }
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
+
 
                     "Dịch vụ" -> {
                         val shopServices = viewModel.services.filter {
@@ -250,8 +340,8 @@ fun AdminDashboardScreen(
                                 ServiceCard(
                                     service,
                                     onEdit = {
-                                        viewModel.serviceToEdit.value =
-                                            service; viewModel.showAddServiceDialog.value = true
+                                        viewModel.serviceToEdit.value = service;
+                                        viewModel.showAddServiceDialog.value = true
                                     },
                                     onDelete = { viewModel.itemToDelete.value = service })
                             }
@@ -290,22 +380,23 @@ fun ViewDialogs(viewModel: AdminViewModel) {
     itemToDelete?.let { item ->
         ConfirmDeleteDialog(
             title = when (item) {
-                is UserItem -> "Xóa tài khoản?"
+                is User -> "Xóa tài khoản?"
                 is Shop -> "Xóa tiệm?"
                 is ServiceItem -> "Xóa dịch vụ?"
                 else -> "Xác nhận xóa?"
             },
             message = "Hành động này không thể hoàn tác.",
             onDismiss = { viewModel.itemToDelete.value = null },
-            onConfirm = { viewModel.deleteItem(item)}
+            onConfirm = { viewModel.deleteItem(item) }
         )
     }
 
     if (showAddUserDialog) {
         AddEditUserDialog(
             viewModel.userToEdit.value,
-            onDismiss = { viewModel.showAddUserDialog.value = false }) { n, e, p, pw,r ->
-            viewModel.saveUser(n, e, p, pw,r)
+            shops = viewModel.shops,
+            onDismiss = { viewModel.showAddUserDialog.value = false }) { n, e, p, pw, r, sId ->
+            viewModel.saveUser(n, e, p, pw, r, sId)
         }
     }
 
@@ -320,70 +411,14 @@ fun ViewDialogs(viewModel: AdminViewModel) {
     if (showAddShopDialog) {
         AddEditShopDialog(
             viewModel.shopToEdit.value,
-            onDismiss = { viewModel.showAddShopDialog.value = false }) { n, a, p, pr,r, i,listS,listB->
+            onDismiss = {
+                viewModel.showAddShopDialog.value = false
+            }) { n, a, p, pr, r, i, listS, listB ->
             viewModel.saveShop(
-                viewModel.shopToEdit.value?.id,n, a, p,
-                pr, r, i,listS,listB
+                viewModel.shopToEdit.value?.id, n, a, p,
+                pr, r, i, listS, listB
             )
         }
     }
 }
 
-@Composable
-fun HeaderSection(authVM: AuthVM,userVM: UserVM,navController: NavController) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column {
-            Text(
-                "Admin Dashboard",
-                color = Color.White,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Text("Quản lý hệ thống", color = Color.Gray, fontSize = 14.sp)
-        }
-        IconButton(onClick = { authVM.logOut(navController,userVM) }) {
-            Icon(
-                Icons.AutoMirrored.Filled.ExitToApp,
-                null,
-                tint = Color.White
-            )
-        }
-    }
-}
-
-@Composable
-fun TabButton(
-    label: String,
-    icon: ImageVector,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Surface(
-        color = if (isSelected) Color(0xFFEBC14F) else Color(0xFF2C2C2C),
-        shape = RoundedCornerShape(25.dp),
-        onClick = onClick
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                icon,
-                null,
-                tint = if (isSelected) Color.Black else Color.White,
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                label,
-                color = if (isSelected) Color.Black else Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp
-            )
-        }
-    }
-}

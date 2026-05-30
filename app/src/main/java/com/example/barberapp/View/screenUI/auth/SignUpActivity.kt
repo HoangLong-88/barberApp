@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.*
 import androidx.navigation.NavController
+import com.example.barberapp.Model.entities.User
 import com.example.barberapp.View.component.FieldLabel
 import com.example.barberapp.View.state.checkAuthUiState
 
@@ -49,7 +50,9 @@ fun RegisterScreen(
     var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var role by remember { mutableStateOf("customer") }
-    var profileImgUrl by remember { mutableStateOf(null) }
+    var avatarUrl by remember { mutableStateOf(null) }
+    var shopId by remember { mutableStateOf("") }
+    var roleColorHex by remember { mutableStateOf("#2196F3") }
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmVisible by remember { mutableStateOf(false) }
@@ -285,13 +288,7 @@ fun RegisterScreen(
             Button(
                 onClick = {
                     if (isFormValid) authVM.signUp(
-                        name,
-                        email,
-                        phone,
-                        password,
-                        role,
-                        profileImgUrl,
-                        navController
+                        name, email, phone, password, role, avatarUrl,shopId,roleColorHex, navController
                     )
                 },
                 enabled = isFormValid,
