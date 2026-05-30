@@ -27,7 +27,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,12 +39,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.example.barberapp.Helps.setVNDFormatString
 import com.example.barberapp.Model.entities.Employee
 import com.example.barberapp.Model.entities.Service
-import com.example.barberapp.Model.entities.ServiceItem
 import com.example.barberapp.Model.entities.Shop
-import com.example.barberapp.Model.entities.UserItem
+import com.example.barberapp.Model.entities.User
 import com.example.barberapp.View.component.DialogTextField
 
 @Composable
@@ -209,19 +206,20 @@ fun AddEditServiceDialog(
 
 @Composable
 fun AddEditUserDialog(
-    user: UserItem?,
+    user: User?,
+    shops: List<Shop>,
     onDismiss: () -> Unit,
-    onConfirm: (String, String, String, String, String) -> Unit
+    onConfirm: (String, String, String, String, String, String) -> Unit
 ) {
     var name by remember { mutableStateOf(user?.name ?: "") }
     var email by remember { mutableStateOf(user?.email ?: "") }
     var phone by remember { mutableStateOf(user?.phone ?: "") }
     val password by remember { mutableStateOf(user?.password ?: "") }
     var role by remember { mutableStateOf(user?.role ?: "customer") }
-    var expanded by remember { mutableStateOf(false) }
-    val roles =
-        listOf("customer" to "Khách hàng", "employee" to "Nhân viên", "manager" to "Quản lý")
-
+    var shopId by remember { mutableStateOf(user?.shopId?:"") }
+    var expandedRole by remember { mutableStateOf(false) }
+    var expandedShop by remember { mutableStateOf(false) }
+    val roles = listOf("customer" to "Khách hàng", "employee" to "Nhân viên", "manager" to "Quản lý")
     Dialog(onDismissRequest = onDismiss) {
         Surface(shape = RoundedCornerShape(24.dp), color = Color(0xFF1E1E1E)) {
             Column(modifier = Modifier.padding(24.dp)) {
@@ -241,7 +239,7 @@ fun AddEditUserDialog(
                 Text("Vai trò", color = Color.Gray, fontSize = 12.sp)
                 Box {
                     Surface(
-                        onClick = { expanded = true },
+                        onClick = { expandedRole = true },
                         color = Color(0xFF2C2C2C),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
@@ -255,8 +253,8 @@ fun AddEditUserDialog(
                         }
                     }
                     DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false },
+                        expanded = expandedRole,
+                        onDismissRequest = { expandedRole = false },
                         modifier = Modifier.background(Color(0xFF2C2C2C))
                     ) {
                         roles.forEach { (k, v) ->
@@ -265,11 +263,53 @@ fun AddEditUserDialog(
                                     v,
                                     color = Color.White
                                 )
-                            }, onClick = { role = k; expanded = false })
+                            }, onClick = { role = k; expandedRole = false
+                            if (role != "employee") shopId = ""})
                         }
                     }
                 }
                 Spacer(modifier = Modifier.height(32.dp))
+                // --- CHỌN NƠI LÀM VIỆC (CHỈ HIỂN THỊ NẾU LÀ NHÂN VIÊN) ---
+                if (role == "employee") {
+                    Text("Nơi làm việc", color = Color.Gray, fontSize = 12.sp)
+                    Box {
+                        Surface(
+                            onClick = { expandedShop = true },
+                            color = Color(0xFF2C2C2C),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(16.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                // Tìm tên shop hiện tại, nếu rỗng hiển thị "Chưa có"
+                                val currentShopName = shops.find { it.id == shopId }?.name ?: "Chưa có"
+                                Text(currentShopName, color = Color.White)
+                                Icon(Icons.Default.KeyboardArrowDown, null, tint = Color.White)
+                            }
+                        }
+                        DropdownMenu(
+                            expanded = expandedShop,
+                            onDismissRequest = { expandedShop = false },
+                            modifier = Modifier.background(Color(0xFF2C2C2C))
+                        ) {
+                            // Lựa chọn Chưa có
+                            DropdownMenuItem(
+                                text = { Text("Chưa có", color = Color.White) },
+                                onClick = { shopId = ""; expandedShop = false }
+                            )
+                            // Load danh sách shop từ database
+                            shops.forEach { shop ->
+                                DropdownMenuItem(
+                                    text = { Text(shop.name, color = Color.White) },
+                                    onClick = { shopId = shop.id; expandedShop = false }
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(32.dp))
+                }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Button(
                         onClick = onDismiss,
@@ -283,7 +323,8 @@ fun AddEditUserDialog(
                                 email,
                                 phone,
                                 password,
-                                role
+                                role,
+                                shopId
                             )
                         },
                         modifier = Modifier.weight(1f),

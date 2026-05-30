@@ -4,6 +4,7 @@ import com.example.barberapp.Model.entities.Employee
 import com.example.barberapp.Model.entities.Review
 import com.example.barberapp.Model.entities.Service
 import com.example.barberapp.Model.entities.Shop
+import com.example.barberapp.Model.entities.User
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 
@@ -23,7 +24,6 @@ class ShopRepository {
             }
     }
 
-    // Hàm 1: Chỉ lấy thông tin Shop (Không kèm review)
     fun getShopDetailData(shopId: String, onSuccess: (Shop?) -> Unit) {
         val shopDocRef = store.collection("shops").document(shopId)
 
@@ -31,21 +31,34 @@ class ShopRepository {
             val selectedShop = shopSnapshot.toObject(Shop::class.java)
 
             if (selectedShop != null) {
-                // Lấy Services từ Root Collection "services" có shopId trùng khớp
+                // Lấy Services
                 store.collection("services").whereEqualTo("shopId", shopId).get()
                     .addOnSuccessListener { serviceSnap ->
                         val servicesList = serviceSnap.documents.mapNotNull { d ->
                             d.toObject(Service::class.java)?.copy(id = d.id)
                         }
 
-                        // Lấy Barbers từ Root Collection "barbers" có shopId trùng khớp
-                        store.collection("barbers").whereEqualTo("shopId", shopId).get()
+                        // Lấy Barbers TỪ BẢNG 'users' THAY VÌ BẢNG 'barbers'
+                        store.collection("users")
+                            .whereEqualTo("role", "employee")
+                            .whereEqualTo("shopId", shopId)
+                            .get()
                             .addOnSuccessListener { barberSnap ->
+                                // Mapping User -> Employee
                                 val barbersList = barberSnap.documents.mapNotNull { d ->
-                                    d.toObject(Employee::class.java)?.copy(id = d.id)
+                                    val user = d.toObject(User::class.java)
+                                    if (user != null) {
+                                        Employee(
+                                            id = d.id,
+                                            shopId = user.shopId,
+                                            name = user.name,
+                                            avatarUrl = user.avatarUrl ?: "", // Lấy avatar,
+                                            rating = 5.0, // Chỗ này có thể để default hoặc mapping thêm
+                                            totalRatings = 0
+                                        )
+                                    } else null
                                 }
 
-                                // Gộp dữ liệu lại trả về cho View
                                 onSuccess(
                                     selectedShop.copy(
                                         id = shopSnapshot.id,

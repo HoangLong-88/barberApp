@@ -1,17 +1,17 @@
 package com.example.barberapp.ViewModel
 
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.barberapp.Model.entities.BookingItem
 import com.example.barberapp.Model.entities.Employee
 import com.example.barberapp.Model.entities.Service
-import com.example.barberapp.Model.entities.ServiceItem
 import com.example.barberapp.Model.entities.Shop
-import com.example.barberapp.Model.entities.UserItem
+import com.example.barberapp.Model.entities.User
 import com.google.firebase.firestore.FirebaseFirestore
-import java.util.UUID
 
 class AdminViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
@@ -20,7 +20,7 @@ class AdminViewModel : ViewModel() {
     private val _currentTab = mutableStateOf("Tiệm")
     val currentTab: State<String> = _currentTab
 
-    val users = mutableStateListOf<UserItem>()
+    val users = mutableStateListOf<User>()
     val services = mutableStateListOf<Service>()
     val bookings = mutableStateListOf<BookingItem>()
     val shops = mutableStateListOf<Shop>()
@@ -37,9 +37,12 @@ class AdminViewModel : ViewModel() {
     private val _selectedDateFilter = mutableStateOf("Tất cả")
     val selectedDateFilter: State<String> = _selectedDateFilter
 
+    private val _selectedShopFilterForEmployee = mutableStateOf("Tất cả")
+    val selectedShopFilterForEmployee: State<String> = _selectedShopFilterForEmployee
+
     // Dialog States
     val showAddUserDialog = mutableStateOf(false)
-    val userToEdit = mutableStateOf<UserItem?>(null)
+    val userToEdit = mutableStateOf<User?>(null)
     val showAddServiceDialog = mutableStateOf(false)
     val serviceToEdit = mutableStateOf<Service?>(null)
     val showAddShopDialog = mutableStateOf(false)
@@ -58,7 +61,7 @@ class AdminViewModel : ViewModel() {
                 users.clear()
                 users.addAll(it.documents.mapNotNull { d ->
                     try {
-                        d.toObject(UserItem::class.java)?.copy(id = d.id)
+                        d.toObject(User::class.java)?.copy(id = d.id)
                     } catch (ex: Exception) {
                         null
                     }
@@ -98,28 +101,6 @@ class AdminViewModel : ViewModel() {
                 }
             }
         }
-        // Giả lập dữ liệu booking
-        bookings.clear()
-        bookings.addAll(
-            listOf(
-                BookingItem(
-                    "1",
-                    "Nguyen Van A",
-                    "Hair Cut",
-                    "John",
-                    "Mon 17/03 - 09:00",
-                    "Completed"
-                ),
-                BookingItem(
-                    "2",
-                    "Tran Van B",
-                    "Beard Shave",
-                    "Mike",
-                    "Mon 17/03 - 10:00",
-                    "Pending"
-                )
-            )
-        )
     }
 
     // --- Actions ---
@@ -145,7 +126,7 @@ class AdminViewModel : ViewModel() {
 
     fun deleteItem(item: Any) {
         when (item) {
-            is UserItem -> db.collection("users").document(item.id).delete()
+            is User -> db.collection("users").document(item.id).delete()
 
             is Shop -> {
                 val shopId = item.id
@@ -190,7 +171,14 @@ class AdminViewModel : ViewModel() {
         itemToDelete.value = null
     }
 
-    fun saveUser(name: String, email: String, phone: String, password: String, role: String) {
+    fun saveUser(
+        name: String,
+        email: String,
+        phone: String,
+        password: String,
+        role: String,
+        shopId: String
+    ) {
         val colorHex = when (role) {
             "employee" -> "#4CAF50"; "manager" -> "#9C27B0"; else -> "#2196F3"
         }
@@ -200,7 +188,8 @@ class AdminViewModel : ViewModel() {
             "phone" to phone,
             "password" to password,
             "role" to role,
-            "roleColorHex" to colorHex
+            "roleColorHex" to colorHex,
+            "shopId" to if (role == "employee") shopId else ""
         )
         val onSuccess = if (userToEdit.value == null) db.collection("users")
             .add(data) else db.collection("users").document(userToEdit.value!!.id).set(data)
@@ -276,7 +265,7 @@ class AdminViewModel : ViewModel() {
                 "name" to barber.name,
                 "avatarUrl" to barber.avatarUrl,
                 "rating" to barber.rating,
-                "shopId" to finalShopId // <-- Gắn chặt Khóa ngoại ở đây
+                "shopId" to finalShopId
             )
             batch.set(barberRef, barberData)
         }
@@ -285,6 +274,10 @@ class AdminViewModel : ViewModel() {
             fetchData()
         }
         showAddShopDialog.value = false
+    }
+
+    fun updateShopFilterForEmployee(shopId: String) {
+        _selectedShopFilterForEmployee.value = shopId
     }
 
     private fun getDefaultServices(shopId: String): List<Service> {

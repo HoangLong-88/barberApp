@@ -30,7 +30,9 @@ class AuthRepository {
         phone: String,
         password: String,
         role: String = "customer",
-        profileImgUrl: String?,
+        avatarUrl: String?,
+        shopId: String,
+        roleColorHex: String,
         onResult: (Boolean, String?) -> Unit
     ) {
         auth.createUserWithEmailAndPassword(
@@ -45,7 +47,9 @@ class AuthRepository {
                     "phone" to phone,
                     "password" to password,
                     "role" to role,
-                    "profileImgUrl" to profileImgUrl,
+                    "avatarUrl" to avatarUrl,
+                    "shopId" to shopId,
+                    "roleColorHex" to roleColorHex,
                     "createAt" to System.currentTimeMillis()
                 )
                 store.collection("users").document(userID).set(userMap)

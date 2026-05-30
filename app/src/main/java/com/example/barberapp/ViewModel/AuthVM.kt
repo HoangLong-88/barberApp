@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import com.example.barberapp.Repository.AuthRepository
-import com.example.barberapp.ViewModel.UserVM
 
 class AuthVM : ViewModel() {
     private val authRepo = AuthRepository();
@@ -39,11 +38,13 @@ class AuthVM : ViewModel() {
         phone: String,
         password: String,
         role: String,
-        profileImgUrl: String?,
+        avatarUrl: String?,
+        shopId: String,
+        roleColorHex: String,
         navController: NavController
         ) {
         uiState = uiState.copy(isLoading = true, error = null)
-        authRepo.checkSignUp(name, email, phone, password, role, profileImgUrl)
+        authRepo.checkSignUp(name, email, phone, password, role, avatarUrl,shopId, roleColorHex)
         { success, errorMessage ->
             uiState = if (success) {
                 navController.navigate("login"){
