@@ -1,0 +1,388 @@
+package com.example.barberapp.View.screenUI.auth
+
+import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.*
+import androidx.compose.ui.unit.*
+import androidx.navigation.NavController
+import com.example.barberapp.View.component.FieldLabel
+import com.example.barberapp.View.state.checkAuthUiState
+
+import com.example.barberapp.View.utils.BackgroundDark
+import com.example.barberapp.View.utils.TextPrimary
+import com.example.barberapp.View.utils.TextSecondary
+import com.example.barberapp.View.utils.TextHint
+import com.example.barberapp.View.utils.GoldDark
+import com.example.barberapp.View.utils.GoldLight
+import com.example.barberapp.View.utils.GoldPrimary
+import com.example.barberapp.View.utils.BorderColor
+import com.example.barberapp.View.utils.registerTextFieldColors
+import com.example.barberapp.ViewModel.AuthVM
+
+// ─── Register Screen ──────────────────────────────────────────────────────────
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RegisterScreen(
+    authVM: AuthVM,
+    navController: NavController,
+) {
+    val uiState = authVM.uiState
+    var name by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var role by remember { mutableStateOf("customer") }
+    var profileImgUrl by remember { mutableStateOf(null) }
+    var confirmPassword by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmVisible by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
+    checkAuthUiState(
+        isSuccess = authVM.uiState.registerSuccess,
+        onSuccess = {
+            authVM.resetState()
+            navController.navigate("login") {
+                popUpTo("register") { inclusive = true }
+            }
+        }
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit){
+                detectTapGestures(onTap = {
+                    focusManager.clearFocus()
+                })
+            }
+            .background(BackgroundDark)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 28.dp),
+        ) {
+            Spacer(Modifier.height(52.dp))
+
+            // ── Back Button ────────────────────────────────────────────────
+            IconButton(
+                onClick = { navController.popBackStack() },
+                modifier = Modifier
+                    .size(36.dp)
+                    .offset(x = (-8).dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    tint = TextPrimary,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+
+            Spacer(Modifier.height(20.dp))
+
+            // ── Title ──────────────────────────────────────────────────────
+            Text(
+                text = "Create Account",
+                color = TextPrimary,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.3.sp
+            )
+
+            Spacer(Modifier.height(6.dp))
+
+            Text(
+                text = "Sign up to get started",
+                color = TextSecondary,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal
+            )
+
+            Spacer(Modifier.height(36.dp))
+
+            // ── Full Name ──────────────────────────────────────────────────
+            FieldLabel("Full name", 13, FontWeight.Medium)
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                placeholder = { Text("John Doe", color = TextHint, fontSize = 14.sp) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                colors = registerTextFieldColors(),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = LocalTextStyle.current.copy(
+                    color = TextPrimary,
+                    fontSize = 15.sp
+                )
+            )
+
+            Spacer(Modifier.height(18.dp))
+
+            // ── Email ──────────────────────────────────────────────────────
+            FieldLabel("Email", 13, FontWeight.Medium)
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                placeholder = { Text("your@email.com", color = TextHint, fontSize = 14.sp) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                colors = registerTextFieldColors(),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = LocalTextStyle.current.copy(
+                    color = TextPrimary,
+                    fontSize = 15.sp
+                )
+            )
+
+            Spacer(Modifier.height(18.dp))
+
+            // ── Phone Number ───────────────────────────────────────────────
+            FieldLabel("Phone", 13, FontWeight.Medium)
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = phone,
+                onValueChange = { phone = it },
+                placeholder = { Text("090xxxxxxx", color = TextHint, fontSize = 14.sp) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                colors = registerTextFieldColors(),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = LocalTextStyle.current.copy(
+                    color = TextPrimary,
+                    fontSize = 15.sp
+                )
+            )
+
+            Spacer(Modifier.height(18.dp))
+
+            // ── Password ───────────────────────────────────────────────────
+            FieldLabel("Password", 13, FontWeight.Medium)
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                placeholder = { Text("••••••••", color = TextHint, fontSize = 14.sp) },
+                singleLine = true,
+                visualTransformation = if (passwordVisible) VisualTransformation.None
+                else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Default.Visibility
+                            else Icons.Default.VisibilityOff,
+                            contentDescription = null,
+                            tint = TextSecondary
+                        )
+                    }
+                },
+                colors = registerTextFieldColors(),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = LocalTextStyle.current.copy(
+                    color = TextPrimary,
+                    fontSize = 15.sp
+                )
+            )
+
+            Spacer(Modifier.height(18.dp))
+
+            // ── Confirm Password ───────────────────────────────────────────
+            FieldLabel("Confirm Password", 13, FontWeight.Medium)
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = confirmPassword,
+                onValueChange = { confirmPassword = it },
+                placeholder = { Text("••••••••", color = TextHint, fontSize = 14.sp) },
+                singleLine = true,
+                visualTransformation = if (confirmVisible) VisualTransformation.None
+                else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    IconButton(onClick = { confirmVisible = !confirmVisible }) {
+                        Icon(
+                            imageVector = if (confirmVisible) Icons.Default.Visibility
+                            else Icons.Default.VisibilityOff,
+                            contentDescription = null,
+                            tint = TextSecondary
+                        )
+                    }
+                },
+                colors = registerTextFieldColors(
+                    // Highlight red border if passwords don't match
+                    focusedBorder = if (confirmPassword.isNotEmpty() && confirmPassword != password)
+                        Color(0xFFE53935) else GoldPrimary,
+                    unfocusedBorder = if (confirmPassword.isNotEmpty() && confirmPassword != password)
+                        Color(0xFFE53935).copy(alpha = 0.6f) else BorderColor
+                ),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = LocalTextStyle.current.copy(
+                    color = TextPrimary,
+                    fontSize = 15.sp
+                )
+            )
+
+            // Passwords don't match warning
+            if (confirmPassword.isNotEmpty() && confirmPassword != password) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "Passwords do not match",
+                    color = Color(0xFFE53935),
+                    fontSize = 12.sp,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            Spacer(Modifier.height(32.dp))
+
+            // ── Create Account Button ──────────────────────────────────────
+            val isFormValid = name.isNotBlank()
+                    && email.isNotBlank()
+                    && phone.isNotBlank()
+                    && password.isNotBlank()
+                    && password == confirmPassword
+            if (uiState.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    color = GoldPrimary
+                )
+            }
+            uiState.error?.let { errorMsg ->
+                Text(
+                    text = errorMsg,
+                    color = Color.Red,
+                    modifier = Modifier
+                        .padding(vertical = 8.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+            }
+
+            Button(
+                onClick = {
+                    if (isFormValid) authVM.signUp(
+                        name,
+                        email,
+                        phone,
+                        password,
+                        role,
+                        profileImgUrl,
+                        navController
+                    )
+                },
+                enabled = isFormValid,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent
+                ),
+                contentPadding = PaddingValues(0.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            brush = if (isFormValid)
+                                Brush.horizontalGradient(listOf(GoldDark, GoldPrimary, GoldLight))
+                            else
+                                Brush.horizontalGradient(
+                                    listOf(
+                                        GoldDark.copy(alpha = 0.4f),
+                                        GoldPrimary.copy(alpha = 0.4f),
+                                        GoldLight.copy(alpha = 0.4f)
+                                    )
+                                ),
+                            shape = RoundedCornerShape(14.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Create Account",
+                        color = if (isFormValid) Color(0xFF1A1000) else Color(0xFF1A1000).copy(alpha = 0.5f),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(40.dp))
+
+            // ── Login Link ─────────────────────────────────────────────────
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Already have account? ",
+                    color = TextSecondary,
+                    fontSize = 13.sp
+                )
+                Text(
+                    text = "Login",
+                    color = GoldPrimary,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clickable {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            Spacer(Modifier.height(28.dp))
+
+            // ── Bottom indicator bar ───────────────────────────────────────
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .width(120.dp)
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(Color(0xFF3A3A3A))
+            )
+
+            Spacer(Modifier.height(8.dp))
+        }
+    }
+}
+
+// ─── Preview ──────────────────────────────────────────────────────────────────
+//@Preview(showBackground = true, backgroundColor = 0xFF0F0F0F, widthDp = 375, heightDp = 812)
+//@Composable
+//fun RegisterScreenPreview() {
+//    MaterialTheme {
+//        RegisterScreen(
+//            navController = rememberNavController()
+//        )
+//    }
+//}
+
+
