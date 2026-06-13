@@ -28,17 +28,36 @@ class AdminViewModel : ViewModel() {
     private val _searchQuery = mutableStateOf("")
     val searchQuery: State<String> = _searchQuery
 
-    private val _selectedShopForService = mutableStateOf<Shop?>(null)
-    val selectedShopForService: State<Shop?> = _selectedShopForService
-
     private val _selectedUserFilter = mutableStateOf("Tất cả")
     val selectedUserFilter: State<String> = _selectedUserFilter
 
     private val _selectedDateFilter = mutableStateOf("Tất cả")
     val selectedDateFilter: State<String> = _selectedDateFilter
 
+<<<<<<< HEAD
     private val _selectedShopFilterForEmployee = mutableStateOf("Tất cả")
     val selectedShopFilterForEmployee: State<String> = _selectedShopFilterForEmployee
+=======
+    private val _selectedShopForService = mutableStateOf<Shop?>(null)
+    val selectedShopForService: State<Shop?> = _selectedShopForService
+
+    // Admin Profile State
+    private val _currentAdmin = mutableStateOf<UserItem?>(null)
+    val currentAdmin: State<UserItem?> = _currentAdmin
+
+    // Statistics State
+    private val _totalRevenue = mutableStateOf(0L)
+    val totalRevenue: State<Long> = _totalRevenue
+
+    private val _totalBookingsCount = mutableStateOf(0)
+    val totalBookingsCount: State<Int> = _totalBookingsCount
+
+    private val _popularServices = mutableStateOf<List<Pair<String, Int>>>(emptyList())
+    val popularServices: State<List<Pair<String, Int>>> = _popularServices
+
+    private val _staffPerformance = mutableStateOf<List<Pair<String, Int>>>(emptyList())
+    val staffPerformance: State<List<Pair<String, Int>>> = _staffPerformance
+>>>>>>> feature/admin
 
     // Dialog States
     val showAddUserDialog = mutableStateOf(false)
@@ -55,6 +74,7 @@ class AdminViewModel : ViewModel() {
 
     private fun fetchData() {
         // Listen Users
+<<<<<<< HEAD
         db.collection("users").addSnapshotListener { v, e ->
             if (e != null) return@addSnapshotListener
             v?.let {
@@ -101,31 +121,84 @@ class AdminViewModel : ViewModel() {
                 }
             }
         }
+=======
+        db.collection("users").addSnapshotListener { snapshot, _ ->
+            snapshot?.let {
+                users.clear()
+                for (doc in it.documents) {
+                    val u = doc.toObject(UserItem::class.java)?.copy(id = doc.id)
+                    if (u != null) users.add(u)
+                }
+            }
+        }
+
+        // Listen Services
+        db.collection("services").addSnapshotListener { snapshot, _ ->
+            snapshot?.let {
+                services.clear()
+                for (doc in it.documents) {
+                    val s = doc.toObject(ServiceItem::class.java)?.copy(id = doc.id)
+                    if (s != null) services.add(s)
+                }
+            }
+        }
+
+        // Listen Shops
+        db.collection("shops").addSnapshotListener { snapshot, _ ->
+            snapshot?.let {
+                shops.clear()
+                val fetched = mutableListOf<Shop>()
+                for (doc in it.documents) {
+                    val sh = doc.toObject(Shop::class.java)?.copy(id = doc.id)
+                    if (sh != null) fetched.add(sh)
+                }
+                shops.addAll(fetched)
+                if (_selectedShopForService.value == null && fetched.isNotEmpty()) {
+                    _selectedShopForService.value = fetched.first()
+                }
+            }
+        }
+
+        // Clear bookings (or implement fetch if you have bookings collection)
+        bookings.clear()
+
+        // Update statistics
+        updateStatistics()
+    }
+
+    private fun updateStatistics() {
+        // Calculate total bookings
+        _totalBookingsCount.value = bookings.size
+
+        // Calculate popular services
+        val serviceCount = mutableMapOf<String, Int>()
+        for (booking in bookings) {
+            serviceCount[booking.serviceName] = (serviceCount[booking.serviceName] ?: 0) + 1
+        }
+        _popularServices.value = serviceCount.toList().sortedByDescending { it.second }.take(5)
+
+        // Calculate staff performance
+        val staffCount = mutableMapOf<String, Int>()
+        for (booking in bookings) {
+            staffCount[booking.barberName] = (staffCount[booking.barberName] ?: 0) + 1
+        }
+        _staffPerformance.value = staffCount.toList().sortedByDescending { it.second }
+
+        // Calculate total revenue (mock: 100000 per booking)
+        _totalRevenue.value = (bookings.size * 100000L)
+>>>>>>> feature/admin
     }
 
     // --- Actions ---
-    fun setCurrentTab(tab: String) {
-        _currentTab.value = tab
-    }
-
-    fun setSearchQuery(query: String) {
-        _searchQuery.value = query
-    }
-
-    fun setSelectedShopForService(shop: Shop) {
-        _selectedShopForService.value = shop
-    }
-
-    fun setSelectedUserFilter(filter: String) {
-        _selectedUserFilter.value = filter
-    }
-
-    fun setSelectedDateFilter(filter: String) {
-        _selectedDateFilter.value = filter
-    }
+    fun setCurrentTab(tab: String) { _currentTab.value = tab }
+    fun setSearchQuery(q: String) { _searchQuery.value = q }
+    fun setSelectedUserFilter(f: String) { _selectedUserFilter.value = f }
+    fun setSelectedDateFilter(f: String) { _selectedDateFilter.value = f }
+    fun setSelectedShopForService(shop: Shop?) { _selectedShopForService.value = shop }
 
     fun deleteItem(item: Any) {
         when (item) {
+<<<<<<< HEAD
             is User -> db.collection("users").document(item.id).delete()
 
             is Shop -> {
@@ -167,10 +240,17 @@ class AdminViewModel : ViewModel() {
 
             // Đoạn xóa dịch vụ lẻ lẻ do Admin chủ động chọn xóa
             is Service -> db.collection("services").document(item.id).delete()
+=======
+            is UserItem -> db.collection("users").document(item.id).delete()
+            is ServiceItem -> db.collection("services").document(item.id).delete()
+            is Shop -> db.collection("shops").document(item.id).delete()
+            is BookingItem -> db.collection("bookings").document(item.id).delete()
+>>>>>>> feature/admin
         }
         itemToDelete.value = null
     }
 
+<<<<<<< HEAD
     fun saveUser(
         name: String,
         email: String,
@@ -182,14 +262,21 @@ class AdminViewModel : ViewModel() {
         val colorHex = when (role) {
             "employee" -> "#4CAF50"; "manager" -> "#9C27B0"; else -> "#2196F3"
         }
+=======
+    fun saveUser(name: String, email: String, phone: String, password: String, role: String) {
+>>>>>>> feature/admin
         val data = hashMapOf(
             "name" to name,
             "email" to email,
             "phone" to phone,
             "password" to password,
+<<<<<<< HEAD
             "role" to role,
             "roleColorHex" to colorHex,
             "shopId" to if (role == "employee") shopId else ""
+=======
+            "role" to role
+>>>>>>> feature/admin
         )
         val onSuccess = if (userToEdit.value == null) db.collection("users")
             .add(data) else db.collection("users").document(userToEdit.value!!.id).set(data)
@@ -212,6 +299,7 @@ class AdminViewModel : ViewModel() {
         showAddServiceDialog.value = false
     }
 
+<<<<<<< HEAD
     fun saveShop(
         shopIdToEdit: String?,
         name: String,
@@ -230,6 +318,10 @@ class AdminViewModel : ViewModel() {
         val finalShopId = shopDocRef.id
 
         val shopData = hashMapOf(
+=======
+    fun saveShop(name: String, address: String, phone: String, priceRange: String, rating: Double, imageUrl: String) {
+        val data = hashMapOf(
+>>>>>>> feature/admin
             "name" to name,
             "address" to address,
             "phone" to phone,
@@ -237,6 +329,7 @@ class AdminViewModel : ViewModel() {
             "rating" to rating,
             "imageUrl" to imageUrl
         )
+<<<<<<< HEAD
         batch.set(shopDocRef, shopData)
         val servicesToSave = if (servicesList.isEmpty() && shopIdToEdit.isNullOrBlank()) {
             getDefaultServices(finalShopId)
@@ -287,5 +380,15 @@ class AdminViewModel : ViewModel() {
             Service(name = "Hair Styling", duration = "45 phút", price = 150000, shopId = shopId),
             Service(name = "Premium Styling", duration = "60 phút", price = 250000, shopId = shopId)
         )
+=======
+        if (shopToEdit.value == null) db.collection("shops").add(data)
+        else db.collection("shops").document(shopToEdit.value!!.id).set(data)
+        showAddShopDialog.value = false
+    }
+
+    fun logout() {
+        // TODO: Implement real logout with Firebase Auth
+        _currentAdmin.value = null
+>>>>>>> feature/admin
     }
 }
