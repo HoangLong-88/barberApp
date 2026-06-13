@@ -101,7 +101,7 @@ fun ShopCard(shop: Shop, onEdit: () -> Unit, onDelete: () -> Unit) {
 }
 
 @Composable
-fun ServiceCard(service: Service?, onEdit: () -> Unit, onDelete: () -> Unit) {
+fun ServiceDetailsCardInCustomer(service: Service?, onEdit: () -> Unit, onDelete: () -> Unit) {
     Surface(color = Color(0xFF1E1E1E), shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f)) {

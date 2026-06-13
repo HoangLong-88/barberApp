@@ -1,11 +1,7 @@
 package com.example.barberapp.View.screenUI.customer.home
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,19 +12,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,12 +28,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.barberapp.Model.entities.Review
 import com.example.barberapp.Model.entities.Service
-import com.example.barberapp.View.component.BarberCard
+import com.example.barberapp.Model.types.ShopDetailTab
+import com.example.barberapp.View.component.BarberDetailsCardInCustomer
+import com.example.barberapp.View.component.ReviewCardInCustomer
+import com.example.barberapp.View.component.ServiceDetailsCardInCustomer
+import com.example.barberapp.View.component.WriteReviewButton
 import com.example.barberapp.View.layout.HeroSection
+import com.example.barberapp.View.layout.ShopDetailTabRow
 import com.example.barberapp.View.layout.ShopMetaSection
-import com.example.barberapp.View.utils.StarRow
 import com.example.barberapp.ViewModel.ShopVM
 
 // ─── Color Palette ───────────────────────────────────────────────────────────
@@ -54,15 +48,9 @@ val GoldPrimary = Color(0xFFF5A623)
 private val GoldLight = Color(0xFFFFC85A)
 val TextPrimary = Color(0xFFFFFFFF)
 val TextSecondary = Color(0xFFAAAAAA)
-private val TabInactive = Color(0xFF888888)
+val TabInactive = Color(0xFF888888)
 val DividerColor = Color(0xFF2E2E2E)
 val AvatarBg = Color(0xFF2E2E2E)
-
-private enum class ShopTab(val label: String) {
-    SERVICES("Services"),
-    BARBERS("Barbers"),
-    REVIEWS("Reviews")
-}
 
 @Composable
 fun ShopDetailScreen(
@@ -72,15 +60,19 @@ fun ShopDetailScreen(
     navController: NavController
 ) {
     var isFavourite by remember { mutableStateOf(false) }
-    var selectedTab by remember { mutableStateOf(ShopTab.SERVICES) }
+    var selectedTab by remember { mutableStateOf(ShopDetailTab.SERVICES) }
     val shopState by shopVM.shop.collectAsState()
     val reviewState by shopVM.reviews.collectAsState()
+    var selectedServices by remember { mutableStateOf(setOf<Service>()) }
+
     LaunchedEffect(shopId) {
         shopVM.loadShopDetails(shopId)
     }
-    val shop = shopState ?: return Box(Modifier
-        .fillMaxSize()
-        .background(BackgroundDark))
+    val shop = shopState ?: return Box(
+        Modifier
+            .fillMaxSize()
+            .background(BackgroundDark)
+    )
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -105,7 +97,7 @@ fun ShopDetailScreen(
                     selected = selectedTab,
                     onSelect = { tab ->
                         selectedTab = tab
-                        if (tab == ShopTab.REVIEWS) {
+                        if (tab == ShopDetailTab.REVIEWS) {
                             shopVM.loadReviewOnly(shopId)
                         }
                     }
@@ -114,183 +106,75 @@ fun ShopDetailScreen(
 
             // ── Tab Content ───────────────────────────────────────────────
             when (selectedTab) {
-                ShopTab.SERVICES -> {
+                ShopDetailTab.SERVICES -> {
                     items(shop.services, key = { it.id }) { service ->
-                        ServiceCard(service = service, onBook = { onBook(service) })
+                        val isSelected = selectedServices.contains(service)
+                        ServiceDetailsCardInCustomer(
+                            service = service, isSelected = isSelected,
+                            onBook = {
+                                selectedServices = if (isSelected) {
+                                    selectedServices - service
+                                } else {
+                                    selectedServices + service
+                                }
+                            })
                     }
-                    item { Spacer(Modifier.height(24.dp)) }
+                    item { Spacer(Modifier.height(80.dp)) }
                 }
 
-                ShopTab.REVIEWS -> {
+                ShopDetailTab.REVIEWS -> {
                     items(reviewState, key = { it.id }) { review ->
-                        ReviewCard(review)
+                        ReviewCardInCustomer(review)
                     }
                     item { WriteReviewButton({ navController.navigate("reviews/$shopId") }) }
                     item { Spacer(Modifier.height(24.dp)) }
                 }
 
-                ShopTab.BARBERS -> {
+                ShopDetailTab.BARBERS -> {
                     items(shop.barbers, key = { it.id }) { barber ->
-                        BarberCard(barber = barber)
+                        BarberDetailsCardInCustomer(barber = barber)
                     }
                     item { Spacer(Modifier.height(24.dp)) }
                 }
             }
         }
-    }
-}
 
-
-@Composable
-private fun ShopDetailTabRow(
-    selected: ShopTab,
-    onSelect: (ShopTab) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-    ) {
-        ShopTab.entries.forEach { tab ->
-            val isActive = tab == selected
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
+        if (selectedTab == ShopDetailTab.SERVICES && selectedServices.isNotEmpty()) {
+            Box(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(vertical = 4.dp)
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    // Thêm hiệu ứng gradient đen mờ dần lên trên để UI nhìn sang trọng hơn
+                    .background(
+                        brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                            colors = listOf(Color.Transparent, BackgroundDark)
+                        )
+                    )
+                    .padding(16.dp)
             ) {
-                TextButton(onClick = { onSelect(tab) }) {
+                Button(
+                    onClick = {
+                        val serviceIdsString = selectedServices.map { it.id }.joinToString(",")
+                        val servicesToBook = selectedServices.toList()
+                        onBook(servicesToBook.first()) // Hoặc update hàm onBook truyền List
+                        navController.navigate("booking_checkout/${shop.id}/$serviceIdsString")
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(54.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = GoldPrimary)
+                ) {
                     Text(
-                        text = tab.label,
-                        color = if (isActive) GoldPrimary else TabInactive,
-                        fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Normal,
-                        fontSize = 14.sp
-                    )
-                }
-                if (isActive) {
-                    Box(
-                        modifier = Modifier
-                            .height(2.dp)
-                            .fillMaxWidth(0.6f)
-                            .background(GoldPrimary, RoundedCornerShape(1.dp))
+                        text = "Confirm Booking (${selectedServices.size})",
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
                     )
                 }
             }
         }
     }
-
-    Divider(color = DividerColor, thickness = 1.dp)
 }
 
-@Composable
-private fun ServiceCard(
-    service: Service?,
-    onBook: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp),
-        colors = CardDefaults.cardColors(containerColor = CardDark),
-        shape = RoundedCornerShape(14.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = service?.name ?: "Loading...",
-                    color = TextPrimary,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 15.sp
-                )
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    text = if (service != null) "Giá: %,d VND".format(service.price) else "Loading...",                    color = TextSecondary,
-                    fontSize = 12.sp
-                )
-            }
 
-            Button(
-                onClick = onBook,
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = GoldPrimary),
-                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp)
-            ) {
-                Text(
-                    text = "Book",
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ReviewCard(review: Review) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp),
-        colors = CardDefaults.cardColors(containerColor = CardDark),
-        shape = RoundedCornerShape(14.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = review.userName,
-                    color = TextPrimary,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 14.sp
-                )
-                StarRow(rating = review.rating)
-            }
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = review.comment,
-                color = TextSecondary,
-                fontSize = 13.sp
-            )
-        }
-    }
-}
-
-@Composable
-private fun WriteReviewButton(onClick: () -> Unit) {
-    Spacer(Modifier.height(8.dp))
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        OutlinedButton(
-            onClick = onClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
-            shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = GoldPrimary),
-            border = ButtonDefaults.outlinedButtonBorder.copy()
-        ) {
-            Text(
-                text = "Write a Review",
-                color = GoldPrimary,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 15.sp
-            )
-        }
-    }
-}

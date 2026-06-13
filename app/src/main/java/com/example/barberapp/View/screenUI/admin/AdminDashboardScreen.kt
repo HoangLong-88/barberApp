@@ -43,7 +43,7 @@ import com.example.barberapp.View.component.AdminHeaderSection
 import com.example.barberapp.View.component.AdminTabButton
 import com.example.barberapp.View.component.BookingCard
 import com.example.barberapp.View.component.SearchBarCustom
-import com.example.barberapp.View.component.ServiceCard
+import com.example.barberapp.View.component.ServiceDetailsCardInCustomer
 import com.example.barberapp.View.component.ShopCard
 import com.example.barberapp.View.component.UserCard
 import com.example.barberapp.ViewModel.AdminViewModel
@@ -337,7 +337,7 @@ fun AdminDashboardScreen(
                         }
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             items(shopServices, key = { it.id }) { service ->
-                                ServiceCard(
+                                ServiceDetailsCardInCustomer(
                                     service,
                                     onEdit = {
                                         viewModel.serviceToEdit.value = service;

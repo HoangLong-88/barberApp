@@ -44,6 +44,7 @@ android {
 
 dependencies {
 implementation(libs.material3)
+    implementation(libs.androidx.foundation)
     //    implementation(libs.firebase.storage.ktx)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
