@@ -23,13 +23,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-<<<<<<< HEAD
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
-=======
+
+import com.example.barberapp.Model.entities.Booking
+import com.example.barberapp.Model.entities.Service
 import com.example.barberapp.Model.entities.ServiceItem
 import com.example.barberapp.Model.entities.Shop
 import com.example.barberapp.Model.entities.User
+
 import com.example.barberapp.View.component.AdminFilterChipCustom
 import com.example.barberapp.View.component.AdminHeaderSection
 import com.example.barberapp.View.component.AdminTabButton
@@ -38,14 +40,10 @@ import com.example.barberapp.View.component.SearchBarCustom
 import com.example.barberapp.View.component.ServiceDetailsCardInCustomer
 import com.example.barberapp.View.component.ShopCard
 import com.example.barberapp.View.component.UserCard
->>>>>>> origin/feature/booking
+
 import com.example.barberapp.ViewModel.AdminViewModel
 import com.example.barberapp.ViewModel.AuthVM
 import com.example.barberapp.ViewModel.UserVM
-import com.example.barberapp.Model.entities.Booking
-import com.example.barberapp.Model.entities.Service
-import com.example.barberapp.Model.entities.Shop
-import com.example.barberapp.Model.entities.User
 
 @Composable
 fun AdminDashboardScreen(navController: NavController, authVM: AuthVM, userVM: UserVM) {
@@ -167,25 +165,20 @@ fun AdminDashboardScreen(navController: NavController, authVM: AuthVM, userVM: U
                     "Dịch vụ" -> {
                         val shopServices = services.filter { it.shopId == selectedShopForService?.id && it.name.contains(searchQuery, ignoreCase = true) }
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-<<<<<<< HEAD
-                            items(shopServices, key = { it.id }) { service -> ServiceCard(service, onEdit = { viewModel.serviceToEdit.value = service; viewModel.showAddServiceDialog.value = true }, onDelete = { viewModel.itemToDelete.value = service }) }
-=======
                             items(shopServices, key = { it.id }) { service ->
-                                ServiceDetailsCardInCustomer(
-                                    service,
-                                    onEdit = {
-                                        viewModel.serviceToEdit.value = service;
-                                        viewModel.showAddServiceDialog.value = true
-                                    },
-                                    onDelete = { viewModel.itemToDelete.value = service })
+                                ServiceCard(service, onEdit = { viewModel.serviceToEdit.value = service; viewModel.showAddServiceDialog.value = true }, onDelete = { viewModel.itemToDelete.value = service })
                             }
->>>>>>> origin/feature/booking
                         }
                     }
                     "Lịch booking" -> {
-                        val filtered = if (selectedDateFilter == "Tất cả") bookings else bookings.filter { it.dateTime.contains(selectedDateFilter) }
+                        // Booking model uses bookingDate and bookingTime. For now, simple filter by date/time string when selectedDateFilter is not "Tất cả".
+                        val filtered = if (selectedDateFilter == "Tất cả") bookings else bookings.filter {
+                            it.bookingDate.contains(selectedDateFilter, ignoreCase = true) || it.bookingTime.contains(selectedDateFilter, ignoreCase = true)
+                        }
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            items(filtered, key = { it.id }) { booking -> BookingCard(booking = booking, onComplete = {}, onCancel = {}, onDelete = { viewModel.itemToDelete.value = booking }) }
+                            items(filtered, key = { it.id }) { booking ->
+                                BookingCard(booking = booking, onComplete = {}, onCancel = {}, onDelete = { viewModel.itemToDelete.value = booking })
+                            }
                         }
                     }
                     "Thống kê" -> {
@@ -301,10 +294,13 @@ fun ServiceCard(service: Service, onEdit: () -> Unit, onDelete: () -> Unit) {
 fun BookingCard(booking: Booking, onComplete: () -> Unit, onCancel: () -> Unit, onDelete: () -> Unit) {
     Surface(color = Color(0xFF1E1E1E), shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(booking.service, color = Color.White, fontWeight = FontWeight.Bold)
-            Text("${booking.service} - ${booking.barber}", color = Color.Gray, fontSize = 13.sp)
-            Text(booking.dateTime, color = Color.Gray, fontSize = 13.sp)
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) { IconButton(onClick = onDelete) { Icon(Icons.Default.Delete, contentDescription = null, tint = Color(0xFFCF6679)) } }
+            val firstService = booking.services.firstOrNull()?.name ?: ""
+            Text(firstService, color = Color.White, fontWeight = FontWeight.Bold)
+            Text("$firstService - ${booking.barberName}", color = Color.Gray, fontSize = 13.sp)
+            Text("${booking.bookingDate} ${booking.bookingTime}", color = Color.Gray, fontSize = 13.sp)
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                IconButton(onClick = onDelete) { Icon(Icons.Default.Delete, contentDescription = null, tint = Color(0xFFCF6679)) }
+            }
         }
     }
 }

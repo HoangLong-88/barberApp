@@ -219,18 +219,20 @@ class AdminViewModel : ViewModel() {
         var revenue = 0L
         
         for (b in filteredBookings) {
-            val svcKey = b.service
-            serviceCount[svcKey] = (serviceCount[svcKey] ?: 0) + 1
-            staffCount[b.barber] = (staffCount[b.barber] ?: 0) + 1
-            
-            val priceStr = b.price
-            val parsed = priceStr.replace(".", "").replace(",", "").filter { it.isDigit() }.toLongOrNull()
-            if (parsed != null && parsed > 0L) {
-                revenue += parsed
-            } else {
-                val s = services.find { it.name == b.service }
-                if (s != null) revenue += s.price.toLong()
+            // Count services included in the booking
+            if (b.services.isNotEmpty()) {
+                for (svc in b.services) {
+                    serviceCount[svc.name] = (serviceCount[svc.name] ?: 0) + 1
+                }
             }
+
+            // Staff
+            val staffKey = if (b.barberName.isNotEmpty()) b.barberName else ""
+            staffCount[staffKey] = (staffCount[staffKey] ?: 0) + 1
+
+            // Revenue per booking: prefer totalPrice if present, otherwise sum service prices
+            val bookingRevenue = if (b.totalPrice > 0L) b.totalPrice else b.services.sumOf { it.price }
+            revenue += bookingRevenue
         }
         
         _totalRevenue.value = revenue
