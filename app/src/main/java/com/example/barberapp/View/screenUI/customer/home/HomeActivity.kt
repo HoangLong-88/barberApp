@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
@@ -29,66 +30,82 @@ fun HomeScreen(modifier: Modifier = Modifier,
                navController: NavController,
                shopVM: ShopVM,
 ) {
-    val searchText  by shopVM.searchText.collectAsState()
+    val searchText by shopVM.searchText.collectAsState()
     val shops by shopVM.filteredShops.collectAsState()
     val focusManager = LocalFocusManager.current
+    val isReady by shopVM.isReady.collectAsState()
 
     Scaffold(
         containerColor = BackgroundDark,
-        bottomBar      = { SharedBottomNavBar(navController) }
+        bottomBar = { SharedBottomNavBar(navController) }
     ) { innerPadding ->
-        LazyColumn(
-            modifier            = modifier
-                .fillMaxSize()
-                .pointerInput(Unit) {
-                    detectTapGestures(onTap = {
-                        focusManager.clearFocus()
-                    })
-                }
-                .padding(innerPadding),
-            contentPadding      = PaddingValues(bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(0.dp)
-        ) {
-            // Header
-            item { TopHeader(userName = "JD") }
-
-            // Search bar
-            item {
-                SearchBar(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    query = searchText,
-                    onQueryChange = shopVM::onSearchTextChange,
-                    onSearch = {
-                        println("Đang tìm kiếm Barber shop với từ khóa: $searchText")
+        if (!isReady) {
+            // Hiện spinner khi đang fetch
+            Box(
+                modifier = Modifier.fillMaxSize().padding(innerPadding),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            LazyColumn(
+                modifier = modifier
+                    .fillMaxSize()
+                    .pointerInput(Unit) {
+                        detectTapGestures(onTap = {
+                            focusManager.clearFocus()
+                        })
                     }
-                )
-            }
+                    .padding(innerPadding),
+                contentPadding = PaddingValues(bottom = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(0.dp)
+            ) {
+                // Header
+                item { TopHeader(userName = "JD") }
 
-            // Promo banner
-            item {
-                PromoBanner(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                )
-            }
-
-            // Section title
-            item {
-                NearbyHeader(
-                    modifier = Modifier.padding(
-                        start = 16.dp, end = 16.dp,
-                        top = 16.dp, bottom = 8.dp
+                // Search bar
+                item {
+                    SearchBar(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        query = searchText,
+                        onQueryChange = shopVM::onSearchTextChange,
+                        onSearch = {
+                            println("Đang tìm kiếm Barber shop với từ khóa: $searchText")
+                        }
                     )
-                )
-            }
+                }
 
-            // Barber shop cards
-            items(shops) { shop ->
-                BarberShopCard(
-                    shop = shop,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-                    onClick = {navController.navigate("shop_details/${shop?.id}")},
-                    onFavoriteClick = {shopId,isFav -> shopVM.toggleFavoriteShop(shopId,isFav)}
-                )
+                // Promo banner
+                item {
+                    PromoBanner(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
+
+                // Section title
+                item {
+                    NearbyHeader(
+                        modifier = Modifier.padding(
+                            start = 16.dp, end = 16.dp,
+                            top = 16.dp, bottom = 8.dp
+                        )
+                    )
+                }
+
+                // Barber shop cards
+                items(shops) { shop ->
+                    BarberShopCard(
+                        shop = shop,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                        onClick = { navController.navigate("shop_details/${shop?.id}") },
+                        onFavoriteClick = { shopId, isFav ->
+                            shopVM.toggleFavoriteShop(
+                                shopId,
+                                isFav
+                            )
+                        }
+                    )
+                }
             }
         }
     }

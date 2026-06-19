@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.barberapp.Model.entities.ServiceItem
+import com.example.barberapp.Model.entities.Service
 import com.example.barberapp.Model.entities.Shop
 import com.example.barberapp.Model.entities.User
 import com.example.barberapp.View.component.AdminFilterChipCustom
@@ -48,6 +48,7 @@ import com.example.barberapp.View.component.ShopCard
 import com.example.barberapp.View.component.UserCard
 import com.example.barberapp.ViewModel.AdminViewModel
 import com.example.barberapp.ViewModel.AuthVM
+import com.example.barberapp.ViewModel.ShopVM
 import com.example.barberapp.ViewModel.UserVM
 
 @Composable
@@ -55,6 +56,7 @@ fun AdminDashboardScreen(
     viewModel: AdminViewModel = viewModel(),
     authVM: AuthVM,
     userVM: UserVM,
+    shopVM: ShopVM,
     navController: NavController
 ) {
     val currentTab by viewModel.currentTab
@@ -70,7 +72,7 @@ fun AdminDashboardScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            AdminHeaderSection(authVM, userVM, navController)
+            AdminHeaderSection(authVM, userVM,shopVM, navController)
             Spacer(modifier = Modifier.height(20.dp))
 
             // Main Tabs
@@ -382,7 +384,7 @@ fun ViewDialogs(viewModel: AdminViewModel) {
             title = when (item) {
                 is User -> "Xóa tài khoản?"
                 is Shop -> "Xóa tiệm?"
-                is ServiceItem -> "Xóa dịch vụ?"
+                is Service -> "Xóa dịch vụ?"
                 else -> "Xác nhận xóa?"
             },
             message = "Hành động này không thể hoàn tác.",

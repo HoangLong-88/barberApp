@@ -6,13 +6,14 @@ import com.example.barberapp.Model.entities.Service
 import com.example.barberapp.Model.entities.Shop
 import com.example.barberapp.Model.entities.User
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Source
 
 class ShopRepository {
     private val store = FirebaseFirestore.getInstance()
     fun getAllShopData(userId: String, onSuccess: (List<Shop?>) -> Unit = {}) {
         // Lấy favoriteShopIds của user trước
         getFavoriteShopIds(userId) { favoriteIds ->
-            store.collection("shops").get()
+            store.collection("shops").get(Source.SERVER)
                 .addOnSuccessListener { snapshot ->
                     val shops = snapshot.documents.mapNotNull { doc ->
                         try {
@@ -107,7 +108,7 @@ class ShopRepository {
             .addOnFailureListener { onResult(null) }
     }
     fun getFavoriteShopIds(userId: String, onResult: (List<String>) -> Unit) {
-        store.collection("users").document(userId).get()
+        store.collection("users").document(userId).get(Source.SERVER)
             .addOnSuccessListener { doc ->
                 val ids = doc.get("favoriteShopIds") as? List<String> ?: emptyList()
                 onResult(ids)

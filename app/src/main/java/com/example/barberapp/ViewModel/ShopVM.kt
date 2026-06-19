@@ -30,26 +30,34 @@ class ShopVM : ViewModel() {
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private var currentUserId: String = ""   // ← thêm
+    private val _isReady = MutableStateFlow(false)
+    val isReady: StateFlow<Boolean> = _isReady.asStateFlow()
 
-    // Gọi hàm này 1 lần từ AppNavHost sau khi userVM.userData sẵn sàng
     fun init(userId: String) {
-        if (currentUserId == userId) return  // tránh fetch lại nếu đã init
+        if (userId.isBlank()) return
         currentUserId = userId
+        _isReady.value = false
         fetchAllShops()
     }
-
+    fun resetData() {
+        currentUserId = ""
+        _allShops.value = emptyList()
+        _shop.value = null
+        _reviews.value = emptyList()
+        _searchText.value = ""
+        _isReady.value = false   // ← reset cờ
+    }
 
     @OptIn(FlowPreview::class)
-    val filteredShops = searchText.debounce(300L).combine(_allShops) { text, shops ->
-        if (text.isBlank()) {
-            shops
-        } else {
-            shops.filter { (it?.name?.contains(text, ignoreCase = true) ?: "Loading...") == true }
-        }
+    val filteredShops = _allShops.combine(
+        searchText.debounce(300L)
+    ) { shops, text ->
+        if (text.isBlank()) shops
+        else shops.filter { it?.name?.contains(text, ignoreCase = true) == true }
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.Companion.WhileSubscribed(5000),
-        initialValue = _allShops.value
+        started = SharingStarted.Eagerly,
+        initialValue = emptyList()
     )
 
     fun onSearchTextChange(newText: String) {
@@ -60,6 +68,7 @@ class ShopVM : ViewModel() {
         viewModelScope.launch {
             shopRepo.getAllShopData(currentUserId) { allShop ->
                 _allShops.value = allShop
+                _isReady.value = true
             }
         }
     }

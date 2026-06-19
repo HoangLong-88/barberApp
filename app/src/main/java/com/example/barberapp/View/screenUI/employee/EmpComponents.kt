@@ -27,13 +27,15 @@ import com.example.barberapp.ViewModel.AuthVM
 import com.example.barberapp.ViewModel.UserVM
 import com.example.barberapp.Model.entities.EmployeeBookingItem
 import com.example.barberapp.Model.entities.EmployeeInfo
+import com.example.barberapp.ViewModel.ShopVM
 
 @Composable
 fun EmployeeHeader(
     info: EmployeeInfo,
     navController: NavController,
     authVM: AuthVM,
-    userVM: UserVM
+    userVM: UserVM,
+    shopVM: ShopVM
 ) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
@@ -56,7 +58,7 @@ fun EmployeeHeader(
         Row {
             IconButton(onClick = {}) { Icon(Icons.Default.Notifications, null, tint = Color.White) }
             IconButton(onClick = {
-                authVM.logOut(navController = navController, userVM = userVM)
+                authVM.logOut(userVM = userVM, shopVM = shopVM)
             }) { Icon(Icons.AutoMirrored.Filled.ExitToApp, null, tint = Color.White) }
         }
     }

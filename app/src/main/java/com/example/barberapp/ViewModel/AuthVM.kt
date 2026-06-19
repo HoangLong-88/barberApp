@@ -12,19 +12,11 @@ class AuthVM : ViewModel() {
     var uiState by mutableStateOf(AuthUIState())
         private set
 
-    fun login(email: String, password: String, navController: NavController) {
+    fun login(email: String, password: String,userVM: UserVM) {
         uiState = uiState.copy(isLoading = true, error = null)
         authRepo.checkLogin(email, password) { success, errorMessage, role ->
             uiState = (if (success) {
-                val targetGraph = when (role) {
-                    "manager" -> "admin_graph"
-                    "employee" -> "emp_graph"
-                    else -> "main_graph"
-                }
-                navController.navigate(targetGraph) {
-                    popUpTo("auth_graph") { inclusive = true }
-                    launchSingleTop = true
-                }
+                userVM.fetchUserProfile()
                 uiState.copy(isLoading = false, loginSuccess = true)
             } else {
                 uiState.copy(isLoading = false, error = errorMessage)
@@ -57,15 +49,11 @@ class AuthVM : ViewModel() {
         }
     }
 
-    fun logOut(navController: NavController, userVM: UserVM) {
+    fun logOut(userVM: UserVM,shopVM: ShopVM) {
         authRepo.getLogOut()
         userVM.clearData()
-        navController.navigate("auth_graph") {
-            popUpTo("main_graph") {
-                inclusive = true
-            }
-            launchSingleTop = true
-        }
+        shopVM.resetData()
+        uiState = AuthUIState()
     }
     fun resetState() {  // ← gọi sau khi navigate
         uiState = AuthUIState()
@@ -76,5 +64,6 @@ data class AuthUIState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val loginSuccess: Boolean = false,
-    val registerSuccess: Boolean = false
+    val registerSuccess: Boolean = false,
+    val roleChecking: String = ""
 )

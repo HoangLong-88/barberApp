@@ -10,9 +10,12 @@ import com.example.barberapp.Model.entities.Service
 import com.example.barberapp.Model.entities.Shop
 import com.example.barberapp.Model.entities.User
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 
 class AdminViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
+    private val listeners = mutableListOf<ListenerRegistration>()
+
 
     // --- State ---
     private val _currentTab = mutableStateOf("Tiệm")
@@ -52,53 +55,39 @@ class AdminViewModel : ViewModel() {
     }
 
     private fun fetchData() {
-        // Listen Users
-        db.collection("users").addSnapshotListener { v, e ->
+        // Hủy listener cũ trước khi đăng ký mới
+        listeners.forEach { it.remove() }
+        listeners.clear()
+
+        listeners += db.collection("users").addSnapshotListener { v, e ->
             if (e != null) return@addSnapshotListener
-            v?.let {
-                users.clear()
-                users.addAll(it.documents.mapNotNull { d ->
-                    try {
-                        d.toObject(User::class.java)?.copy(id = d.id)
-                    } catch (ex: Exception) {
-                        null
-                    }
-                })
-            }
+            v?.let { users.clear(); users.addAll(it.documents.mapNotNull { d ->
+                d.toObject(User::class.java)?.copy(id = d.id)
+            }) }
         }
-        // Listen Services
-        db.collection("services").addSnapshotListener { v, e ->
+        listeners += db.collection("services").addSnapshotListener { v, e ->
             if (e != null) return@addSnapshotListener
-            v?.let {
-                services.clear()
-                services.addAll(it.documents.mapNotNull { d ->
-                    try {
-                        d.toObject(Service::class.java)?.copy(id = d.id)
-                    } catch (ex: Exception) {
-                        null
-                    }
-                })
-            }
+            v?.let { services.clear(); services.addAll(it.documents.mapNotNull { d ->
+                d.toObject(Service::class.java)?.copy(id = d.id)
+            }) }
         }
-        // Listen Shops
-        db.collection("shops").addSnapshotListener { v, e ->
+        listeners += db.collection("shops").addSnapshotListener { v, e ->
             if (e != null) return@addSnapshotListener
             v?.let {
                 shops.clear()
-                val fetchedShops =
-                    it.documents.mapNotNull { d ->
-                        try {
-                            d.toObject(Shop::class.java)?.copy(id = d.id)
-                        } catch (ex: Exception) {
-                            null
-                        }
-                    }
-                shops.addAll(fetchedShops)
-                if (_selectedShopForService.value == null && fetchedShops.isNotEmpty()) {
-                    _selectedShopForService.value = fetchedShops.first()
+                val fetched = it.documents.mapNotNull { d ->
+                    d.toObject(Shop::class.java)?.copy(id = d.id)
                 }
+                shops.addAll(fetched)
+                if (_selectedShopForService.value == null && fetched.isNotEmpty())
+                    _selectedShopForService.value = fetched.first()
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        listeners.forEach { it.remove() }
     }
 
     // --- Actions ---
@@ -157,7 +146,7 @@ class AdminViewModel : ViewModel() {
                                 // Thực thi xóa đồng loạt (Atomic Operation)
                                 batch.commit().addOnSuccessListener {
                                     // Sau khi xóa thành công toàn bộ dưới DB, gọi các hàm nạp lại dữ liệu để cập nhật UI
-                                    fetchData()
+//                                    fetchData()
                                 }
                             }
                     }
@@ -189,10 +178,12 @@ class AdminViewModel : ViewModel() {
             "roleColorHex" to colorHex,
             "shopId" to if (role == "employee") shopId else ""
         )
-        val onSuccess = if (userToEdit.value == null) db.collection("users")
+        val task = if (userToEdit.value == null) db.collection("users")
             .add(data) else db.collection("users").document(userToEdit.value!!.id).set(data)
-        if (onSuccess.isSuccessful) fetchData()
+//        if (onSuccess.isSuccessful) fetchData()
+        task.addOnSuccessListener { fetchData() }
         showAddUserDialog.value = false
+        userToEdit.value=null
     }
 
     fun saveService(name: String, duration: String, price: String) {
@@ -204,10 +195,12 @@ class AdminViewModel : ViewModel() {
                 .toIntOrNull() ?: 0),
             "shopId" to currentShopId
         )
-        val onSuccess = if (serviceToEdit.value == null) db.collection("services").add(data)
+        val task = if (serviceToEdit.value == null) db.collection("services").add(data)
         else db.collection("services").document(serviceToEdit.value!!.id).set(data)
-        if (onSuccess.isSuccessful) fetchData()
+//        if (onSuccess.isSuccessful) fetchData()
+        task.addOnSuccessListener { fetchData() }
         showAddServiceDialog.value = false
+        serviceToEdit.value = null
     }
 
     fun saveShop(
@@ -269,7 +262,7 @@ class AdminViewModel : ViewModel() {
         }
 
         batch.commit().addOnSuccessListener {
-            fetchData()
+//            fetchData()
         }
         showAddShopDialog.value = false
     }
