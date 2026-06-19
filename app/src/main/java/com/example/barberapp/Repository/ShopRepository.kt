@@ -6,7 +6,6 @@ import com.example.barberapp.Model.entities.Service
 import com.example.barberapp.Model.entities.Shop
 import com.example.barberapp.Model.entities.User
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 
 class ShopRepository {
     private val store = FirebaseFirestore.getInstance()
@@ -54,7 +53,7 @@ class ShopRepository {
                                             name = user.name,
                                             avatarUrl = user.avatarUrl ?: "", // Lấy avatar,
                                             rating = 5.0, // Chỗ này có thể để default hoặc mapping thêm
-                                            totalRatings = 0
+                                            totalRatings = 5.0
                                         )
                                     } else null
                                 }

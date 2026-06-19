@@ -13,7 +13,7 @@ data class User (
     val role: String = "",
     val avatarUrl: String? = null,
     val roleColorHex: String = "#2196F3",
-    val shopId: String = ""
+    val shopId: String = "",
 ){
     val roleColor: Color get() = try { Color(roleColorHex.toColorInt()) } catch (e: Exception) { Color(0xFF2196F3) }
 }

@@ -2,12 +2,14 @@ package com.example.barberapp.View.component
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,11 +22,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -47,7 +52,10 @@ import androidx.compose.ui.unit.sp
 import com.example.barberapp.Model.entities.Booking
 import com.example.barberapp.Model.entities.Employee
 import com.example.barberapp.Model.entities.Notification
+import com.example.barberapp.Model.entities.Review
+import com.example.barberapp.Model.entities.Service
 import com.example.barberapp.Model.entities.Shop
+import com.example.barberapp.Model.entities.User
 import com.example.barberapp.View.screenUI.customer.bookings.BookingStatus
 import com.example.barberapp.View.screenUI.customer.bookings.FilterTab
 import com.example.barberapp.View.screenUI.customer.home.AvatarBg
@@ -65,14 +73,12 @@ import com.example.barberapp.View.utils.LogoutRed
 import com.example.barberapp.View.utils.PendingBg
 import com.example.barberapp.View.utils.PendingText
 import com.example.barberapp.View.utils.PrimaryYellow
+import com.example.barberapp.View.utils.StarRow
 import com.example.barberapp.View.utils.SurfaceColor
 import com.example.barberapp.View.utils.SurfaceDark
 import com.example.barberapp.View.utils.TextPrimary
 import com.example.barberapp.View.utils.TextSecondary
 import com.example.barberapp.View.utils.notifColors
-
-class Card {
-}
 
 @Composable
 fun StatCard(stat: StatItem, modifier: Modifier = Modifier.Companion) {
@@ -120,7 +126,7 @@ fun BookingCard(booking: Booking) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = booking.service,
+                    text = booking.services.toString(),
                     color = TextPrimary,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold
@@ -134,14 +140,14 @@ fun BookingCard(booking: Booking) {
 
             Spacer(Modifier.height(8.dp))
 
-            Text(booking.shop, color = TextSecondary, fontSize = 13.sp)
-            Text(booking.dateTime, color = TextSecondary, fontSize = 13.sp)
-            Text("Barber: ${booking.barber}", color = TextSecondary, fontSize = 13.sp)
+            Text(booking.shopName, color = TextSecondary, fontSize = 13.sp)
+            Text(booking.bookingDate, color = TextSecondary, fontSize = 13.sp)
+            Text("Barber: ${booking.barberName}", color = TextSecondary, fontSize = 13.sp)
 
             Spacer(Modifier.height(10.dp))
 
             Text(
-                text = booking.price,
+                text = booking.totalPrice.toString(),
                 color = statusFg,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -419,7 +425,7 @@ fun NotificationCard(
 }
 
 @Composable
-fun BarberCard(barber: Employee?) {
+fun BarberDetailsCardInCustomer(barber: Employee?) {
     Card(
         modifier  = Modifier
             .fillMaxWidth()
@@ -473,12 +479,112 @@ fun BarberCard(barber: Employee?) {
                 )
                 Spacer(Modifier.width(3.dp))
                 Text(
-                    text       = barber?.rating?.toString()?:"Loading...",
+                    text       = barber?.totalRatings?.toString()?:"Loading...",
                     color      = GoldPrimary,
                     fontWeight = FontWeight.SemiBold,
                     fontSize   = 13.sp
                 )
             }
+        }
+    }
+}
+
+@Composable
+ fun ServiceDetailsCardInCustomer(
+    service: Service?,
+    isSelected: Boolean = false,
+    onBook: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        colors = CardDefaults.cardColors(containerColor = CardDark),
+        shape = RoundedCornerShape(14.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = service?.name ?: "Loading...",
+                    color = com.example.barberapp.View.screenUI.customer.home.TextPrimary,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 15.sp
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = if (service != null) "Giá: %,d VND".format(service.price) else "Loading...",                    color = com.example.barberapp.View.screenUI.customer.home.TextSecondary,
+                    fontSize = 12.sp
+                )
+            }
+
+            // --- NÚT BẤM CẬP NHẬT THEO TRẠNG THÁI ---
+            Button(
+                onClick = onBook,
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    // Đổi màu nền thành trong suốt nếu đã chọn, màu vàng nếu chưa chọn
+                    containerColor = if (isSelected) Color.Transparent else GoldPrimary,
+                    contentColor = if (isSelected) GoldPrimary else Color.Black
+                ),
+                // Thêm viền màu vàng khi đã chọn
+                border = if (isSelected) BorderStroke(1.dp, GoldPrimary) else null,
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp)
+            ) {
+                if (isSelected) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Selected",
+                        modifier = Modifier.size(20.dp)
+                    )
+                } else {
+                    Text(
+                        text = "Book",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+ fun ReviewCardInCustomer(review: Review) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        colors = CardDefaults.cardColors(containerColor = CardDark),
+        shape = RoundedCornerShape(14.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = review.userName,
+                    color = com.example.barberapp.View.screenUI.customer.home.TextPrimary,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 14.sp
+                )
+                StarRow(rating = review.rating)
+            }
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = review.comment,
+                color = com.example.barberapp.View.screenUI.customer.home.TextSecondary,
+                fontSize = 13.sp
+            )
         }
     }
 }
