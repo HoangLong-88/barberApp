@@ -6,7 +6,7 @@ data class Employee(
     val name: String = "",
     val avatarUrl: String = "",
     val rating: Double = 0.0,
-    val totalRatings: Int = 0,
+    val totalRatings: Double = 0.0,
     val appointmentsToday: Int = 0,
     val completedToday: Int = 0
 )

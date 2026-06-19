@@ -12,10 +12,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.barberapp.View.screenUI.auth.LoginScreen
 import com.example.barberapp.View.screenUI.auth.RegisterScreen
 import com.example.barberapp.View.screenUI.customer.bookings.MyBookingsScreen
@@ -29,6 +31,8 @@ import com.example.barberapp.View.screenUI.customer.reviews.WriteReviewScreen
 import com.example.barberapp.ViewModel.AuthVM
 import com.example.barberapp.ViewModel.UserVM
 import com.example.barberapp.View.screenUI.admin.AdminDashboardScreen
+import com.example.barberapp.View.screenUI.customer.bookings.BookingCheckoutScreen
+import com.example.barberapp.View.screenUI.customer.bookings.BookingSuccessScreen
 import com.example.barberapp.View.screenUI.employee.EmployeeScreen
 
 @Composable
@@ -103,6 +107,27 @@ fun AppNavHost() {
                 composable("reviews/{shopId}") {backStackEntry->
                     val shopId = backStackEntry.arguments?.getString("shopId")?:""
                     WriteReviewScreen() }
+                composable(
+                    route = "booking_checkout/{shopId}/{serviceIds}",
+                    arguments = listOf(
+                        navArgument("shopId") { type = NavType.StringType },
+                        navArgument("serviceIds") { type = NavType.StringType }
+                    )
+                ) { backStackEntry ->
+                    val shopId = backStackEntry.arguments?.getString("shopId") ?: ""
+                    val serviceIds = backStackEntry.arguments?.getString("serviceIds")?.split(",") ?: emptyList()
+
+                    BookingCheckoutScreen(
+                        navController = navController,
+                        shopId = shopId,
+                        initialServiceIds = serviceIds
+                    )
+                }
+                composable("booking_success/{bookingId}") { backStackEntry ->
+                    val bookingId = backStackEntry.arguments?.getString("bookingId") ?: ""
+                    BookingSuccessScreen(navController = navController, bookingId = bookingId)
+                }
+
             }
             navigation(startDestination = "admin", route = "admin_graph") {
                 composable("admin") {

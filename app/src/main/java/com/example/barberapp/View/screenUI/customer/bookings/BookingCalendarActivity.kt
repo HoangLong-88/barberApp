@@ -26,43 +26,16 @@ enum class BookingStatus { Completed, Pending, Cancelled }
 enum class FilterTab { All, Completed, Pending, Cancelled }
 
 // ─── Sample Data ─────────────────────────────────────────────────────────────
-
 private val sampleBookings = listOf(
     Booking(
         "1",
-        "Hair Cut",
-        "King Barber Shop",
-        "20 May – 17:00",
-        "John",
-        "80.000 VND",
-        BookingStatus.Completed
-    ),
-    Booking(
-        "2",
-        "Beard Shave",
-        "King Barber Shop",
-        "18 May – 14:00",
-        "Mike",
-        "40.000 VND",
-        BookingStatus.Completed
-    ),
-    Booking(
-        "3",
-        "Hair Styling",
-        "Elite Cuts Studio",
-        "25 May – 10:00",
-        "David",
-        "150.000 VND",
-        BookingStatus.Pending
-    ),
-    Booking(
-        "4",
-        "Hair Cut",
-        "Classic Barber",
-        "28 May – 09:00",
-        "John",
-        "70.000 VND",
-        BookingStatus.Cancelled
+        services = emptyList(),
+        shopName = "King Barber Shop",
+        bookingDate = "20 May",
+        bookingTime =" 17:00",
+        barberName = "John",
+        totalPrice = 80000,
+        status = BookingStatus.Completed
     ),
 )
 
