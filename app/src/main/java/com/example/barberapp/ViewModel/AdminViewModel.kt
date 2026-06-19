@@ -9,6 +9,7 @@ import com.example.barberapp.Model.entities.Service
 import com.example.barberapp.Model.entities.Shop
 import com.example.barberapp.Model.entities.User
 import com.example.barberapp.Model.entities.Booking
+import com.example.barberapp.View.screenUI.customer.bookings.BookingStatus
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 
@@ -91,6 +92,16 @@ class AdminViewModel : ViewModel() {
                     _selectedShopForService.value = fetched.first()
             }
         }
+        listeners += db.collection("bookings").addSnapshotListener { v, e ->
+            if (e != null) return@addSnapshotListener
+            v?.let {
+                bookings.clear()
+                bookings.addAll(it.documents.mapNotNull { d ->
+                    d.toObject(Booking::class.java)?.copy(id = d.id)
+                })
+                calculateStats() // tính lại stats mỗi khi bookings thay đổi
+            }
+        }
     }
 
     override fun onCleared() {
@@ -121,6 +132,20 @@ class AdminViewModel : ViewModel() {
     fun setStatsTimeRange(range: String) { statsTimeRange.value = range; calculateStats() }
 //    fun updateShopFilterForEmployee(id: String) { selectedShopFilterForEmployee.value = id }
 
+    fun confirmBooking(bookingId: String) {
+        db.collection("bookings").document(bookingId)
+            .update("status", BookingStatus.Completed.name)
+    }
+
+    fun cancelBooking(bookingId: String) {
+        db.collection("bookings").document(bookingId)
+            .update("status", BookingStatus.Cancelled.name)
+    }
+
+    fun deleteBooking(bookingId: String) {
+        db.collection("bookings").document(bookingId).delete()
+        itemToDelete.value = null
+    }
     fun calculateStats() {
         // 1. Tổng doanh thu & Số lượng
         val completedBookings = bookings

@@ -103,12 +103,13 @@ fun StatCard(stat: StatItem, modifier: Modifier = Modifier.Companion) {
 
 // ─── Booking Card ─────────────────────────────────────────────────────────────
 @Composable
-fun BookingCard(booking: Booking) {
+fun BookingCardForCustomer(booking: Booking) {
     val (statusBg, statusFg) = when (booking.status) {
         BookingStatus.Completed -> CompletedBg to CompletedText
         BookingStatus.Pending   -> PendingBg to PendingText
         BookingStatus.Cancelled -> CancelledBg to CancelledText
     }
+    val servicesText = booking.services.joinToString(", ") { it.name }
 
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -122,7 +123,7 @@ fun BookingCard(booking: Booking) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = booking.services.toString(),
+                    text = servicesText,
                     color = TextPrimary,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold
@@ -143,7 +144,7 @@ fun BookingCard(booking: Booking) {
             Spacer(Modifier.height(10.dp))
 
             Text(
-                text = booking.totalPrice.toString(),
+                text = booking.totalPrice.toString() + " VNĐ",
                 color = statusFg,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -180,7 +181,7 @@ fun BarberShopCard(
     onClick: () -> Unit = {},
     onFavoriteClick: (String, Boolean) -> Unit = { _, _ ->}
 ) {
-    var isFav = shop?.isFavorite == true
+    val isFav = shop?.isFavorite == true
 
     Column(
         modifier = modifier

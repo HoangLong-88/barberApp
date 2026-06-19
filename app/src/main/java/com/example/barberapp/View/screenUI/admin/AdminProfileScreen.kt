@@ -21,13 +21,14 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.barberapp.ViewModel.AuthVM
+import com.example.barberapp.ViewModel.ShopVM
 import com.example.barberapp.ViewModel.UserVM
 
 @Composable
 fun AdminProfileScreen(
     authVM: AuthVM,
     userVM: UserVM,
-    navController: NavController
+    shopVM: ShopVM
 ) {
     val admin = userVM.userData
 
@@ -110,7 +111,7 @@ fun AdminProfileScreen(
 
         // Logout Button
         Button(
-            onClick = { authVM.logOut(navController, userVM) },
+            onClick = { authVM.logOut(userVM, shopVM) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)

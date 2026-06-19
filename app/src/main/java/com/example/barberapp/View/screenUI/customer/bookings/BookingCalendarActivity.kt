@@ -7,18 +7,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.barberapp.Model.entities.Booking
-import com.example.barberapp.View.component.BookingCard
+import com.example.barberapp.View.component.BookingCardForCustomer
 import com.example.barberapp.View.component.FilterTabRow
 import com.example.barberapp.View.component.SharedBottomNavBar
 import com.example.barberapp.View.utils.BackgroundColor
 import com.example.barberapp.View.utils.TextPrimary
 import com.example.barberapp.View.utils.TextSecondary
+import com.example.barberapp.ViewModel.BookingVM
 
 // ─── Data Models ─────────────────────────────────────────────────────────────
 enum class BookingStatus { Completed, Pending, Cancelled }
@@ -32,7 +31,7 @@ private val sampleBookings = listOf(
         services = emptyList(),
         shopName = "King Barber Shop",
         bookingDate = "20 May",
-        bookingTime =" 17:00",
+        bookingTime = " 17:00",
         barberName = "John",
         totalPrice = 80000,
         status = BookingStatus.Completed
@@ -42,15 +41,19 @@ private val sampleBookings = listOf(
 // ─── Main Screen ─────────────────────────────────────────────────────────────
 
 @Composable
-fun MyBookingsScreen(navController: NavController) {
+fun CustomerBookingsScreen(navController: NavController, userId: String, bookingVM: BookingVM) {
     var selectedFilter by remember { mutableStateOf(FilterTab.All) }
+    val bookings by bookingVM.bookings.collectAsState()
+    LaunchedEffect(userId) {
+        bookingVM.loadCustomerBookings(userId)
+    }
 
     val filteredBookings = remember(selectedFilter) {
         when (selectedFilter) {
-            FilterTab.All -> sampleBookings
-            FilterTab.Completed -> sampleBookings.filter { it.status == BookingStatus.Completed }
-            FilterTab.Pending -> sampleBookings.filter { it.status == BookingStatus.Pending }
-            FilterTab.Cancelled -> sampleBookings.filter { it.status == BookingStatus.Cancelled }
+            FilterTab.All -> bookings
+            FilterTab.Completed -> bookings.filter { it.status == BookingStatus.Completed }
+            FilterTab.Pending -> bookings.filter { it.status == BookingStatus.Pending }
+            FilterTab.Cancelled -> bookings.filter { it.status == BookingStatus.Cancelled }
         }
     }
 
@@ -93,7 +96,7 @@ fun MyBookingsScreen(navController: NavController) {
             // Bookings List
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(filteredBookings, key = { it.id }) { booking ->
-                    BookingCard(booking = booking)
+                    BookingCardForCustomer(booking = booking)
                 }
                 item { Spacer(Modifier.height(8.dp)) }
             }
@@ -103,8 +106,8 @@ fun MyBookingsScreen(navController: NavController) {
 
 // ─── Preview ─────────────────────────────────────────────────────────────────
 
-@Preview(showBackground = true, backgroundColor = 0xFF121212, showSystemUi = true)
-@Composable
-fun MyBookingsScreenPreview() {
-    MyBookingsScreen(navController = rememberNavController())
-}
+//@Preview(showBackground = true, backgroundColor = 0xFF121212, showSystemUi = true)
+//@Composable
+//fun CustomerBookingsScreenPreview() {
+//    CustomerBookingsScreen(navController = rememberNavController())
+//}

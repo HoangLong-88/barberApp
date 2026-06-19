@@ -1,16 +1,8 @@
 package com.example.barberapp.View.screenUI.navHostApp
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -20,7 +12,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.barberapp.View.screenUI.auth.LoginScreen
 import com.example.barberapp.View.screenUI.auth.RegisterScreen
-import com.example.barberapp.View.screenUI.customer.bookings.MyBookingsScreen
+import com.example.barberapp.View.screenUI.customer.bookings.CustomerBookingsScreen
 import com.example.barberapp.View.screenUI.customer.home.ShopDetailScreen
 import com.example.barberapp.View.screenUI.customer.home.HomeScreen
 import com.example.barberapp.View.screenUI.customer.notifications.NotificationsScreen
@@ -34,6 +26,7 @@ import com.example.barberapp.View.screenUI.admin.AdminDashboardScreen
 import com.example.barberapp.View.screenUI.customer.bookings.BookingCheckoutScreen
 import com.example.barberapp.View.screenUI.customer.bookings.BookingSuccessScreen
 import com.example.barberapp.View.screenUI.employee.EmployeeScreen
+import com.example.barberapp.ViewModel.BookingVM
 import com.example.barberapp.ViewModel.ShopVM
 import com.google.firebase.auth.FirebaseAuth
 
@@ -43,6 +36,7 @@ fun AppNavHost() {
     val userVM: UserVM = viewModel()
     val authVM: AuthVM = viewModel()
     val shopVM: ShopVM = viewModel()
+    val bookingVM: BookingVM = viewModel()
 
     val userAcc = userVM.userData
 
@@ -85,11 +79,9 @@ fun AppNavHost() {
         }
         navigation(startDestination = "home", route = "main_graph") {
             composable("home") { HomeScreen(navController = navController, shopVM = shopVM) }
-            composable("booking") { MyBookingsScreen(navController = navController) }
+            composable("booking") { CustomerBookingsScreen(navController = navController, userId = userAcc?.id?: "", bookingVM = bookingVM) }
             composable("notification") { NotificationsScreen(navController = navController) }
-            composable("profile") {
-                ProfileScreen(navController = navController, authVM = authVM, userVM = userVM, shopVM = shopVM)
-            }
+            composable("profile") {ProfileScreen(navController = navController, authVM = authVM, userVM = userVM, shopVM = shopVM) }
             composable("edit_profile") { EditProfileScreen(navController = navController, userVM = userVM) }
             composable("favorite") { FavoritesScreen(navController = navController, shopVM = shopVM) }
             composable("shop_details/{shopId}") { backStackEntry ->
@@ -119,7 +111,7 @@ fun AppNavHost() {
             ) { backStackEntry ->
                 val shopId = backStackEntry.arguments?.getString("shopId") ?: ""
                 val serviceIds = backStackEntry.arguments?.getString("serviceIds")?.split(",") ?: emptyList()
-                BookingCheckoutScreen(navController = navController, shopId = shopId, initialServiceIds = serviceIds)
+                BookingCheckoutScreen(navController = navController, shopId = shopId, initialServiceIds = serviceIds, userVM = userVM)
             }
             composable("booking_success/{bookingId}") { backStackEntry ->
                 val bookingId = backStackEntry.arguments?.getString("bookingId") ?: ""

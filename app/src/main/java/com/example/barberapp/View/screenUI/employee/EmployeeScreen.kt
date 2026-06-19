@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.barberapp.Model.entities.Booking
 import com.example.barberapp.ViewModel.AuthVM
 import com.example.barberapp.ViewModel.UserVM
 import com.example.barberapp.Model.entities.EmployeeBookingItem
@@ -29,19 +30,25 @@ import com.example.barberapp.ViewModel.ShopVM
 
 @Composable
 fun EmployeeScreen(
-    viewModel: EmpViewModel = viewModel(),
+    empVM: EmpViewModel = viewModel(),
     navController: NavController,
     authVM: AuthVM,
     userVM: UserVM,
     shopVM: ShopVM
 ) {
-    val currentTab by viewModel.currentTab
-    val viewMode by viewModel.viewMode
-    val EmployeeInfo by viewModel.employeeInfo
-    val filteredBookings by viewModel.filteredBookings
+    val currentTab by empVM.currentTab
+    val viewMode by empVM.viewMode
+    val EmployeeInfo by empVM.employeeInfo
+    val filteredBookings by empVM.filteredBookings
     
-    var selectedBookingForDetail by remember { mutableStateOf<EmployeeBookingItem?>(null) }
-
+    var selectedBookingForDetail by remember { mutableStateOf<Booking?>(null) }
+    LaunchedEffect(userVM.userData?.id) {
+        val uid = userVM.userData?.id
+        if (!uid.isNullOrBlank()) {
+            empVM.loadBookings(uid)
+            empVM.setEmployeeProfile(userVM.userData?.name ?: "Nhân viên")
+        }
+    }
     Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFF121212)) {
         Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
             EmployeeHeader(EmployeeInfo, navController, authVM, userVM, shopVM)
@@ -51,15 +58,15 @@ fun EmployeeScreen(
 
             // Main Tabs (Lịch, Đánh giá, Hồ sơ)
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                EmployeeTabButton("Lịch", Icons.Default.DateRange, currentTab == "Lịch", Modifier.weight(1f)) { viewModel.setTab("Lịch") }
-                EmployeeTabButton("Đánh giá", Icons.Default.ThumbUp, currentTab == "Đánh giá", Modifier.weight(1f)) { viewModel.setTab("Đánh giá") }
-                EmployeeTabButton("Hồ sơ", Icons.Default.Person, currentTab == "Hồ sơ", Modifier.weight(1f)) { viewModel.setTab("Hồ sơ") }
+                EmployeeTabButton("Lịch", Icons.Default.DateRange, currentTab == "Lịch", Modifier.weight(1f)) { empVM.setTab("Lịch") }
+                EmployeeTabButton("Đánh giá", Icons.Default.ThumbUp, currentTab == "Đánh giá", Modifier.weight(1f)) { empVM.setTab("Đánh giá") }
+                EmployeeTabButton("Hồ sơ", Icons.Default.Person, currentTab == "Hồ sơ", Modifier.weight(1f)) { empVM.setTab("Hồ sơ") }
             }
 
             Spacer(modifier = Modifier.height(20.dp))
 
             if (currentTab == "Lịch") {
-                CalendarSection(viewModel)
+                CalendarSection(empVM)
                 
                 Spacer(modifier = Modifier.height(20.dp))
 
@@ -68,8 +75,8 @@ fun EmployeeScreen(
                     Text("${filteredBookings.size} lịch hẹn", color = Color.White, fontWeight = FontWeight.Bold)
                     Surface(color = Color(0xFF1E1E1E), shape = RoundedCornerShape(20.dp)) {
                         Row {
-                            ViewModeButton("Timeline", viewMode == "Timeline") { viewModel.setViewMode("Timeline") }
-                            ViewModeButton("Danh sách", viewMode == "Danh sách") { viewModel.setViewMode("Danh sách") }
+                            ViewModeButton("Timeline", viewMode == "Timeline") { empVM.setViewMode("Timeline") }
+                            ViewModeButton("Danh sách", viewMode == "Danh sách") { empVM.setViewMode("Danh sách") }
                         }
                     }
                 }
@@ -85,12 +92,12 @@ fun EmployeeScreen(
                     if (viewMode == "Timeline") {
                         val hours = (9..21).map { "${it.toString().padStart(2, '0')}:00" }
                         items(hours) { hour ->
-                            val booking = filteredBookings.find { it.time == hour }
+                            val booking = filteredBookings.find { it.bookingTime == hour }
                             TimelineRow(
                                 time = hour,
                                 booking = booking,
-                                onConfirm = { booking?.let { viewModel.confirmBooking(it.id) } },
-                                onCancel = { booking?.let { viewModel.cancelBooking(it.id) } },
+                                onConfirm = { booking?.let { empVM.confirmBooking(it.id) } },
+                                onCancel = { booking?.let { empVM.cancelBooking(it.id) } },
                                 onBookingClick = { selectedBookingForDetail = it }
                             )
                         }
@@ -105,8 +112,8 @@ fun EmployeeScreen(
                             items(filteredBookings) { booking ->
                                 BookingCardList(
                                     booking,
-                                    onConfirm = { viewModel.confirmBooking(booking.id) },
-                                    onCancel = { viewModel.cancelBooking(booking.id) },
+                                    onConfirm = { empVM.confirmBooking(booking.id) },
+                                    onCancel = { empVM.cancelBooking(booking.id) },
                                     onClick = { selectedBookingForDetail = booking }
                                 )
                             }
@@ -121,7 +128,8 @@ fun EmployeeScreen(
     selectedBookingForDetail?.let { booking ->
         BookingDetailSheet(
             booking = booking,
-            onDismiss = { selectedBookingForDetail = null }
+            onDismiss = { selectedBookingForDetail = null },
+            onConfirm = {empVM.confirmBooking(booking.id)}
         )
     }
 }

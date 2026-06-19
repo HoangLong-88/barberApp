@@ -124,7 +124,7 @@ fun UserCard(user: User, onEdit: () -> Unit, onDelete: () -> Unit) {
 }
 
 @Composable
-fun BookingCard(
+fun BookingCardForAdmin(
     booking: Booking,
     onComplete: () -> Unit,
     onCancel: () -> Unit,

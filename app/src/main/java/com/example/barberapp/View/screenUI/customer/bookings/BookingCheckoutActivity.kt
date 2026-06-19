@@ -63,6 +63,7 @@ import com.example.barberapp.View.screenUI.customer.home.CardDark
 import com.example.barberapp.View.utils.BackgroundDark
 import com.example.barberapp.View.utils.GoldAccent
 import com.example.barberapp.ViewModel.ShopVM
+import com.example.barberapp.ViewModel.UserVM
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
@@ -263,7 +264,8 @@ fun BookingCheckoutScreen(
     navController: NavController,
     shopId: String,
     initialServiceIds: List<String>,
-    shopVM: ShopVM = viewModel()
+    shopVM: ShopVM = viewModel(),
+    userVM: UserVM
 ) {
     val context = LocalContext.current
     val db      = FirebaseFirestore.getInstance()
@@ -537,6 +539,8 @@ fun BookingCheckoutScreen(
                                     shopName    = shopState?.name ?: "",
                                     barberId    = selectedBarber!!.id,
                                     barberName  = selectedBarber!!.name,
+                                    customerName  = userVM.userData?.name ?: "",
+                                    customerPhone = userVM.userData?.phone ?: "",
                                     services    = selectedServices,
                                     totalPrice  = totalPrice,
                                     bookingDate = selectedDate!!.fullDate,

@@ -43,7 +43,7 @@ import com.example.barberapp.Model.entities.User
 import com.example.barberapp.View.component.AdminFilterChipCustom
 import com.example.barberapp.View.component.AdminHeaderSection
 import com.example.barberapp.View.component.AdminTabButton
-import com.example.barberapp.View.component.BookingCard
+import com.example.barberapp.View.component.BookingCardForAdmin
 import com.example.barberapp.View.component.SearchBarCustom
 import com.example.barberapp.View.component.ServiceDetailsCardInCustomer
 import com.example.barberapp.View.component.ShopCard
@@ -137,7 +137,7 @@ fun AdminDashboardScreen(
                     "Dịch vụ" -> ServiceTabContent(viewModel)
                     "Lịch booking" -> BookingTabContent(viewModel)
                     "Thống kê" -> AdminStatisticsScreen(viewModel)
-                    "Hồ sơ" -> AdminProfileScreen(authVM, userVM, navController)
+                    "Hồ sơ" -> AdminProfileScreen(authVM, userVM, shopVM)
                 }
             }
         }
@@ -267,7 +267,10 @@ fun BookingTabContent(viewModel: AdminViewModel) {
     LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         items(filtered, key = { it.id }) { booking ->
             // Sử dụng model Booking mới nhất
-            BookingCard(booking = booking, onComplete = {}, onCancel = {}, onDelete = { viewModel.itemToDelete.value = booking })
+            BookingCardForAdmin(booking = booking,
+                onComplete = {viewModel.confirmBooking(booking.id)},
+                onCancel = {viewModel.cancelBooking(booking.id)},
+                onDelete = { viewModel.deleteBooking(booking.id) })
         }
     }
 
