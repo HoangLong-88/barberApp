@@ -1,32 +1,13 @@
 package com.example.barberapp.View.component
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,12 +21,13 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.barberapp.Helps.setVNDFormatString
-import com.example.barberapp.Model.entities.BookingItem
+import com.example.barberapp.Model.entities.Booking
 import com.example.barberapp.Model.entities.Service
 import com.example.barberapp.Model.entities.Shop
 import com.example.barberapp.Model.entities.User
 import com.example.barberapp.ViewModel.AuthVM
 import com.example.barberapp.ViewModel.UserVM
+import com.example.barberapp.View.screenUI.customer.bookings.BookingStatus
 
 @Composable
 fun SearchBarCustom(query: String, onQueryChange: (String) -> Unit) {
@@ -142,32 +124,36 @@ fun UserCard(user: User, onEdit: () -> Unit, onDelete: () -> Unit) {
 
 @Composable
 fun BookingCard(
-    booking: BookingItem,
+    booking: Booking,
     onComplete: () -> Unit,
     onCancel: () -> Unit,
     onDelete: () -> Unit
 ) {
     val statusColor = when (booking.status) {
-        "Completed" -> Color(0xFF4CAF50)
-        "Cancelled" -> Color(0xFFF44336)
+        BookingStatus.Completed -> Color(0xFF4CAF50)
+        BookingStatus.Cancelled -> Color(0xFFF44336)
         else -> Color(0xFFEBC14F)
     }
+    
+    // Gộp tên các dịch vụ lại để hiển thị
+    val servicesText = booking.services.joinToString(", ") { it.name }
 
     Surface(color = Color(0xFF1E1E1E), shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(booking.customerName, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Text("${booking.serviceName} • ${booking.barberName}", color = Color.Gray, fontSize = 14.sp)
-                    Text(booking.dateTime, color = Color.Gray, fontSize = 14.sp)
+                    Text("Lịch hẹn #${booking.id.takeLast(4)}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Text(servicesText, color = Color(0xFFEBC14F), fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                    Text("Thợ: ${booking.barberName}", color = Color.Gray, fontSize = 14.sp)
+                    Text("${booking.bookingDate} • ${booking.bookingTime}", color = Color.Gray, fontSize = 14.sp)
                 }
                 Surface(color = statusColor.copy(0.1f), shape = RoundedCornerShape(12.dp)) {
-                    Text(booking.status, color = statusColor, modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text(booking.status.name, color = statusColor, modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp), fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Spacer(modifier = Modifier.height(12.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
-                if (booking.status == "Pending") {
+                if (booking.status == BookingStatus.Pending) {
                     TextButton(onClick = onComplete, colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFF4CAF50))) { Text("Hoàn thành", fontWeight = FontWeight.Bold) }
                     TextButton(onClick = onCancel, colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFFF44336))) { Text("Hủy", fontWeight = FontWeight.Bold) }
                 }
