@@ -27,7 +27,7 @@ import com.example.barberapp.ViewModel.ShopVM
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier,
                navController: NavController,
-               shopVM: ShopVM = viewModel()
+               shopVM: ShopVM,
 ) {
     val searchText  by shopVM.searchText.collectAsState()
     val shops by shopVM.filteredShops.collectAsState()
@@ -86,18 +86,10 @@ fun HomeScreen(modifier: Modifier = Modifier,
                 BarberShopCard(
                     shop = shop,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-                    onClick = {navController.navigate("shop_details/${shop?.id}")}
+                    onClick = {navController.navigate("shop_details/${shop?.id}")},
+                    onFavoriteClick = {shopId,isFav -> shopVM.toggleFavoriteShop(shopId,isFav)}
                 )
             }
         }
-    }
-}
-
-// ── Preview ───────────────────────────────────────────────────────────────────
-@Preview(showBackground = true, backgroundColor = 0xFF1A1A1A, showSystemUi = true)
-@Composable
-fun HomeScreenPreview() {
-    MaterialTheme {
-        HomeScreen(navController = rememberNavController())
     }
 }

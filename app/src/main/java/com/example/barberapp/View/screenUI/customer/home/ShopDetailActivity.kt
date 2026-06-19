@@ -55,11 +55,10 @@ val AvatarBg = Color(0xFF2E2E2E)
 @Composable
 fun ShopDetailScreen(
     shopId: String,
-    shopVM: ShopVM = viewModel(),
+    shopVM: ShopVM,
     onBook: (Service?) -> Unit = {},
     navController: NavController
 ) {
-    var isFavourite by remember { mutableStateOf(false) }
     var selectedTab by remember { mutableStateOf(ShopDetailTab.SERVICES) }
     val shopState by shopVM.shop.collectAsState()
     val reviewState by shopVM.reviews.collectAsState()
@@ -83,9 +82,9 @@ fun ShopDetailScreen(
             // ── Hero Image ────────────────────────────────────────────────
             item {
                 HeroSection(
-                    isFavourite,
+                    isFavourite = shop.isFavorite,
                     onBack = { navController.popBackStack() },
-                    onFavClick = { isFavourite = !isFavourite })
+                    onFavClick = { shopVM.toggleFavoriteShop(shop.id,!shop.isFavorite) })
             }
 
             // ── Shop Meta ─────────────────────────────────────────────────
@@ -126,7 +125,7 @@ fun ShopDetailScreen(
                     items(reviewState, key = { it.id }) { review ->
                         ReviewCardInCustomer(review)
                     }
-                    item { WriteReviewButton({ navController.navigate("reviews/$shopId") }) }
+                    item { WriteReviewButton({ navController.navigate("reviews/${shop.id}") }) }
                     item { Spacer(Modifier.height(24.dp)) }
                 }
 

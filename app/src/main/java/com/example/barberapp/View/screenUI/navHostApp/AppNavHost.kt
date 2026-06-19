@@ -34,12 +34,15 @@ import com.example.barberapp.View.screenUI.admin.AdminDashboardScreen
 import com.example.barberapp.View.screenUI.customer.bookings.BookingCheckoutScreen
 import com.example.barberapp.View.screenUI.customer.bookings.BookingSuccessScreen
 import com.example.barberapp.View.screenUI.employee.EmployeeScreen
+import com.example.barberapp.ViewModel.ShopVM
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun AppNavHost() {
     val navController = rememberNavController()
     val userVM: UserVM = viewModel()
     val authVM: AuthVM = viewModel()
+    val shopVM: ShopVM = viewModel()
 
     var isLoading by remember { mutableStateOf(true) }
     var startRoot by remember { mutableStateOf("auth_graph") }
@@ -58,6 +61,12 @@ fun AppNavHost() {
         } else {
             startRoot = "auth_graph"
             isLoading = false
+        }
+    }
+    LaunchedEffect(userAcc?.id) {
+        val uid = userAcc?.id
+        if (!uid.isNullOrBlank()) {
+            shopVM.init(uid)           // ← init với userId, tự fetch allShops
         }
     }
     if (isLoading) {
@@ -85,7 +94,9 @@ fun AppNavHost() {
             }
 
             navigation(startDestination = "home", route = "main_graph") {
-                composable("home") { HomeScreen(navController = navController) }
+                composable("home") {
+                    HomeScreen(navController = navController, shopVM = shopVM)
+                }
                 composable("booking") { MyBookingsScreen(navController = navController) }
                 composable("notification") { NotificationsScreen(navController = navController) }
                 composable("profile") {
@@ -100,13 +111,39 @@ fun AppNavHost() {
                         userVM = userVM
                     )
                 }
-                composable("favorite") { FavoritesScreen(navController = navController) }
+                composable("favorite") {
+                    FavoritesScreen(
+                        navController = navController,
+                        shopVM = shopVM
+                    )
+                }
                 composable("shop_details/{shopId}") { backStackEntry ->
-                    val shopId = backStackEntry.arguments?.getString("shopId")?:""
-                    ShopDetailScreen(navController = navController, shopId = shopId) }
-                composable("reviews/{shopId}") {backStackEntry->
-                    val shopId = backStackEntry.arguments?.getString("shopId")?:""
-                    WriteReviewScreen() }
+                    val shopId = backStackEntry.arguments?.getString("shopId") ?: ""
+                    ShopDetailScreen(
+                        navController = navController,
+                        shopId = shopId,
+                        shopVM = shopVM
+                    )
+                }
+
+                composable("reviews/{shopId}") { backStackEntry ->
+                    val shopId = backStackEntry.arguments?.getString("shopId") ?: ""
+
+                    // Lấy thông tin user trực tiếp từ ViewModel toàn cục
+
+                    val shopDetailEntry = remember(backStackEntry) {
+                        navController.getBackStackEntry("shop_details/$shopId")
+                    }
+                    val shopVM: ShopVM = viewModel(shopDetailEntry)
+
+                    WriteReviewScreen(
+                        shopId = shopId,
+                        userId = userAcc?.id ?: "",
+                        userName = userAcc?.name ?: "Anonymous",
+                        onBack = { navController.popBackStack() },
+                        onSuccess = { shopVM.loadReviewOnly(shopId) }
+                    )
+                }
                 composable(
                     route = "booking_checkout/{shopId}/{serviceIds}",
                     arguments = listOf(
@@ -115,7 +152,8 @@ fun AppNavHost() {
                     )
                 ) { backStackEntry ->
                     val shopId = backStackEntry.arguments?.getString("shopId") ?: ""
-                    val serviceIds = backStackEntry.arguments?.getString("serviceIds")?.split(",") ?: emptyList()
+                    val serviceIds =
+                        backStackEntry.arguments?.getString("serviceIds")?.split(",") ?: emptyList()
 
                     BookingCheckoutScreen(
                         navController = navController,
@@ -137,7 +175,7 @@ fun AppNavHost() {
                     )
                 }
             }
-            navigation(startDestination = "employee", route = "emp_graph"){
+            navigation(startDestination = "employee", route = "emp_graph") {
                 composable("employee") {
                     EmployeeScreen(
                         navController = navController,

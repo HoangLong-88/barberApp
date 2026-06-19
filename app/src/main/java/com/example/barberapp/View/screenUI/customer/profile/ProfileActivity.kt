@@ -46,7 +46,7 @@ fun ProfileScreen(
     userVM: UserVM = viewModel()
 ) {
     val userInfo = userVM.userData
-        reloadCustomerInfoState(userInfo,userVM)
+    reloadCustomerInfoState(userInfo,userVM)
     val stats = listOf(
         StatItem("12", "Bookings"),
         StatItem("5", "Reviews"),
