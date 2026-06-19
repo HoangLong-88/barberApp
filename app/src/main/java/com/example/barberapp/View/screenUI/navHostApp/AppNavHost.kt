@@ -34,116 +34,106 @@ import com.example.barberapp.View.screenUI.admin.AdminDashboardScreen
 import com.example.barberapp.View.screenUI.customer.bookings.BookingCheckoutScreen
 import com.example.barberapp.View.screenUI.customer.bookings.BookingSuccessScreen
 import com.example.barberapp.View.screenUI.employee.EmployeeScreen
+import com.example.barberapp.ViewModel.ShopVM
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun AppNavHost() {
     val navController = rememberNavController()
     val userVM: UserVM = viewModel()
     val authVM: AuthVM = viewModel()
+    val shopVM: ShopVM = viewModel()
 
-    var isLoading by remember { mutableStateOf(true) }
-    var startRoot by remember { mutableStateOf("auth_graph") }
     val userAcc = userVM.userData
 
-    LaunchedEffect(Unit) {
-        if (userAcc != null) {
-            val role = userAcc.role
-            startRoot =
-                when (role) {
-                    "manager" -> "admin_graph"
-                    "employee" -> "emp_graph"
-                    else -> "main_graph"
+    // Chỉ theo dõi userAcc — khi thay đổi thì navigate
+    LaunchedEffect(userAcc) {
+        val uid = userAcc?.id ?: ""
+        if (userAcc != null && uid.isNotBlank()) {
+            // Kick off fetch shops (không đợi)
+            shopVM.init(uid)
+            // Navigate ngay theo role
+            val target = when (userAcc.role) {
+                "manager"  -> "admin_graph"
+                "employee" -> "emp_graph"
+                else       -> "main_graph"
+            }
+            navController.navigate(target) {
+                popUpTo(0) { inclusive = true }
+                launchSingleTop = true
+            }
+        } else if (userAcc == null) {
+            // Logout hoặc chưa đăng nhập
+            val hasSession = FirebaseAuth.getInstance().currentUser != null
+            if (!hasSession) {
+                navController.navigate("auth_graph") {
+                    popUpTo(0) { inclusive = true }
+                    launchSingleTop = true
                 }
-            isLoading = false
-        } else {
-            startRoot = "auth_graph"
-            isLoading = false
+            }
+            // Nếu hasSession = true → UserVM đang fetch → chờ userAcc update
         }
     }
-    if (isLoading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
+
+    NavHost(
+        navController = navController,
+        startDestination = "auth_graph"   // luôn bắt đầu từ auth
+    ) {
+        navigation(startDestination = "login", route = "auth_graph") {
+            composable("login") { LoginScreen(navController = navController, authVM = authVM, userVM = userVM) }
+            composable("register") { RegisterScreen(navController = navController, authVM = authVM) }
         }
-    } else {
-        NavHost(
-            navController = navController,
-            startDestination = startRoot // Điều hướng thẳng vào cụm tương ứng
-        ) {
-            navigation(startDestination = "login", route = "auth_graph") {
-                composable("login") {
-                    LoginScreen(
-                        navController = navController,
-                        authVM = authVM
-                    )
-                }
-                composable("register") {
-                    RegisterScreen(
-                        navController = navController,
-                        authVM = authVM
-                    )
-                }
+        navigation(startDestination = "home", route = "main_graph") {
+            composable("home") { HomeScreen(navController = navController, shopVM = shopVM) }
+            composable("booking") { MyBookingsScreen(navController = navController) }
+            composable("notification") { NotificationsScreen(navController = navController) }
+            composable("profile") {
+                ProfileScreen(navController = navController, authVM = authVM, userVM = userVM, shopVM = shopVM)
             }
-
-            navigation(startDestination = "home", route = "main_graph") {
-                composable("home") { HomeScreen(navController = navController) }
-                composable("booking") { MyBookingsScreen(navController = navController) }
-                composable("notification") { NotificationsScreen(navController = navController) }
-                composable("profile") {
-                    ProfileScreen(
-                        navController = navController,
-                        authVM = authVM, userVM = userVM
-                    )
-                }
-                composable("edit_profile") {
-                    EditProfileScreen(
-                        navController = navController,
-                        userVM = userVM
-                    )
-                }
-                composable("favorite") { FavoritesScreen(navController = navController) }
-                composable("shop_details/{shopId}") { backStackEntry ->
-                    val shopId = backStackEntry.arguments?.getString("shopId")?:""
-                    ShopDetailScreen(navController = navController, shopId = shopId) }
-                composable("reviews/{shopId}") {backStackEntry->
-                    val shopId = backStackEntry.arguments?.getString("shopId")?:""
-                    WriteReviewScreen() }
-                composable(
-                    route = "booking_checkout/{shopId}/{serviceIds}",
-                    arguments = listOf(
-                        navArgument("shopId") { type = NavType.StringType },
-                        navArgument("serviceIds") { type = NavType.StringType }
-                    )
-                ) { backStackEntry ->
-                    val shopId = backStackEntry.arguments?.getString("shopId") ?: ""
-                    val serviceIds = backStackEntry.arguments?.getString("serviceIds")?.split(",") ?: emptyList()
-
-                    BookingCheckoutScreen(
-                        navController = navController,
-                        shopId = shopId,
-                        initialServiceIds = serviceIds
-                    )
-                }
-                composable("booking_success/{bookingId}") { backStackEntry ->
-                    val bookingId = backStackEntry.arguments?.getString("bookingId") ?: ""
-                    BookingSuccessScreen(navController = navController, bookingId = bookingId)
-                }
-
+            composable("edit_profile") { EditProfileScreen(navController = navController, userVM = userVM) }
+            composable("favorite") { FavoritesScreen(navController = navController, shopVM = shopVM) }
+            composable("shop_details/{shopId}") { backStackEntry ->
+                val shopId = backStackEntry.arguments?.getString("shopId") ?: ""
+                ShopDetailScreen(navController = navController, shopId = shopId, shopVM = shopVM)
             }
-            navigation(startDestination = "admin", route = "admin_graph") {
-                composable("admin") {
-                    AdminDashboardScreen(
-                        navController = navController,
-                        authVM = authVM, userVM = userVM
-                    )
+            composable("reviews/{shopId}") { backStackEntry ->
+                val shopId = backStackEntry.arguments?.getString("shopId") ?: ""
+                val shopDetailEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry("shop_details/$shopId")
                 }
+                val shopVMLocal: ShopVM = viewModel(shopDetailEntry)
+                WriteReviewScreen(
+                    shopId = shopId,
+                    userId = userAcc?.id ?: "",
+                    userName = userAcc?.name ?: "Anonymous",
+                    onBack = { navController.popBackStack() },
+                    onSuccess = { shopVMLocal.loadReviewOnly(shopId) }
+                )
             }
-            navigation(startDestination = "employee", route = "emp_graph"){
-                composable("employee") {
-                    EmployeeScreen(
-                        navController = navController,
-                        authVM = authVM, userVM = userVM
-                    )
-                }
+            composable(
+                route = "booking_checkout/{shopId}/{serviceIds}",
+                arguments = listOf(
+                    navArgument("shopId") { type = NavType.StringType },
+                    navArgument("serviceIds") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val shopId = backStackEntry.arguments?.getString("shopId") ?: ""
+                val serviceIds = backStackEntry.arguments?.getString("serviceIds")?.split(",") ?: emptyList()
+                BookingCheckoutScreen(navController = navController, shopId = shopId, initialServiceIds = serviceIds)
+            }
+            composable("booking_success/{bookingId}") { backStackEntry ->
+                val bookingId = backStackEntry.arguments?.getString("bookingId") ?: ""
+                BookingSuccessScreen(navController = navController, bookingId = bookingId)
+            }
+        }
+        navigation(startDestination = "admin", route = "admin_graph") {
+            composable("admin") {
+                AdminDashboardScreen(navController = navController, authVM = authVM, userVM = userVM, shopVM = shopVM)
+            }
+        }
+        navigation(startDestination = "employee", route = "emp_graph") {
+            composable("employee") {
+                EmployeeScreen(navController = navController, authVM = authVM, userVM = userVM, shopVM = shopVM)
             }
         }
     }

@@ -26,6 +26,7 @@ import com.example.barberapp.Model.entities.Service
 import com.example.barberapp.Model.entities.Shop
 import com.example.barberapp.Model.entities.User
 import com.example.barberapp.ViewModel.AuthVM
+import com.example.barberapp.ViewModel.ShopVM
 import com.example.barberapp.ViewModel.UserVM
 import com.example.barberapp.View.screenUI.customer.bookings.BookingStatus
 
@@ -197,7 +198,7 @@ fun AdminTabButton(
 }
 
 @Composable
-fun AdminHeaderSection(authVM: AuthVM, userVM: UserVM, navController: NavController) {
+fun AdminHeaderSection(authVM: AuthVM, userVM: UserVM, shopVM: ShopVM, navController: NavController) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -212,7 +213,7 @@ fun AdminHeaderSection(authVM: AuthVM, userVM: UserVM, navController: NavControl
             )
             Text("Quản lý hệ thống", color = Color.Gray, fontSize = 14.sp)
         }
-        IconButton(onClick = { authVM.logOut(navController, userVM) }) {
+        IconButton(onClick = { authVM.logOut( userVM, shopVM) }) {
             Icon(
                 Icons.AutoMirrored.Filled.ExitToApp,
                 null,

@@ -14,6 +14,7 @@ data class User (
     val avatarUrl: String? = null,
     val roleColorHex: String = "#2196F3",
     val shopId: String = "",
+    val favoriteShopIds: List<String> = emptyList()
 ){
     val roleColor: Color get() = try { Color(roleColorHex.toColorInt()) } catch (e: Exception) { Color(0xFF2196F3) }
 }

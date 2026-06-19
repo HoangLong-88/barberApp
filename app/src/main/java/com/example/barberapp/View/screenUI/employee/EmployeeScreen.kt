@@ -25,13 +25,15 @@ import com.example.barberapp.ViewModel.AuthVM
 import com.example.barberapp.ViewModel.UserVM
 import com.example.barberapp.Model.entities.EmployeeBookingItem
 import com.example.barberapp.ViewModel.EmpViewModel
+import com.example.barberapp.ViewModel.ShopVM
 
 @Composable
 fun EmployeeScreen(
     viewModel: EmpViewModel = viewModel(),
     navController: NavController,
     authVM: AuthVM,
-    userVM: UserVM
+    userVM: UserVM,
+    shopVM: ShopVM
 ) {
     val currentTab by viewModel.currentTab
     val viewMode by viewModel.viewMode
@@ -42,7 +44,7 @@ fun EmployeeScreen(
 
     Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFF121212)) {
         Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
-            EmployeeHeader(EmployeeInfo, navController, authVM, userVM)
+            EmployeeHeader(EmployeeInfo, navController, authVM, userVM, shopVM)
             EmployeeStats(EmployeeInfo)
             
             Spacer(modifier = Modifier.height(24.dp))

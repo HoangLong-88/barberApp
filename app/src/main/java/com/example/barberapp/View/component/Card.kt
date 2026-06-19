@@ -36,9 +36,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,7 +52,6 @@ import com.example.barberapp.Model.entities.Notification
 import com.example.barberapp.Model.entities.Review
 import com.example.barberapp.Model.entities.Service
 import com.example.barberapp.Model.entities.Shop
-import com.example.barberapp.Model.entities.User
 import com.example.barberapp.View.screenUI.customer.bookings.BookingStatus
 import com.example.barberapp.View.screenUI.customer.bookings.FilterTab
 import com.example.barberapp.View.screenUI.customer.home.AvatarBg
@@ -181,9 +177,10 @@ fun FilterTabRow(
 fun BarberShopCard(
     shop: Shop?,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
+    onFavoriteClick: (String, Boolean) -> Unit = { _, _ ->}
 ) {
-    var isFav by remember { mutableStateOf(shop?.isFavorite) }
+    var isFav = shop?.isFavorite == true
 
     Column(
         modifier = modifier
@@ -236,14 +233,16 @@ fun BarberShopCard(
                     .clip(CircleShape)
                     .background(BackgroundDark.copy(alpha = 0.5f))
                     .align(Alignment.TopEnd)
-                    .clickable { isFav = !isFav!! },
+                    .clickable {
+                        shop?.id?.let { shopId -> onFavoriteClick(shopId,!isFav) }
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = if (isFav == true) Icons.Filled.Favorite
+                    imageVector = if (isFav) Icons.Filled.Favorite
                     else Icons.Outlined.FavoriteBorder,
                     contentDescription = "Favorite",
-                    tint = if (isFav == true) LogoutRed else TextPrimary,
+                    tint = if (isFav) LogoutRed else TextPrimary,
                     modifier = Modifier.size(18.dp)
                 )
             }
