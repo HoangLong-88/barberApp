@@ -10,7 +10,7 @@ import com.example.barberapp.Model.entities.Booking
 import com.example.barberapp.Model.entities.DateItem
 import com.example.barberapp.Model.entities.EmployeeInfo
 import com.example.barberapp.Repository.BookingRepository
-import com.example.barberapp.View.screenUI.customer.bookings.BookingStatus
+import com.example.barberapp.Model.types.BookingStatus
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import java.time.LocalDate

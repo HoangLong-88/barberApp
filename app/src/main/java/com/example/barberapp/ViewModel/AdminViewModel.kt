@@ -9,7 +9,7 @@ import com.example.barberapp.Model.entities.Service
 import com.example.barberapp.Model.entities.Shop
 import com.example.barberapp.Model.entities.User
 import com.example.barberapp.Model.entities.Booking
-import com.example.barberapp.View.screenUI.customer.bookings.BookingStatus
+import com.example.barberapp.Model.types.BookingStatus
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 

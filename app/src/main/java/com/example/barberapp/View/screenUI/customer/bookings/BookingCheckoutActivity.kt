@@ -59,6 +59,7 @@ import androidx.navigation.NavController
 import com.example.barberapp.Model.entities.Booking
 import com.example.barberapp.Model.entities.BookingService
 import com.example.barberapp.Model.entities.Employee
+import com.example.barberapp.Model.types.BookingStatus
 import com.example.barberapp.View.screenUI.customer.home.CardDark
 import com.example.barberapp.View.utils.BackgroundDark
 import com.example.barberapp.View.utils.GoldAccent
@@ -78,9 +79,9 @@ private val TIME_SLOTS = listOf(
 
 // ─── Helper: generate next 7 days ────────────────────────────────────────────
 private data class DateOption(
-    val dayOfWeek: String,   // "Thu"
-    val dayNumber: String,   // "11"
-    val fullDate: String     // "15/06/2026"
+    val dayOfWeek: String,
+    val dayNumber: String,
+    val fullDate: String
 )
 
 private fun generateNextDays(count: Int = 7): List<DateOption> {

@@ -26,9 +26,8 @@ import androidx.navigation.NavController
 import com.example.barberapp.Model.entities.Booking
 import com.example.barberapp.ViewModel.AuthVM
 import com.example.barberapp.ViewModel.UserVM
-import com.example.barberapp.Model.entities.EmployeeBookingItem
 import com.example.barberapp.Model.entities.EmployeeInfo
-import com.example.barberapp.View.screenUI.customer.bookings.BookingStatus
+import com.example.barberapp.Model.types.BookingStatus
 import com.example.barberapp.ViewModel.ShopVM
 
 @Composable

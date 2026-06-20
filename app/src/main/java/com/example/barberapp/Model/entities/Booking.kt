@@ -1,6 +1,6 @@
 package com.example.barberapp.Model.entities
 
-import com.example.barberapp.View.screenUI.customer.bookings.BookingStatus
+import com.example.barberapp.Model.types.BookingStatus
 import com.google.firebase.firestore.DocumentId
 
 data class Booking(

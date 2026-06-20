@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.barberapp.Model.entities.Booking
+import com.example.barberapp.Model.types.BookingStatus
 import com.example.barberapp.View.component.BookingCardForCustomer
 import com.example.barberapp.View.component.FilterTabRow
 import com.example.barberapp.View.component.SharedBottomNavBar
@@ -18,9 +19,6 @@ import com.example.barberapp.View.utils.BackgroundColor
 import com.example.barberapp.View.utils.TextPrimary
 import com.example.barberapp.View.utils.TextSecondary
 import com.example.barberapp.ViewModel.BookingVM
-
-// ─── Data Models ─────────────────────────────────────────────────────────────
-enum class BookingStatus { Completed, Pending, Cancelled }
 
 enum class FilterTab { All, Completed, Pending, Cancelled }
 

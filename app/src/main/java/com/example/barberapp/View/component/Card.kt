@@ -52,7 +52,7 @@ import com.example.barberapp.Model.entities.Notification
 import com.example.barberapp.Model.entities.Review
 import com.example.barberapp.Model.entities.Service
 import com.example.barberapp.Model.entities.Shop
-import com.example.barberapp.View.screenUI.customer.bookings.BookingStatus
+import com.example.barberapp.Model.types.BookingStatus
 import com.example.barberapp.View.screenUI.customer.bookings.FilterTab
 import com.example.barberapp.View.screenUI.customer.home.AvatarBg
 import com.example.barberapp.View.screenUI.customer.home.CardDark
@@ -109,7 +109,7 @@ fun BookingCardForCustomer(booking: Booking) {
         BookingStatus.Pending   -> PendingBg to PendingText
         BookingStatus.Cancelled -> CancelledBg to CancelledText
     }
-    val servicesText = booking.services.joinToString(", ") { it.name }
+    val servicesText = booking.services.joinToString(",\n ") { it.name }
 
     Card(
         shape = RoundedCornerShape(16.dp),
