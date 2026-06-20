@@ -12,7 +12,9 @@ class UserVM : ViewModel() {
     private val userRepo = UserRepository()
     var userData by mutableStateOf<User?>(null)
         private set
-
+    init {
+        fetchUserProfile()
+    }
     fun fetchUserProfile() {
         val uid = userRepo.getCurrentUID() ?: return
         userRepo.getUserData(uid) { user, error ->

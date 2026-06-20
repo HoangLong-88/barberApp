@@ -76,11 +76,13 @@ import com.example.barberapp.View.utils.TextPrimary
 import com.example.barberapp.View.utils.TextSecondary
 import com.example.barberapp.View.utils.barbershopTextFieldColors
 import com.example.barberapp.ViewModel.AuthVM
+import com.example.barberapp.ViewModel.UserVM
 
 // ─── Login Screen ─────────────────────────────────────────────────────────────
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
+    userVM: UserVM,
     authVM: AuthVM,
     navController: NavController
 ) {
@@ -228,7 +230,7 @@ fun LoginScreen(
             } else {
                 Button(
                     onClick = {
-                        authVM.login(email, password, navController)
+                        authVM.login(email, password,userVM)
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -334,13 +336,13 @@ fun LoginScreen(
 }
 
 // ─── Preview ──────────────────────────────────────────────────────────────────
-@Preview(showBackground = true, backgroundColor = 0xFF0F0F0F, widthDp = 375, heightDp = 812)
-@Composable
-fun LoginScreenPreview() {
-    MaterialTheme {
-        LoginScreen(
-            navController = rememberNavController(),
-            authVM = viewModel()
-        )
-    }
-}
+//@Preview(showBackground = true, backgroundColor = 0xFF0F0F0F, widthDp = 375, heightDp = 812)
+//@Composable
+//fun LoginScreenPreview() {
+//    MaterialTheme {
+//        LoginScreen(
+//            navController = rememberNavController(),
+//            authVM = viewModel()
+//        )
+//    }
+//}

@@ -25,6 +25,7 @@ import com.example.barberapp.View.state.reloadCustomerInfoState
 import com.example.barberapp.View.utils.BackgroundDark
 import com.example.barberapp.View.utils.TextPrimary
 import com.example.barberapp.ViewModel.AuthVM
+import com.example.barberapp.ViewModel.ShopVM
 import com.example.barberapp.ViewModel.UserVM
 
 // ── Data models ─────────────────────────────────────────────────────────────
@@ -43,10 +44,11 @@ fun ProfileScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     authVM: AuthVM = viewModel(),
-    userVM: UserVM = viewModel()
+    userVM: UserVM = viewModel(),
+    shopVM: ShopVM
 ) {
     val userInfo = userVM.userData
-        reloadCustomerInfoState(userInfo,userVM)
+    reloadCustomerInfoState(userInfo,userVM)
     val stats = listOf(
         StatItem("12", "Bookings"),
         StatItem("5", "Reviews"),
@@ -89,7 +91,7 @@ fun ProfileScreen(
             }),
         MenuItem(
             Icons.AutoMirrored.Outlined.Logout, "Logout", isDestructive = true,
-            onClick = { authVM.logOut(navController, userVM) }
+            onClick = { authVM.logOut( userVM,shopVM) }
         ),
     )
 
@@ -138,15 +140,15 @@ fun ProfileScreen(
     }
 }
 
-// ── Preview ───────────────────────────────────────────────────────────────────
-@Preview(showBackground = true, backgroundColor = 0xFF1C1C1C)
-@Composable
-fun ProfileScreenPreview() {
-    MaterialTheme {
-        ProfileScreen(
-            navController = rememberNavController(),
-            userVM = viewModel(),
-            authVM = viewModel()
-        )
-    }
-}
+//// ── Preview ───────────────────────────────────────────────────────────────────
+//@Preview(showBackground = true, backgroundColor = 0xFF1C1C1C)
+//@Composable
+//fun ProfileScreenPreview() {
+//    MaterialTheme {
+//        ProfileScreen(
+//            navController = rememberNavController(),
+//            userVM = viewModel(),
+//            authVM = viewModel()
+//        )
+//    }
+//}

@@ -5,7 +5,7 @@ data class Review(
     val shopId: String = "",
     val userId: String = "",
     val userName: String = "",
-    val rating: Float = 0f,
+    val rating: Float = 0.0f,
     val comment: String = "",
     val timestamp: Long = 0L
 )
