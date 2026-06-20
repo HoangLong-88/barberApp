@@ -38,8 +38,12 @@ import com.example.barberapp.View.screenUI.customer.home.TextSecondary
 import com.example.barberapp.View.utils.GoldPrimary
 import com.example.barberapp.View.utils.TextPrimary
 
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
+
 @Composable
 fun HeroSection(
+    imageUrl: String, // ← Thêm tham số nhận link ảnh từ DetailScreen truyền qua
     isFavourite: Boolean,
     onBack: () -> Unit,
     onFavClick: () -> Unit
@@ -49,18 +53,29 @@ fun HeroSection(
             .fillMaxWidth()
             .height(220.dp)
     ) {
-        // Dark gradient placeholder (replace Box with AsyncImage / Coil in production)
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(Color(0xFF2A1A0A), Color(0xFF0D0D0D))
+        // ── THAY THẾ CHỖ NÀY BẰNG ASYNCIMAGE CỦA COIL ──────────────────────────
+        if (imageUrl.isNotBlank()) {
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = "Ảnh nền tiệm",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop // Cắt ảnh vừa vặn khung hình không bị méo tỉ lệ
+            )
+        } else {
+            // Placeholder gradient cũ khi shop chưa có ảnh hoặc link bị rỗng
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(Color(0xFF2A1A0A), Color(0xFF0D0D0D))
+                        )
                     )
-                )
-        )
+            )
+        }
+        // ──────────────────────────────────────────────────────────────────────
 
-        // Scrim so buttons stay readable
+        // Lớp phủ Scrim để các nút bấm (Back, Trái tim) hiển thị rõ hơn trên nền ảnh
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -71,7 +86,7 @@ fun HeroSection(
                 )
         )
 
-        // Back button
+        // Back button (Giữ nguyên)
         IconButton(
             onClick = onBack,
             modifier = Modifier
@@ -87,7 +102,7 @@ fun HeroSection(
             )
         }
 
-        // Favourite button
+        // Favourite button (Giữ nguyên)
         IconButton(
             onClick = onFavClick,
             modifier = Modifier

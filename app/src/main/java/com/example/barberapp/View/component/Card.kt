@@ -36,9 +36,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,8 +52,7 @@ import com.example.barberapp.Model.entities.Notification
 import com.example.barberapp.Model.entities.Review
 import com.example.barberapp.Model.entities.Service
 import com.example.barberapp.Model.entities.Shop
-import com.example.barberapp.Model.entities.User
-import com.example.barberapp.View.screenUI.customer.bookings.BookingStatus
+import com.example.barberapp.Model.types.BookingStatus
 import com.example.barberapp.View.screenUI.customer.bookings.FilterTab
 import com.example.barberapp.View.screenUI.customer.home.AvatarBg
 import com.example.barberapp.View.screenUI.customer.home.CardDark
@@ -79,6 +75,12 @@ import com.example.barberapp.View.utils.SurfaceDark
 import com.example.barberapp.View.utils.TextPrimary
 import com.example.barberapp.View.utils.TextSecondary
 import com.example.barberapp.View.utils.notifColors
+
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.ContentScale
+
 
 @Composable
 fun StatCard(stat: StatItem, modifier: Modifier = Modifier.Companion) {
@@ -107,12 +109,13 @@ fun StatCard(stat: StatItem, modifier: Modifier = Modifier.Companion) {
 
 // ─── Booking Card ─────────────────────────────────────────────────────────────
 @Composable
-fun BookingCard(booking: Booking) {
+fun BookingCardForCustomer(booking: Booking) {
     val (statusBg, statusFg) = when (booking.status) {
         BookingStatus.Completed -> CompletedBg to CompletedText
         BookingStatus.Pending   -> PendingBg to PendingText
         BookingStatus.Cancelled -> CancelledBg to CancelledText
     }
+    val servicesText = booking.services.joinToString(",\n ") { it.name }
 
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -126,7 +129,7 @@ fun BookingCard(booking: Booking) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = booking.services.toString(),
+                    text = servicesText,
                     color = TextPrimary,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold
@@ -147,7 +150,7 @@ fun BookingCard(booking: Booking) {
             Spacer(Modifier.height(10.dp))
 
             Text(
-                text = booking.totalPrice.toString(),
+                text = booking.totalPrice.toString() + " VNĐ",
                 color = statusFg,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -177,13 +180,15 @@ fun FilterTabRow(
 }
 
 // ── Barber shop card ──────────────────────────────────────────────────────────
+// ── Barber shop card ──────────────────────────────────────────────────────────
 @Composable
 fun BarberShopCard(
     shop: Shop?,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
+    onFavoriteClick: (String, Boolean) -> Unit = { _, _ ->}
 ) {
-    var isFav by remember { mutableStateOf(shop?.isFavorite) }
+    val isFav = shop?.isFavorite == true
 
     Column(
         modifier = modifier
@@ -192,7 +197,7 @@ fun BarberShopCard(
             .background(CardBg)
             .clickable(onClick = onClick)
     ) {
-        // Image placeholder with gradient overlay + heart button
+        // Image container + heart button
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -203,19 +208,34 @@ fun BarberShopCard(
                     )
                 )
         ) {
-            // ── Replace Box below with AsyncImage / Image(painterResource(...)) ──
-            Box(
-                modifier = Modifier.Companion.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "📸  Shop Image",
-                    color = TextSecondary.copy(alpha = 0.4f),
-                    fontSize = 14.sp
-                )
-            }
 
-            // Gradient scrim at bottom
+            // ── THAY THẾ BOX CŨ BẰNG ASYNCIMAGE Ở ĐÂY ──────────────────────────────
+            if (!shop?.imageUrl.isNullOrBlank()) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(shop?.imageUrl)
+                        .crossfade(true) // Hiệu ứng mờ dần khi tải xong cho mượt
+                        .build(),
+                    contentDescription = "Ảnh tiệm ${shop?.name}",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop // Cắt ảnh vừa vặn khung hình không bị méo tỉ lệ
+                )
+            } else {
+                // Trường hợp shop chưa có ảnh hoặc URL trống thì hiện placeholder mặc định
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "📸 Chưa có ảnh shop",
+                        color = TextSecondary.copy(alpha = 0.4f),
+                        fontSize = 14.sp
+                    )
+                }
+            }
+            // ──────────────────────────────────────────────────────────────────────
+
+            // Gradient scrim at bottom (Giữ nguyên để chữ phía dưới rõ hơn)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -228,7 +248,7 @@ fun BarberShopCard(
                     )
             )
 
-            // Heart icon
+            // Heart icon (Giữ nguyên nút yêu thích của bạn)
             Box(
                 modifier = Modifier
                     .padding(12.dp)
@@ -236,20 +256,22 @@ fun BarberShopCard(
                     .clip(CircleShape)
                     .background(BackgroundDark.copy(alpha = 0.5f))
                     .align(Alignment.TopEnd)
-                    .clickable { isFav = !isFav!! },
+                    .clickable {
+                        shop?.id?.let { shopId -> onFavoriteClick(shopId, !isFav) }
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = if (isFav == true) Icons.Filled.Favorite
+                    imageVector = if (isFav) Icons.Filled.Favorite
                     else Icons.Outlined.FavoriteBorder,
                     contentDescription = "Favorite",
-                    tint = if (isFav == true) LogoutRed else TextPrimary,
+                    tint = if (isFav) LogoutRed else TextPrimary,
                     modifier = Modifier.size(18.dp)
                 )
             }
         }
 
-        // Info section
+        // ── Info section phía dưới giữ nguyên toàn bộ code cũ của bạn ──
         Column(modifier = Modifier.padding(12.dp)) {
             Row(
                 modifier              = Modifier.fillMaxWidth(),
@@ -328,7 +350,6 @@ fun BarberShopCard(
         }
     }
 }
-
 // ─── Notification Card ────────────────────────────────────────────────────────
 @Composable
 fun NotificationCard(

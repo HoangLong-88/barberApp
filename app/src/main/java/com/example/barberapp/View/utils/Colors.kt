@@ -66,6 +66,14 @@ val InputBorder = Color(0xFF2A2A2A)
 val OnSurfaceVariant = Color(0xFF9E9E9E)
 val IconTint         = Color(0xFF757575)
 val OnSurface        = Color(0xFFFFFFFF)
+// ─── Color Palette ────────────────────────────────────────────────────────────
+ val SurfaceDarker   = Color(0xFF1A1A1A)
+val YellowPrimary   = Color(0xFFF5C518)
+ val YellowDim       = Color(0xFF8A7020)
+val StarEmpty       = Color(0xFF3A3A3A)
+ val BorderActive    = Color(0xFFF5C518)
+ val BorderInactive  = Color(0xFF2C2C2C)
+
 
 // ─── TextField Colors ─────────────────────────────────────────────────────────
 @OptIn(ExperimentalMaterial3Api::class)

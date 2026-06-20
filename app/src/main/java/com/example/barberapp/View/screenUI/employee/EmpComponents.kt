@@ -23,17 +23,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.barberapp.Model.entities.Booking
 import com.example.barberapp.ViewModel.AuthVM
 import com.example.barberapp.ViewModel.UserVM
-import com.example.barberapp.Model.entities.EmployeeBookingItem
 import com.example.barberapp.Model.entities.EmployeeInfo
+import com.example.barberapp.Model.types.BookingStatus
+import com.example.barberapp.ViewModel.ShopVM
 
 @Composable
 fun EmployeeHeader(
     info: EmployeeInfo,
     navController: NavController,
     authVM: AuthVM,
-    userVM: UserVM
+    userVM: UserVM,
+    shopVM: ShopVM
 ) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
@@ -56,7 +59,7 @@ fun EmployeeHeader(
         Row {
             IconButton(onClick = {}) { Icon(Icons.Default.Notifications, null, tint = Color.White) }
             IconButton(onClick = {
-                authVM.logOut(navController = navController, userVM = userVM)
+                authVM.logOut(userVM = userVM, shopVM = shopVM)
             }) { Icon(Icons.AutoMirrored.Filled.ExitToApp, null, tint = Color.White) }
         }
     }
@@ -93,7 +96,7 @@ fun StatCard(label: String, value: String, subValue: String, modifier: Modifier,
 }
 
 @Composable
-fun BookingCardList(booking: EmployeeBookingItem, onConfirm: () -> Unit, onCancel: () -> Unit, onClick: () -> Unit = {}) {
+fun BookingCardList(booking: Booking, onConfirm: () -> Unit, onCancel: () -> Unit, onClick: () -> Unit = {}) {
     Surface(
         color = Color(0xFF1E1E1E),
         shape = RoundedCornerShape(16.dp),
@@ -102,21 +105,21 @@ fun BookingCardList(booking: EmployeeBookingItem, onConfirm: () -> Unit, onCance
         Column(modifier = Modifier.padding(16.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Row {
-                    Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(Color(0xFF2C2C2C)), contentAlignment = Alignment.Center) {
+                    Box(modifier = Modifier.size(25.dp).clip(CircleShape).background(Color(0xFF2C2C2C)), contentAlignment = Alignment.Center) {
                         Text(booking.customerName.first().toString().uppercase(), color = Color.White)
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
                         Text(booking.customerName, color = Color.White, fontWeight = FontWeight.Bold)
-                        Text("${booking.time} • ${booking.serviceName}", color = Color.Gray, fontSize = 12.sp)
+                        Text("${booking.bookingTime} • ${booking.services.joinToString(",\n ") { it.name }}", color = Color.Gray, fontSize = 12.sp)
                     }
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text(booking.price, color = Color(0xFFEBC14F), fontWeight = FontWeight.Bold)
+                    Text(booking.totalPrice.toString()+" VNĐ", color = Color(0xFFEBC14F), fontWeight = FontWeight.Bold)
                     StatusBadge(booking.status)
                 }
             }
-            if (booking.status == "Pending") {
+            if (booking.status.toString() == "Pending") {
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Button(
@@ -138,7 +141,7 @@ fun BookingCardList(booking: EmployeeBookingItem, onConfirm: () -> Unit, onCance
 }
 
 @Composable
-fun TimelineRow(time: String, booking: EmployeeBookingItem?, onConfirm: () -> Unit, onCancel: () -> Unit, onBookingClick: (EmployeeBookingItem) -> Unit = {}) {
+fun TimelineRow(time: String, booking: Booking?, onConfirm: () -> Unit, onCancel: () -> Unit, onBookingClick: (Booking) -> Unit = {}) {
     Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
         Column(
             horizontalAlignment = Alignment.End,
@@ -183,7 +186,8 @@ fun TimelineRow(time: String, booking: EmployeeBookingItem?, onConfirm: () -> Un
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BookingDetailSheet(booking: EmployeeBookingItem, onDismiss: () -> Unit) {
+fun BookingDetailSheet(booking: Booking,onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    val servicesText = booking.services.joinToString(", ") { it.name }
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         containerColor = Color(0xFF1E1E1E),
@@ -205,7 +209,7 @@ fun BookingDetailSheet(booking: EmployeeBookingItem, onDismiss: () -> Unit) {
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
                     Text(booking.customerName, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                    Text(booking.phone, color = Color.Gray, fontSize = 14.sp)
+                    Text(booking.customerPhone, color = Color.Gray, fontSize = 14.sp)
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 Surface(modifier = Modifier.size(45.dp), shape = CircleShape, color = Color(0xFF2C2C2C)) {
@@ -217,18 +221,21 @@ fun BookingDetailSheet(booking: EmployeeBookingItem, onDismiss: () -> Unit) {
             HorizontalDivider(color = Color.Gray.copy(alpha = 0.2f))
             Spacer(modifier = Modifier.height(24.dp))
 
-            DetailItem("Dịch vụ", booking.serviceName)
-            DetailItem("Thời gian", "${booking.time} - ${booking.date}")
-            DetailItem("Thời lượng dự kiến", "${booking.duration} phút")
-            DetailItem("Giá dịch vụ", booking.price)
-            DetailItem("Ghi chú", booking.note.ifEmpty { "Không có ghi chú" })
+            DetailItem("Dịch vụ", servicesText)
+            DetailItem("Thời gian", "${booking.bookingTime} - ${booking.bookingDate}")
+//            DetailItem("Thời lượng dự kiến", "${booking.} phút")
+            DetailItem("Giá dịch vụ", booking.totalPrice.toString())
+//            DetailItem("Ghi chú", booking.note.ifEmpty { "Không có ghi chú" })
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            if (booking.status == "Pending") {
+            if (booking.status == BookingStatus.Pending) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Button(
-                        onClick = onDismiss,
+                        onClick = {
+                            onConfirm()
+                            onDismiss()
+                        },
                         modifier = Modifier.weight(1f).height(50.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEBC14F)),
                         shape = RoundedCornerShape(12.dp)
@@ -248,8 +255,8 @@ fun DetailItem(label: String, value: String) {
 }
 
 @Composable
-fun StatusBadge(status: String) {
-    val (color, text) = when (status) {
+fun StatusBadge(status: BookingStatus) {
+    val (color, text) = when (status.toString()) {
         "Pending" -> Color(0xFFEBC14F) to "Chờ xác nhận"
         "Confirmed" -> Color(0xFF4CAF50) to "Đã xác nhận"
         "Completed" -> Color(0xFF4CAF50) to "Hoàn thành"
@@ -257,6 +264,6 @@ fun StatusBadge(status: String) {
         else -> Color.Gray to status
     }
     Surface(color = color.copy(alpha = 0.1f), shape = RoundedCornerShape(8.dp)) {
-        Text(text, color = color, modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+        Text(text = text.toString(), color = color, modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp), fontSize = 10.sp, fontWeight = FontWeight.Bold)
     }
 }

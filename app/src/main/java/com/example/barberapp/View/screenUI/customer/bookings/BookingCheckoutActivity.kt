@@ -59,10 +59,12 @@ import androidx.navigation.NavController
 import com.example.barberapp.Model.entities.Booking
 import com.example.barberapp.Model.entities.BookingService
 import com.example.barberapp.Model.entities.Employee
+import com.example.barberapp.Model.types.BookingStatus
 import com.example.barberapp.View.screenUI.customer.home.CardDark
 import com.example.barberapp.View.utils.BackgroundDark
 import com.example.barberapp.View.utils.GoldAccent
 import com.example.barberapp.ViewModel.ShopVM
+import com.example.barberapp.ViewModel.UserVM
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
@@ -77,9 +79,9 @@ private val TIME_SLOTS = listOf(
 
 // ─── Helper: generate next 7 days ────────────────────────────────────────────
 private data class DateOption(
-    val dayOfWeek: String,   // "Thu"
-    val dayNumber: String,   // "11"
-    val fullDate: String     // "15/06/2026"
+    val dayOfWeek: String,
+    val dayNumber: String,
+    val fullDate: String
 )
 
 private fun generateNextDays(count: Int = 7): List<DateOption> {
@@ -263,7 +265,8 @@ fun BookingCheckoutScreen(
     navController: NavController,
     shopId: String,
     initialServiceIds: List<String>,
-    shopVM: ShopVM = viewModel()
+    shopVM: ShopVM = viewModel(),
+    userVM: UserVM
 ) {
     val context = LocalContext.current
     val db      = FirebaseFirestore.getInstance()
@@ -537,6 +540,8 @@ fun BookingCheckoutScreen(
                                     shopName    = shopState?.name ?: "",
                                     barberId    = selectedBarber!!.id,
                                     barberName  = selectedBarber!!.name,
+                                    customerName  = userVM.userData?.name ?: "",
+                                    customerPhone = userVM.userData?.phone ?: "",
                                     services    = selectedServices,
                                     totalPrice  = totalPrice,
                                     bookingDate = selectedDate!!.fullDate,
