@@ -82,6 +82,7 @@ fun ShopDetailScreen(
             // ── Hero Image ────────────────────────────────────────────────
             item {
                 HeroSection(
+                    imageUrl = shop.imageUrl,
                     isFavourite = shop.isFavorite,
                     onBack = { navController.popBackStack() },
                     onFavClick = { shopVM.toggleFavoriteShop(shop.id,!shop.isFavorite) })

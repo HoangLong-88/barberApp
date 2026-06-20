@@ -76,6 +76,12 @@ import com.example.barberapp.View.utils.TextPrimary
 import com.example.barberapp.View.utils.TextSecondary
 import com.example.barberapp.View.utils.notifColors
 
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.ContentScale
+
+
 @Composable
 fun StatCard(stat: StatItem, modifier: Modifier = Modifier.Companion) {
     Column(
@@ -174,6 +180,7 @@ fun FilterTabRow(
 }
 
 // ── Barber shop card ──────────────────────────────────────────────────────────
+// ── Barber shop card ──────────────────────────────────────────────────────────
 @Composable
 fun BarberShopCard(
     shop: Shop?,
@@ -190,7 +197,7 @@ fun BarberShopCard(
             .background(CardBg)
             .clickable(onClick = onClick)
     ) {
-        // Image placeholder with gradient overlay + heart button
+        // Image container + heart button
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -201,19 +208,34 @@ fun BarberShopCard(
                     )
                 )
         ) {
-            // ── Replace Box below with AsyncImage / Image(painterResource(...)) ──
-            Box(
-                modifier = Modifier.Companion.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "📸  Shop Image",
-                    color = TextSecondary.copy(alpha = 0.4f),
-                    fontSize = 14.sp
-                )
-            }
 
-            // Gradient scrim at bottom
+            // ── THAY THẾ BOX CŨ BẰNG ASYNCIMAGE Ở ĐÂY ──────────────────────────────
+            if (!shop?.imageUrl.isNullOrBlank()) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(shop?.imageUrl)
+                        .crossfade(true) // Hiệu ứng mờ dần khi tải xong cho mượt
+                        .build(),
+                    contentDescription = "Ảnh tiệm ${shop?.name}",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop // Cắt ảnh vừa vặn khung hình không bị méo tỉ lệ
+                )
+            } else {
+                // Trường hợp shop chưa có ảnh hoặc URL trống thì hiện placeholder mặc định
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "📸 Chưa có ảnh shop",
+                        color = TextSecondary.copy(alpha = 0.4f),
+                        fontSize = 14.sp
+                    )
+                }
+            }
+            // ──────────────────────────────────────────────────────────────────────
+
+            // Gradient scrim at bottom (Giữ nguyên để chữ phía dưới rõ hơn)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -226,7 +248,7 @@ fun BarberShopCard(
                     )
             )
 
-            // Heart icon
+            // Heart icon (Giữ nguyên nút yêu thích của bạn)
             Box(
                 modifier = Modifier
                     .padding(12.dp)
@@ -235,7 +257,7 @@ fun BarberShopCard(
                     .background(BackgroundDark.copy(alpha = 0.5f))
                     .align(Alignment.TopEnd)
                     .clickable {
-                        shop?.id?.let { shopId -> onFavoriteClick(shopId,!isFav) }
+                        shop?.id?.let { shopId -> onFavoriteClick(shopId, !isFav) }
                     },
                 contentAlignment = Alignment.Center
             ) {
@@ -249,7 +271,7 @@ fun BarberShopCard(
             }
         }
 
-        // Info section
+        // ── Info section phía dưới giữ nguyên toàn bộ code cũ của bạn ──
         Column(modifier = Modifier.padding(12.dp)) {
             Row(
                 modifier              = Modifier.fillMaxWidth(),
@@ -328,7 +350,6 @@ fun BarberShopCard(
         }
     }
 }
-
 // ─── Notification Card ────────────────────────────────────────────────────────
 @Composable
 fun NotificationCard(
