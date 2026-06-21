@@ -1,23 +1,31 @@
 package com.example.barberapp.View.layout
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.barberapp.Helps.decodeBase64ToBitmap
+import com.example.barberapp.View.utils.BackgroundDark
 import com.example.barberapp.View.utils.GoldAccent
 import com.example.barberapp.View.utils.SurfaceDark
 import com.example.barberapp.View.utils.TextPrimary
@@ -28,7 +36,7 @@ class Header {
 
 // ── Top header ────────────────────────────────────────────────────────────────
 @Composable
-fun TopHeader(userName: String) {
+fun TopHeader(avatarUrl: String?) {
     Row(
         modifier = Modifier.Companion
             .fillMaxWidth()
@@ -37,7 +45,7 @@ fun TopHeader(userName: String) {
     ) {
         Column(modifier = Modifier.Companion.weight(1f)) {
             Text(
-                text = "Good evening",
+                text = "What's up, guy?",
                 color = TextSecondary,
                 fontSize = 13.sp
             )
@@ -61,12 +69,24 @@ fun TopHeader(userName: String) {
                 .border(1.5.dp, GoldAccent.copy(alpha = 0.6f), CircleShape),
             contentAlignment = Alignment.Companion.Center
         ) {
-            Text(
-                text = userName,
-                color = TextPrimary,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Companion.Bold
-            )
+            if (!avatarUrl.isNullOrBlank()){
+                val decodeBitMap = decodeBase64ToBitmap(avatarUrl)
+                if (decodeBitMap !=null){
+                    Image(
+                        bitmap = decodeBitMap,
+                        contentDescription = "Saved Avatar",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+            }else {
+                Icon(
+                    imageVector = Icons.Filled.Person,
+                    contentDescription = "Avatar",
+                    tint = BackgroundDark,
+                    modifier = Modifier.size(36.dp)
+                )
+            }
         }
     }
 }
