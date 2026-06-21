@@ -23,7 +23,22 @@ class UserVM : ViewModel() {
         val uid = userRepo.getCurrentUID() ?: return
         userRepo.getUserData(uid) { user, error ->
             if (user != null) {
-                userData = user // This will trigger a recomposition
+                userData = user
+            }
+        }
+    }
+
+    fun updatePassword(newPass: String, onDone: (Boolean, String?) -> Unit) {
+        userRepo.updateAuthPassword(newPass) { success, error ->
+            if (success) {
+                val current = userData ?: return@updateAuthPassword
+                val updated = current.copy(password = newPass)
+                userRepo.updateProfile(updated) { dbSuccess ->
+                    if (dbSuccess) fetchUserProfile()
+                    onDone(dbSuccess, if (dbSuccess) null else "Lỗi cập nhật Firestore")
+                }
+            } else {
+                onDone(false, error)
             }
         }
     }
@@ -39,12 +54,12 @@ class UserVM : ViewModel() {
         onDone: () -> Unit,
     ) {
         val uid = userRepo.getCurrentUID() ?: return
-        // Nếu có ảnh mới (uri không phải link web https)
+        val current = userData ?: return
+
         if (newUri != null && newUri.scheme != "https") {
-            var base64Avatar = uriToBase64(context, newUri) ?: ""
-            // 2. Sau khi có Link ảnh, tạo object User mới
-            val updatedUser = User(
-                id = uid,
+            // Theo logic đồng nghiệp: Chuyển ảnh sang Base64
+            val base64Avatar = uriToBase64(context, newUri) ?: ""
+            val updatedUser = current.copy(
                 name = name,
                 email = email,
                 phone = phone,
@@ -52,17 +67,21 @@ class UserVM : ViewModel() {
                 role = role,
                 avatarUrl = base64Avatar
             )
-            // 3. Lưu object User này vào Firestore
             userRepo.updateProfile(updatedUser) { success ->
-                if (success) fetchUserProfile() // Tải lại dữ liệu mới
+                if (success) fetchUserProfile()
                 onDone()
             }
-
         } else {
-            // Nếu không thay ảnh, chỉ cập nhật textfield
-            val currentUserData = User(uid, name, email, phone, password, role, userData?.avatarUrl)
-            userRepo.updateProfile(currentUserData) {
-                if (it) fetchUserProfile()
+            // Nếu không thay ảnh, chỉ cập nhật các textfield
+            val updatedUser = current.copy(
+                name = name,
+                email = email,
+                phone = phone,
+                password = password,
+                role = role
+            )
+            userRepo.updateProfile(updatedUser) { success ->
+                if (success) fetchUserProfile()
                 onDone()
             }
         }

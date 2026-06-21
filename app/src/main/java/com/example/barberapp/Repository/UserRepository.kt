@@ -10,7 +10,9 @@ class UserRepository {
     private val store = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
     private val storage = FirebaseStorage.getInstance()
+
     fun getCurrentUID(): String? = auth.currentUser?.uid
+
     fun getUserData(uid: String, onResult: (User?, String?) -> Unit) {
         store.collection("users").document(uid).get()
             .addOnSuccessListener { document ->
@@ -25,9 +27,17 @@ class UserRepository {
                 onResult(null, e.message)
             }
     }
+
     fun updateProfile(user: User, onComplete: (Boolean) -> Unit) {
         store.collection("users").document(user.id)
             .set(user)
             .addOnCompleteListener { onComplete(it.isSuccessful) }
+    }
+
+    fun updateAuthPassword(newPath: String, onComplete: (Boolean, String?) -> Unit) {
+        auth.currentUser?.updatePassword(newPath)
+            ?.addOnCompleteListener { task ->
+                onComplete(task.isSuccessful, task.exception?.message)
+            }
     }
 }

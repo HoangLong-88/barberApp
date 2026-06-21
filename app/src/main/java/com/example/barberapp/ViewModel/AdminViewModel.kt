@@ -3,45 +3,64 @@ package com.example.barberapp.ViewModel
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.example.barberapp.Model.entities.Employee
 import com.example.barberapp.Model.entities.Service
 import com.example.barberapp.Model.entities.Shop
 import com.example.barberapp.Model.entities.User
 import com.example.barberapp.Model.entities.Booking
+import com.example.barberapp.Model.entities.AuditLog
+import com.example.barberapp.Model.entities.SystemConfig
 import com.example.barberapp.Model.types.BookingStatus
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.Query
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
-class AdminViewModel : ViewModel() {
+class AdminViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
     private val listeners = mutableListOf<ListenerRegistration>()
 
-
-    // --- State ---
-    private val _currentTab = mutableStateOf("Tiệm")
+    private val _currentTab = mutableStateOf(savedStateHandle.get<String>("currentTab") ?: "Tiệm")
     val currentTab: State<String> = _currentTab
+
+    private val _searchQuery = mutableStateOf(savedStateHandle.get<String>("searchQuery") ?: "")
+    val searchQuery: State<String> = _searchQuery
+
+    private val _selectedUserFilter = mutableStateOf(savedStateHandle.get<String>("userFilter") ?: "Tất cả")
+    val selectedUserFilter: State<String> = _selectedUserFilter
+
+    // 4. Phân loại theo thời gian: "Hôm nay", "Sắp tới", "Tất cả"
+    private val _selectedDateFilter = mutableStateOf(savedStateHandle.get<String>("dateFilter") ?: "Hôm nay")
+    val selectedDateFilter: State<String> = _selectedDateFilter
+
+    // 1. Lọc trạng thái: "Tất cả", "Pending", "Completed", "Cancelled"
+    private val _selectedBookingStatus = mutableStateOf(savedStateHandle.get<String>("bookingStatus") ?: "Tất cả")
+    val selectedBookingStatus: State<String> = _selectedBookingStatus
+
+    private val _statsTimeRange = mutableStateOf(savedStateHandle.get<String>("statsRange") ?: "Tháng")
+    val statsTimeRange: State<String> = _statsTimeRange
 
     val users = mutableStateListOf<User>()
     val services = mutableStateListOf<Service>()
     val bookings = mutableStateListOf<Booking>()
     val shops = mutableStateListOf<Shop>()
-
-    private val _searchQuery = mutableStateOf("")
-    val searchQuery: State<String> = _searchQuery
+    val auditLogs = mutableStateListOf<AuditLog>()
+    
+    private val _systemConfig = mutableStateOf(SystemConfig())
+    val systemConfig: State<SystemConfig> = _systemConfig
 
     private val _selectedShopForService = mutableStateOf<Shop?>(null)
     val selectedShopForService: State<Shop?> = _selectedShopForService
 
-    private val _selectedUserFilter = mutableStateOf("Tất cả")
-    val selectedUserFilter: State<String> = _selectedUserFilter
-
-    private val _selectedDateFilter = mutableStateOf("Tất cả")
-    val selectedDateFilter: State<String> = _selectedDateFilter
-
     private val _selectedShopFilterForEmployee = mutableStateOf("Tất cả")
     val selectedShopFilterForEmployee: State<String> = _selectedShopFilterForEmployee
-    // --- State Thống Kê ---
+    
     val totalRevenue = mutableStateOf(0)
     val totalBookingsCount = mutableStateOf(0)
     val avgRevenuePerBooking = mutableStateOf(0)
@@ -49,8 +68,7 @@ class AdminViewModel : ViewModel() {
     val completionRate = mutableStateOf(0)
     val popularServices = mutableStateListOf<Pair<String, Int>>()
     val staffPerformance = mutableStateListOf<Pair<String, Int>>()
-    val statsTimeRange = mutableStateOf("Tháng")
-    // Dialog States
+
     val showAddUserDialog = mutableStateOf(false)
     val userToEdit = mutableStateOf<User?>(null)
     val showAddServiceDialog = mutableStateOf(false)
@@ -64,7 +82,6 @@ class AdminViewModel : ViewModel() {
     }
 
     private fun fetchData() {
-        // Hủy listener cũ trước khi đăng ký mới
         listeners.forEach { it.remove() }
         listeners.clear()
 
@@ -92,14 +109,35 @@ class AdminViewModel : ViewModel() {
                     _selectedShopForService.value = fetched.first()
             }
         }
-        listeners += db.collection("bookings").addSnapshotListener { v, e ->
+        listeners += db.collection("bookings")
+            .orderBy("createdAt", Query.Direction.DESCENDING)
+            .addSnapshotListener { v, e ->
+                if (e != null) return@addSnapshotListener
+                v?.let {
+                    bookings.clear()
+                    bookings.addAll(it.documents.mapNotNull { d ->
+                        d.toObject(Booking::class.java)?.copy(id = d.id)
+                    })
+                    calculateStats() 
+                }
+            }
+        listeners += db.collection("audit_logs")
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .limit(50)
+            .addSnapshotListener { v, e ->
+                if (e != null) return@addSnapshotListener
+                v?.let {
+                    auditLogs.clear()
+                    auditLogs.addAll(it.documents.mapNotNull { d ->
+                        d.toObject(AuditLog::class.java)?.copy(id = d.id)
+                    })
+                }
+            }
+        
+        listeners += db.collection("config").document("system").addSnapshotListener { v, e ->
             if (e != null) return@addSnapshotListener
-            v?.let {
-                bookings.clear()
-                bookings.addAll(it.documents.mapNotNull { d ->
-                    d.toObject(Booking::class.java)?.copy(id = d.id)
-                })
-                calculateStats() // tính lại stats mỗi khi bookings thay đổi
+            v?.toObject(SystemConfig::class.java)?.let {
+                _systemConfig.value = it
             }
         }
     }
@@ -109,59 +147,112 @@ class AdminViewModel : ViewModel() {
         listeners.forEach { it.remove() }
     }
 
-    // --- Actions ---
-    fun setCurrentTab(tab: String) {
-        _currentTab.value = tab
+    private fun logAction(action: String, details: String) {
+        val adminId = auth.currentUser?.uid ?: "unknown"
+        val adminName = users.find { it.id == adminId }?.name ?: "Admin"
+        val log = AuditLog(
+            adminId = adminId,
+            adminName = adminName,
+            action = action,
+            details = details,
+            timestamp = System.currentTimeMillis()
+        )
+        db.collection("audit_logs").add(log)
     }
 
-    fun setSearchQuery(query: String) {
-        _searchQuery.value = query
+    fun setCurrentTab(tab: String) { 
+        _currentTab.value = tab 
+        savedStateHandle["currentTab"] = tab
+    }
+    
+    fun setSearchQuery(query: String) { 
+        _searchQuery.value = query 
+        savedStateHandle["searchQuery"] = query
     }
 
-    fun setSelectedShopForService(shop: Shop) {
-        _selectedShopForService.value = shop
+    fun setSelectedUserFilter(filter: String) { 
+        _selectedUserFilter.value = filter 
+        savedStateHandle["userFilter"] = filter
     }
 
-    fun setSelectedUserFilter(filter: String) {
-        _selectedUserFilter.value = filter
+    fun setSelectedDateFilter(filter: String) { 
+        _selectedDateFilter.value = filter 
+        savedStateHandle["dateFilter"] = filter
     }
 
-    fun setSelectedDateFilter(filter: String) {
-        _selectedDateFilter.value = filter
+    fun setSelectedBookingStatus(status: String) {
+        _selectedBookingStatus.value = status
+        savedStateHandle["bookingStatus"] = status
     }
-    fun setStatsTimeRange(range: String) { statsTimeRange.value = range; calculateStats() }
-//    fun updateShopFilterForEmployee(id: String) { selectedShopFilterForEmployee.value = id }
+
+    fun setStatsTimeRange(range: String) { 
+        _statsTimeRange.value = range 
+        savedStateHandle["statsRange"] = range
+        calculateStats() 
+    }
+
+    fun setSelectedShopForService(shop: Shop) { _selectedShopForService.value = shop }
 
     fun confirmBooking(bookingId: String) {
-        db.collection("bookings").document(bookingId)
-            .update("status", BookingStatus.Completed.name)
+        db.collection("bookings").document(bookingId).update("status", BookingStatus.Completed.name)
+            .addOnSuccessListener { logAction("Hoàn thành lịch hẹn", "ID: $bookingId") }
     }
 
     fun cancelBooking(bookingId: String) {
-        db.collection("bookings").document(bookingId)
-            .update("status", BookingStatus.Cancelled.name)
+        db.collection("bookings").document(bookingId).update("status", BookingStatus.Cancelled.name)
+            .addOnSuccessListener { logAction("Hủy lịch hẹn", "ID: $bookingId") }
     }
 
     fun deleteBooking(bookingId: String) {
         db.collection("bookings").document(bookingId).delete()
+            .addOnSuccessListener { logAction("Xóa lịch hẹn", "ID: $bookingId") }
         itemToDelete.value = null
     }
+
     fun calculateStats() {
-        // 1. Tổng doanh thu & Số lượng
-        val completedBookings = bookings
+        val now = Calendar.getInstance()
+        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+
+        val timeFilteredBookings = bookings.filter { booking ->
+            try {
+                val date = sdf.parse(booking.bookingDate) ?: return@filter false
+                val cal = Calendar.getInstance().apply { time = date }
+                
+                when (_statsTimeRange.value) {
+                    "Hôm nay" -> {
+                        cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) &&
+                        cal.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR)
+                    }
+                    "Tuần" -> {
+                        cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) &&
+                        cal.get(Calendar.WEEK_OF_YEAR) == now.get(Calendar.WEEK_OF_YEAR)
+                    }
+                    "Tháng" -> {
+                        cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) &&
+                        cal.get(Calendar.MONTH) == now.get(Calendar.MONTH)
+                    }
+                    "Năm" -> {
+                        cal.get(Calendar.YEAR) == now.get(Calendar.YEAR)
+                    }
+                    else -> true
+                }
+            } catch (e: Exception) { false }
+        }
+
+        val completedBookings = timeFilteredBookings.filter { it.status == BookingStatus.Completed }
+        
         totalBookingsCount.value = completedBookings.size
         totalRevenue.value = completedBookings.sumOf { it.totalPrice.toInt() }
-
-        // 2. Trung bình
-        avgRevenuePerBooking.value = if (totalBookingsCount.value > 0) totalRevenue.value / totalBookingsCount.value else 0
+        
+        avgRevenuePerBooking.value = if (completedBookings.isNotEmpty()) totalRevenue.value / completedBookings.size else 0
 
         val staffCount = users.count { it.role == "employee" }
-        avgBookingsPerStaff.value = if (staffCount > 0) totalBookingsCount.value.toDouble() / staffCount else 0.0
+        avgBookingsPerStaff.value = if (staffCount > 0) completedBookings.size.toDouble() / staffCount else 0.0
 
-        // 3. Tỷ lệ hoàn thành
-        completionRate.value = if (bookings.isNotEmpty()) (completedBookings.size * 100) / bookings.size else 0
+        completionRate.value = if (timeFilteredBookings.isNotEmpty()) {
+            (completedBookings.size * 100) / timeFilteredBookings.size
+        } else 0
 
-        // 4. Dịch vụ phổ biến
         val serviceMap = mutableMapOf<String, Int>()
         completedBookings.forEach { b ->
             b.services.forEach { s ->
@@ -171,7 +262,6 @@ class AdminViewModel : ViewModel() {
         popularServices.clear()
         popularServices.addAll(serviceMap.toList().sortedByDescending { it.second }.take(5))
 
-        // 5. Hiệu suất nhân viên
         val staffMap = mutableMapOf<String, Int>()
         completedBookings.forEach { b ->
             staffMap[b.barberName] = staffMap.getOrDefault(b.barberName, 0) + 1
@@ -179,174 +269,99 @@ class AdminViewModel : ViewModel() {
         staffPerformance.clear()
         staffPerformance.addAll(staffMap.toList().sortedByDescending { it.second })
     }
+
     fun refreshData() { fetchData() }
 
     fun deleteItem(item: Any) {
         when (item) {
-            is User -> db.collection("users").document(item.id).delete()
-
+            is User -> db.collection("users").document(item.id).delete().addOnSuccessListener { logAction("Xóa tài khoản", "${item.name} (${item.role})") }
             is Shop -> {
                 val shopId = item.id
-
-                // 1. Tìm kiếm tất cả dịch vụ thuộc về Shop này
-                db.collection("services").whereEqualTo("shopId", shopId).get()
-                    .addOnSuccessListener { serviceSnapshot ->
-
-                        // 2. Tìm kiếm tất cả thợ (barbers) thuộc về Shop này (để tránh sót dữ liệu rác)
-                        db.collection("barbers").whereEqualTo("shopId", shopId).get()
-                            .addOnSuccessListener { barberSnapshot ->
-
-                                // Khởi tạo một WriteBatch để gom tất cả các lệnh xóa lại chạy một lượt
-                                val batch = db.batch()
-
-                                // Thêm lệnh xóa toàn bộ Dịch vụ của Shop này vào batch
-                                for (doc in serviceSnapshot.documents) {
-                                    batch.delete(doc.reference)
-                                }
-
-                                // Thêm lệnh xóa toàn bộ Thợ của Shop này vào batch
-                                for (doc in barberSnapshot.documents) {
-                                    batch.delete(doc.reference)
-                                }
-
-                                // Cuối cùng, thêm lệnh xóa chính tài liệu Shop đó vào batch
-                                val shopRef = db.collection("shops").document(shopId)
-                                batch.delete(shopRef)
-
-                                // Thực thi xóa đồng loạt (Atomic Operation)
-                                batch.commit().addOnSuccessListener {
-                                    // Sau khi xóa thành công toàn bộ dưới DB, gọi các hàm nạp lại dữ liệu để cập nhật UI
-//                                    fetchData()
-                                }
-                            }
+                val batch = db.batch()
+                db.collection("services").whereEqualTo("shopId", shopId).get().addOnSuccessListener { s ->
+                    s.forEach { batch.delete(it.reference) }
+                    db.collection("barbers").whereEqualTo("shopId", shopId).get().addOnSuccessListener { b ->
+                        b.forEach { batch.delete(it.reference) }
+                        batch.delete(db.collection("shops").document(shopId))
+                        batch.commit().addOnSuccessListener { logAction("Xóa tiệm", item.name) }
                     }
+                }
             }
-
-            // Đoạn xóa dịch vụ lẻ lẻ do Admin chủ động chọn xóa
-            is Service -> db.collection("services").document(item.id).delete()
+            is Service -> db.collection("services").document(item.id).delete().addOnSuccessListener { logAction("Xóa dịch vụ", item.name) }
         }
         itemToDelete.value = null
     }
 
-    fun saveUser(
-        name: String,
-        email: String,
-        phone: String,
-        password: String,
-        role: String,
-        shopId: String
-    ) {
-        val colorHex = when (role) {
-            "employee" -> "#4CAF50"; "manager" -> "#9C27B0"; else -> "#2196F3"
-        }
+    fun saveUser(name: String, email: String, phone: String, pw: String, role: String, shopId: String) {
+        val colorHex = when (role) { "employee" -> "#4CAF50"; "manager" -> "#9C27B0"; else -> "#2196F3" }
         val data = hashMapOf(
-            "name" to name,
-            "email" to email,
-            "phone" to phone,
-            "password" to password,
-            "role" to role,
-            "roleColorHex" to colorHex,
-            "shopId" to if (role == "employee") shopId else ""
+            "name" to name, "email" to email, "phone" to phone, "password" to pw,
+            "role" to role, "roleColorHex" to colorHex, "shopId" to if (role == "employee") shopId else ""
         )
-        val task = if (userToEdit.value == null) db.collection("users")
-            .add(data) else db.collection("users").document(userToEdit.value!!.id).set(data)
-//        if (onSuccess.isSuccessful) fetchData()
-        task.addOnSuccessListener { fetchData() }
+        val isNew = userToEdit.value == null
+        val task = if (isNew) db.collection("users").add(data) 
+                   else db.collection("users").document(userToEdit.value!!.id).set(data)
+        
+        task.addOnSuccessListener { 
+            fetchData()
+            logAction(if (isNew) "Thêm tài khoản" else "Cập nhật tài khoản", "$name ($role)")
+        }
         showAddUserDialog.value = false
-        userToEdit.value=null
+        userToEdit.value = null
     }
 
     fun saveService(name: String, duration: String, price: String) {
         val currentShopId = _selectedShopForService.value?.id ?: ""
         val data = hashMapOf(
-            "name" to name,
-            "duration" to duration,
-            "price" to (price.filter { char -> char.isDigit() }
-                .toIntOrNull() ?: 0),
+            "name" to name, "duration" to duration,
+            "price" to (price.filter { it.isDigit() }.toIntOrNull() ?: 0),
             "shopId" to currentShopId
         )
-        val task = if (serviceToEdit.value == null) db.collection("services").add(data)
-        else db.collection("services").document(serviceToEdit.value!!.id).set(data)
-//        if (onSuccess.isSuccessful) fetchData()
-        task.addOnSuccessListener { fetchData() }
+        val isNew = serviceToEdit.value == null
+        val task = if (isNew) db.collection("services").add(data)
+                   else db.collection("services").document(serviceToEdit.value!!.id).set(data)
+        
+        task.addOnSuccessListener { 
+            fetchData()
+            logAction(if (isNew) "Thêm dịch vụ" else "Cập nhật dịch vụ", name)
+        }
         showAddServiceDialog.value = false
         serviceToEdit.value = null
     }
 
-    fun saveShop(
-        shopIdToEdit: String?,
-        name: String,
-        address: String,
-        phone: String,
-        priceRange: String,
-        rating: Double,
-        imageUrl: String,
-        servicesList: List<Service>,
-        barbersList: List<Employee>
-    ) {
+    fun saveShop(shopId: String?, name: String, addr: String, ph: String, pr: String, r: Double, img: String, svs: List<Service>, barbs: List<Employee>) {
         val batch = db.batch()
-
-        val shopDocRef = if (shopIdToEdit.isNullOrBlank()) db.collection("shops").document()
-        else db.collection("shops").document(shopIdToEdit)
-        val finalShopId = shopDocRef.id
-
-        val shopData = hashMapOf(
-            "name" to name,
-            "address" to address,
-            "phone" to phone,
-            "priceRange" to priceRange,
-            "rating" to rating,
-            "imageUrl" to imageUrl
-        )
-        batch.set(shopDocRef, shopData)
-        val servicesToSave = if (servicesList.isEmpty() && shopIdToEdit.isNullOrBlank()) {
-            getDefaultServices(finalShopId)
-        } else {
-            servicesList
+        val shopRef = if (shopId.isNullOrBlank()) db.collection("shops").document() else db.collection("shops").document(shopId)
+        val finalId = shopRef.id
+        val isNew = shopId.isNullOrBlank()
+        
+        batch.set(shopRef, hashMapOf("name" to name, "address" to addr, "phone" to ph, "priceRange" to pr, "rating" to r, "imageUrl" to img))
+        
+        (if (svs.isEmpty() && isNew) getDefaultServices(finalId) else svs).forEach { s ->
+            val sRef = if (s.id.isBlank()) db.collection("services").document() else db.collection("services").document(s.id)
+            batch.set(sRef, hashMapOf("name" to s.name, "duration" to s.duration, "price" to s.price, "shopId" to finalId))
         }
-
-        servicesToSave.forEach { service ->
-            val serviceRef = if (service.id.isBlank()) db.collection("services").document()
-            else db.collection("services").document(service.id)
-
-            val serviceData = hashMapOf(
-                "name" to service.name,
-                "duration" to service.duration,
-                "price" to service.price,
-                "shopId" to finalShopId // <-- Gắn chặt Khóa ngoại ở đây
-            )
-            batch.set(serviceRef, serviceData)
+        barbs.forEach { b ->
+            val bRef = if (b.id.isBlank()) db.collection("barbers").document() else db.collection("barbers").document(b.id)
+            batch.set(bRef, hashMapOf("name" to b.name, "avatarUrl" to b.avatarUrl, "rating" to b.rating, "shopId" to finalId))
         }
-
-        barbersList.forEach { barber ->
-            val barberRef = if (barber.id.isBlank()) db.collection("barbers").document()
-            else db.collection("barbers").document(barber.id)
-
-            val barberData = hashMapOf(
-                "name" to barber.name,
-                "avatarUrl" to barber.avatarUrl,
-                "rating" to barber.rating,
-                "shopId" to finalShopId
-            )
-            batch.set(barberRef, barberData)
-        }
-
-        batch.commit().addOnSuccessListener {
-//            fetchData()
+        batch.commit().addOnSuccessListener { 
+            fetchData()
+            logAction(if (isNew) "Thêm tiệm" else "Cập nhật tiệm", name)
         }
         showAddShopDialog.value = false
     }
 
-    fun updateShopFilterForEmployee(shopId: String) {
-        _selectedShopFilterForEmployee.value = shopId
+    fun updateShopFilterForEmployee(shopId: String) { _selectedShopFilterForEmployee.value = shopId }
+
+    fun updateSystemConfig(config: SystemConfig) {
+        db.collection("config").document("system").set(config)
+            .addOnSuccessListener { logAction("Cập nhật hệ thống", "Version: ${config.appVersion}") }
     }
 
-    private fun getDefaultServices(shopId: String): List<Service> {
-        return listOf(
-            Service(name = "Hair Cut", duration = "30 phút", price = 100000, shopId = shopId),
-            Service(name = "Beard Shave", duration = "20 phút", price = 50000, shopId = shopId),
-            Service(name = "Hair Styling", duration = "45 phút", price = 150000, shopId = shopId),
-            Service(name = "Premium Styling", duration = "60 phút", price = 250000, shopId = shopId)
-        )
-    }
+    private fun getDefaultServices(shopId: String) = listOf(
+        Service(name = "Hair Cut", duration = "30 phút", price = 100000, shopId = shopId),
+        Service(name = "Beard Shave", duration = "20 phút", price = 50000, shopId = shopId),
+        Service(name = "Hair Styling", duration = "45 phút", price = 150000, shopId = shopId)
+    )
 }
