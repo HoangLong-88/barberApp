@@ -11,12 +11,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.barberapp.View.component.MenuItemRow
 import com.example.barberapp.View.component.SharedBottomNavBar
 import com.example.barberapp.View.layout.StatsRow
@@ -119,7 +117,8 @@ fun ProfileScreen(
             UserInfoRow(
                 name = userInfo?.name ?: "Loading...",
                 email = userInfo?.email ?: "Loading...",
-                phone = userInfo?.phone ?: "No phone linked!"
+                phone = userInfo?.phone ?: "No phone linked!",
+                avatarUri = userInfo?.avatarUrl
             )
 
             Spacer(modifier = Modifier.height(20.dp))

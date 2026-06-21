@@ -1,6 +1,7 @@
 package com.example.barberapp.View.screenUI.admin
 
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -25,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.example.barberapp.Helps.decodeBase64ToBitmap
 import com.example.barberapp.ViewModel.AdminViewModel
 import com.example.barberapp.ViewModel.AuthVM
 import com.example.barberapp.ViewModel.ShopVM
@@ -72,13 +74,31 @@ fun AdminProfileScreen(
                     .background(Color(0xFF1E1E1E)),
                 contentAlignment = Alignment.Center
             ) {
-                if (!admin?.avatarUrl.isNullOrEmpty()) {
-                    AsyncImage(
-                        model = admin?.avatarUrl,
-                        contentDescription = "Profile Picture",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
+                val avatarData = admin?.avatarUrl
+                if (!avatarData.isNullOrEmpty()) {
+                    // KIỂM TRA NẾU LÀ BASE64 THÌ GIẢI MÃ (Theo logic đồng nghiệp)
+                    if (avatarData.startsWith("data:image") || avatarData.length > 100) {
+                        val bitmap = decodeBase64ToBitmap(avatarData)
+                        if (bitmap != null) {
+                            Image(
+                                bitmap = bitmap,
+                                contentDescription = "Profile Picture",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            // Nếu giải mã lỗi, dùng icon mặc định
+                            Icon(Icons.Default.Person, null, tint = Color(0xFFEBC14F), modifier = Modifier.size(70.dp))
+                        }
+                    } else {
+                        // Nếu vẫn là URL cũ (Firebase Storage)
+                        AsyncImage(
+                            model = avatarData,
+                            contentDescription = "Profile Picture",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
                 } else {
                     Icon(
                         Icons.Default.Person,
@@ -99,18 +119,6 @@ fun AdminProfileScreen(
                     .clickable { showEditProfileDialog = true }
             ) {
                 Icon(Icons.Default.CameraAlt, null, tint = Color.Black, modifier = Modifier.fillMaxSize())
-            }
-            
-            // Online Status indicator
-            Box(
-                modifier = Modifier
-                    .size(16.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFF121212))
-                    .align(Alignment.TopEnd),
-                contentAlignment = Alignment.Center
-            ) {
-                Box(modifier = Modifier.size(10.dp).clip(CircleShape).background(Color.Green))
             }
         }
 
@@ -233,7 +241,7 @@ fun AdminProfileScreen(
             user = admin,
             onDismiss = { showEditProfileDialog = false },
             onConfirm = { name, email, phone, uri ->
-                userVM.saveChanges(name, email, phone, admin.password, admin.role, uri) {
+                userVM.saveChanges(context, name, email, phone, admin.password, admin.role, uri) {
                     showEditProfileDialog = false
                     Toast.makeText(context, "Đã cập nhật hồ sơ", Toast.LENGTH_SHORT).show()
                 }

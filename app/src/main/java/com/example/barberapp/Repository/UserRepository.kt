@@ -28,15 +28,6 @@ class UserRepository {
             }
     }
 
-    fun uploadImage(uid: String, imgUri: Uri, onComplete: (String?) -> Unit) {
-        val ref = storage.reference.child("avatars/$uid.jpg")
-        ref.putFile(imgUri).addOnSuccessListener {
-            ref.downloadUrl.addOnSuccessListener { downloadUri ->
-                onComplete(downloadUri.toString())
-            }
-        }.addOnFailureListener { onComplete(null) }
-    }
-
     fun updateProfile(user: User, onComplete: (Boolean) -> Unit) {
         store.collection("users").document(user.id)
             .set(user)
