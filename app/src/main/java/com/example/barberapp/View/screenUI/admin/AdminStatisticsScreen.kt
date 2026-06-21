@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,11 +19,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.barberapp.Helps.setVNDFormatString
 import com.example.barberapp.ViewModel.AdminViewModel
+import java.util.Locale
 
 @Composable
 fun AdminStatisticsScreen(viewModel: AdminViewModel) {
-    // Sử dụng 'by' cho các MutableState đơn lẻ (đúng)
     val totalRevenue by viewModel.totalRevenue
     val totalBookings by viewModel.totalBookingsCount
     val avgRevenue by viewModel.avgRevenuePerBooking
@@ -30,23 +32,25 @@ fun AdminStatisticsScreen(viewModel: AdminViewModel) {
     val completionRate by viewModel.completionRate
     val statsTimeRange by viewModel.statsTimeRange
     
-    // SỬA LỖI: Sử dụng '=' cho các danh sách (SnapshotStateList không dùng được 'by')
     val popularServices = viewModel.popularServices
     val staffPerformance = viewModel.staffPerformance
+
+    // Fix lỗi: Reading locale in a non-observable way
+    val localeVN = remember { Locale("vi", "VN") }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 20.dp)
+        contentPadding = PaddingValues(bottom = 24.dp)
     ) {
-        // Header
+        // Header & Refresh
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Báo cáo thống kê", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Text("Báo cáo hệ thống", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 IconButton(
                     onClick = { viewModel.refreshData() }, 
                     modifier = Modifier.size(36.dp).background(Color(0xFF2C2C2C), RoundedCornerShape(8.dp))
@@ -70,7 +74,7 @@ fun AdminStatisticsScreen(viewModel: AdminViewModel) {
                     ) {
                         Text(
                             range,
-                            modifier = Modifier.padding(8.dp).fillMaxWidth(),
+                            modifier = Modifier.padding(vertical = 10.dp),
                             textAlign = TextAlign.Center,
                             color = if (statsTimeRange == range) Color.Black else Color.White,
                             fontSize = 12.sp,
@@ -81,22 +85,37 @@ fun AdminStatisticsScreen(viewModel: AdminViewModel) {
             }
         }
 
-        // Stat Cards
+        // Summary Cards
         item {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    StatCard("Doanh thu", "${String.format("%,d", totalRevenue)}đ", Icons.Default.AttachMoney, Color(0xFFEBC14F), Modifier.weight(1f))
-                    StatCard("Tổng lịch", totalBookings.toString(), Icons.Default.DateRange, Color(0xFF2196F3), Modifier.weight(1f))
+                    StatCard("Doanh thu", setVNDFormatString(totalRevenue), Icons.Default.AttachMoney, Color(0xFFEBC14F), Modifier.weight(1f))
+                    StatCard("Tỷ lệ hoàn thành", "$completionRate%", Icons.Default.CheckCircle, Color(0xFF4CAF50), Modifier.weight(1f))
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    StatCard("Đ.Thu TB", "${String.format("%,d", avgRevenue)}đ", Icons.Default.TrendingUp, Color(0xFF4CAF50), Modifier.weight(1f))
-                    StatCard("Lịch/NV", String.format("%.1f", avgBookingsPerStaff), Icons.Default.Person, Color(0xFFFF9800), Modifier.weight(1f))
+                    StatCard("Tổng lịch", totalBookings.toString(), Icons.Default.DateRange, Color(0xFF2196F3), Modifier.weight(1f))
+                    // Sử dụng localeVN đã được remember để tránh lỗi warning
+                    StatCard("Lịch/NV", String.format(localeVN, "%.1f", avgBookingsPerStaff), Icons.Default.Person, Color(0xFFFF9800), Modifier.weight(1f))
                 }
             }
         }
 
-        // Popular Services
-        item { SectionHeader("Dịch vụ phổ biến nhất") }
+        // Middle Stats: Average Revenue
+        item {
+            Surface(color = Color(0xFF1E1E1E), shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()) {
+                Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.AutoMirrored.Filled.TrendingUp, null, tint = Color(0xFF4CAF50))
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column {
+                        Text("Doanh thu trung bình mỗi lượt", color = Color.Gray, fontSize = 12.sp)
+                        Text(setVNDFormatString(avgRevenue), color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        }
+
+        // Popular Services Section
+        item { SectionHeader("Dịch vụ được đặt nhiều") }
         item {
             if (popularServices.isEmpty()) {
                 EmptyStateCard("Chưa có dữ liệu dịch vụ", Icons.Default.Info)
@@ -112,15 +131,13 @@ fun AdminStatisticsScreen(viewModel: AdminViewModel) {
             }
         }
 
-        // Staff Performance
+        // Staff Performance Section
         item { SectionHeader("Hiệu suất nhân viên") }
         if (staffPerformance.isEmpty()) {
             item { EmptyStateCard("Chưa có dữ liệu nhân viên", Icons.Default.Warning) }
         } else {
-            // SỬA LỖI: Chỉ rõ kiểu dữ liệu Pair để tránh lỗi giải nén
-            items(staffPerformance) { pair: Pair<String, Int> ->
-                val (name, count) = pair
-                StaffStatCard(name, count)
+            items(staffPerformance) { pair ->
+                StaffStatCard(pair.first, pair.second)
             }
         }
     }
@@ -134,8 +151,8 @@ fun StatCard(label: String, value: String, icon: ImageVector, color: Color, modi
                 Icon(icon, null, tint = color, modifier = Modifier.size(20.dp))
             }
             Spacer(modifier = Modifier.height(12.dp))
-            Text(label, color = Color.Gray, fontSize = 12.sp)
-            Text(value, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text(label, color = Color.Gray, fontSize = 11.sp, maxLines = 1)
+            Text(value, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold, maxLines = 1)
         }
     }
 }
@@ -179,7 +196,7 @@ fun StaffStatCard(name: String, count: Int) {
 
 @Composable
 fun SectionHeader(title: String) {
-    Text(title, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 8.dp))
+    Text(title, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 8.dp, bottom = 4.dp))
 }
 
 @Composable

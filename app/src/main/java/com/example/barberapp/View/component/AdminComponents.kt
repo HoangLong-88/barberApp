@@ -38,14 +38,14 @@ fun SearchBarCustom(query: String, onQueryChange: (String) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        placeholder = { Text("Tìm kiếm...", color = Color.Gray) },
+        placeholder = { Text("Tìm theo tên, SĐT khách hoặc thợ...", color = Color.Gray, fontSize = 14.sp) },
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray) },
         colors = TextFieldDefaults.colors(
             focusedContainerColor = Color(0xFF1E1E1E),
             unfocusedContainerColor = Color(0xFF1E1E1E),
             focusedTextColor = Color.White,
             unfocusedTextColor = Color.White,
-            focusedIndicatorColor = Color.Transparent,
+            focusedIndicatorColor = Color(0xFFEBC14F),
             unfocusedIndicatorColor = Color.Transparent
         ),
         shape = RoundedCornerShape(12.dp),
@@ -135,32 +135,125 @@ fun BookingCardForAdmin(
         BookingStatus.Cancelled -> Color(0xFFF44336)
         else -> Color(0xFFEBC14F)
     }
-    
-    // Gộp tên các dịch vụ lại để hiển thị
-    val servicesText = booking.services.joinToString(", ") { it.name }
 
-    Surface(color = Color(0xFF1E1E1E), shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()) {
+    Surface(
+        color = Color(0xFF1E1E1E), 
+        shape = RoundedCornerShape(20.dp), 
+        modifier = Modifier.fillMaxWidth(),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(0.05f))
+    ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("Lịch hẹn #${booking.id.takeLast(4)}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Text(servicesText, color = Color(0xFFEBC14F), fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                    Text("Thợ: ${booking.barberName}", color = Color.Gray, fontSize = 14.sp)
-                    Text("${booking.bookingDate} • ${booking.bookingTime}", color = Color.Gray, fontSize = 14.sp)
+            // Header: ID and Status
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Bookmark, contentDescription = null, tint = Color(0xFFEBC14F), modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Mã: ${booking.id.takeLast(6).uppercase()}", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
                 }
-                Surface(color = statusColor.copy(0.1f), shape = RoundedCornerShape(12.dp)) {
-                    Text(booking.status.name, color = statusColor, modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Surface(
+                    color = statusColor.copy(0.15f), 
+                    shape = RoundedCornerShape(12.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, statusColor.copy(0.3f))
+                ) {
+                    Text(
+                        booking.status.name.uppercase(), 
+                        color = statusColor, 
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp), 
+                        fontSize = 10.sp, 
+                        fontWeight = FontWeight.Black
+                    )
                 }
             }
+            
             Spacer(modifier = Modifier.height(12.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
-                if (booking.status == BookingStatus.Pending) {
-                    TextButton(onClick = onComplete, colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFF4CAF50))) { Text("Hoàn thành", fontWeight = FontWeight.Bold) }
-                    TextButton(onClick = onCancel, colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFFF44336))) { Text("Hủy", fontWeight = FontWeight.Bold) }
+
+            // Main Info: Customer & Barber
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.weight(1.5f)) {
+                    Text("Khách hàng", color = Color.Gray, fontSize = 11.sp)
+                    Text(booking.customerName, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text(booking.customerPhone, color = Color.Gray, fontSize = 13.sp)
                 }
-                IconButton(onClick = onDelete) { Icon(Icons.Default.Delete, null, tint = Color.Red.copy(0.5f), modifier = Modifier.size(20.dp)) }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Thợ thực hiện", color = Color.Gray, fontSize = 11.sp)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Face, null, tint = Color(0xFFEBC14F), modifier = Modifier.size(14.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(booking.barberName, color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                    }
+                    Text("${booking.bookingDate} - ${booking.bookingTime}", color = Color.Gray, fontSize = 12.sp)
+                }
+            }
+
+            // Services Details
+            Spacer(modifier = Modifier.height(12.dp))
+            Surface(
+                color = Color.Black.copy(0.2f),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    booking.services.forEach { service ->
+                        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text(service.name, color = Color.LightGray, fontSize = 13.sp)
+                            Text(setVNDFormatString(service.price), color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                        }
+                    }
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = Color.White.copy(0.1f))
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Text("Tổng cộng", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                        Text(
+                            text = setVNDFormatString(booking.totalPrice),
+                            color = Color(0xFFEBC14F),
+                            fontWeight = FontWeight.Black,
+                            fontSize = 18.sp
+                        )
+                    }
+                }
+            }
+
+            // Actions
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                if (booking.status == BookingStatus.Pending) {
+                    OutlinedButton(
+                        onClick = onCancel,
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFF44336).copy(0.5f)),
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.height(38.dp)
+                    ) {
+                        Text("Hủy lịch", color = Color(0xFFF44336), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Button(
+                        onClick = onComplete,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.height(38.dp)
+                    ) {
+                        Icon(Icons.Default.Check, null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Hoàn thành", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+                } else {
+                    IconButton(
+                        onClick = onDelete,
+                        modifier = Modifier.background(Color.Red.copy(0.1f), CircleShape).size(36.dp)
+                    ) { 
+                        Icon(Icons.Default.Delete, null, tint = Color.Red, modifier = Modifier.size(18.dp)) 
+                    }
+                }
             }
         }
+    }
+}
+
+@Composable
+fun BookingInfoItem(icon: ImageVector, text: String) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 2.dp)) {
+        Icon(icon, null, tint = Color.Gray, modifier = Modifier.size(14.dp))
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(text, color = Color.Gray, fontSize = 12.sp)
     }
 }
 
