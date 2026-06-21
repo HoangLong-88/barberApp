@@ -23,17 +23,20 @@ import com.example.barberapp.View.layout.NearbyHeader
 import com.example.barberapp.View.layout.TopHeader
 import com.example.barberapp.View.utils.BackgroundDark
 import com.example.barberapp.ViewModel.ShopVM
+import com.example.barberapp.ViewModel.UserVM
 
 // ── Screen ────────────────────────────────────────────────────────────────────
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier,
                navController: NavController,
                shopVM: ShopVM,
+               userVM: UserVM,
 ) {
     val searchText by shopVM.searchText.collectAsState()
     val shops by shopVM.filteredShops.collectAsState()
     val focusManager = LocalFocusManager.current
     val isReady by shopVM.isReady.collectAsState()
+    val userInfo = userVM.userData
 
     Scaffold(
         containerColor = BackgroundDark,
@@ -61,7 +64,7 @@ fun HomeScreen(modifier: Modifier = Modifier,
                 verticalArrangement = Arrangement.spacedBy(0.dp)
             ) {
                 // Header
-                item { TopHeader(userName = "JD") }
+                item { TopHeader(avatarUrl = userInfo?.avatarUrl) }
 
                 // Search bar
                 item {

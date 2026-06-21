@@ -78,7 +78,7 @@ fun AppNavHost() {
             composable("register") { RegisterScreen(navController = navController, authVM = authVM) }
         }
         navigation(startDestination = "home", route = "main_graph") {
-            composable("home") { HomeScreen(navController = navController, shopVM = shopVM) }
+            composable("home") { HomeScreen(navController = navController, shopVM = shopVM, userVM = userVM) }
             composable("booking") { CustomerBookingsScreen(navController = navController, userId = userAcc?.id?: "", bookingVM = bookingVM) }
             composable("notification") { NotificationsScreen(navController = navController) }
             composable("profile") {ProfileScreen(navController = navController, authVM = authVM, userVM = userVM, shopVM = shopVM) }

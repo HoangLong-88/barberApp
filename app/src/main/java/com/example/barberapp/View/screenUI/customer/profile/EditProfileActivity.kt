@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import com.example.barberapp.View.utils.BackgroundColor
 import com.example.barberapp.View.utils.GoldLight
 import com.example.barberapp.View.utils.GoldPrimary
@@ -25,9 +26,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -38,6 +41,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import com.example.barberapp.Helps.decodeBase64ToBitmap
 import com.example.barberapp.View.component.ProfileTextField
 import com.example.barberapp.View.state.reloadCustomerInfoState
 import com.example.barberapp.ViewModel.UserVM
@@ -48,8 +52,9 @@ import com.example.barberapp.ViewModel.UserVM
 @Composable
 fun EditProfileScreen(
     navController: NavController,
-    userVM: UserVM = viewModel(),
+    userVM: UserVM,
 ) {
+    val context = LocalContext.current
     val userInfo = userVM.userData
     reloadCustomerInfoState(userInfo,userVM)
     var username by remember { mutableStateOf(userInfo?.name ?: "Loading...") }
@@ -58,7 +63,6 @@ fun EditProfileScreen(
     var password by remember { mutableStateOf(userInfo?.password?: "Loading...") }
     var role by remember { mutableStateOf(userInfo?.role?: "No role") }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-    val remotedImageUri = userInfo?.avatarUrl
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri -> selectedImageUri = uri }
@@ -99,7 +103,7 @@ fun EditProfileScreen(
             ) {
                 Button(
                     onClick = {
-                        userVM.saveChanges(username, email, phone,password,role, selectedImageUri) {
+                        userVM.saveChanges(context,username, email, phone,password,role, selectedImageUri) {
                             navController.popBackStack() // Go back when finished
                         }
                     },
@@ -152,15 +156,26 @@ fun EditProfileScreen(
                         .background(GoldLight),
                     contentAlignment = Alignment.Center
                 ) {
-                    val imageModel = selectedImageUri ?: remotedImageUri
-                    if (imageModel != null && imageModel.toString().isNotEmpty()) {
+                    val remotedImageUri = userInfo?.avatarUrl
+                    val avatarUri = selectedImageUri
+                    if (avatarUri != null && avatarUri.toString().isNotEmpty()) {
                         AsyncImage(
-                            model = imageModel,
+                            model = avatarUri,
                             contentDescription = null,
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
                         )
-                    } else {
+                    } else if (!remotedImageUri.isNullOrBlank()){
+                        val decodeBitMap = decodeBase64ToBitmap(remotedImageUri)
+                        if (decodeBitMap !=null){
+                            Image(
+                                bitmap = decodeBitMap,
+                                contentDescription = "Saved Avatar",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                    }else {
                         // Nếu không có ảnh thì dùng Icon mặc định
                         Icon(
                             imageVector = Icons.Default.Person,
@@ -184,7 +199,7 @@ fun EditProfileScreen(
                                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                             )
                         },
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     Icon(
                         imageVector = Icons.Default.CameraAlt,
@@ -230,10 +245,10 @@ fun EditProfileScreen(
 }
 
 // ── Preview ────────────────────────────────────────────────────────────────────
-@Preview(showBackground = true, backgroundColor = 0xFF0D0D0D, showSystemUi = true)
-@Composable
-fun EditProfileScreenPreview() {
-    MaterialTheme {
-        EditProfileScreen(navController = rememberNavController())
-    }
-}
+//@Preview(showBackground = true, backgroundColor = 0xFF0D0D0D, showSystemUi = true)
+//@Composable
+//fun EditProfileScreenPreview() {
+//    MaterialTheme {
+//        EditProfileScreen(navController = rememberNavController())
+//    }
+//}
