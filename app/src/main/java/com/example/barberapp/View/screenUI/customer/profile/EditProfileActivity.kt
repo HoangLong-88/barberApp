@@ -16,11 +16,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,6 +37,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,8 +47,13 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.barberapp.Helps.decodeBase64ToBitmap
+import com.example.barberapp.View.component.FieldLabel
 import com.example.barberapp.View.component.ProfileTextField
 import com.example.barberapp.View.state.reloadCustomerInfoState
+import com.example.barberapp.View.utils.BorderColor
+import com.example.barberapp.View.utils.TextHint
+import com.example.barberapp.View.utils.TextSecondary
+import com.example.barberapp.View.utils.registerTextFieldColors
 import com.example.barberapp.ViewModel.UserVM
 
 
@@ -62,12 +72,16 @@ fun EditProfileScreen(
     var phone by remember { mutableStateOf(userInfo?.phone?: "Loading...") }
     var password by remember { mutableStateOf(userInfo?.password?: "Loading...") }
     var role by remember { mutableStateOf(userInfo?.role?: "No role") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmVisible by remember { mutableStateOf(false) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri -> selectedImageUri = uri }
     )
     val focusManager = LocalFocusManager.current
+    val canSave = confirmPassword.isEmpty() || password == confirmPassword    // đổi pass → phải khớp
     Scaffold(
         containerColor = BackgroundColor,
         topBar = {
@@ -103,10 +117,14 @@ fun EditProfileScreen(
             ) {
                 Button(
                     onClick = {
-                        userVM.saveChanges(context,username, email, phone,password,role, selectedImageUri) {
+                        if (password.isNotEmpty() && password != confirmPassword) {
+                            return@Button // không làm gì, UI đã hiện lỗi rồi
+                        }
+                        userVM.saveChanges(context,username, email, phone,password,confirmPassword,role, selectedImageUri) {
                             navController.popBackStack() // Go back when finished
                         }
                     },
+                    enabled = canSave,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(54.dp),
@@ -239,7 +257,85 @@ fun EditProfileScreen(
                 keyboardType = KeyboardType.Phone
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
+            // ── Password ───────────────────────────────────────────────────
+            FieldLabel("Password", 13, FontWeight.Medium)
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                placeholder = { Text("••••••••", color = TextHint, fontSize = 14.sp) },
+                singleLine = true,
+                visualTransformation = if (passwordVisible) VisualTransformation.None
+                else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Default.Visibility
+                            else Icons.Default.VisibilityOff,
+                            contentDescription = null,
+                            tint = TextSecondary
+                        )
+                    }
+                },
+                colors = registerTextFieldColors(),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = LocalTextStyle.current.copy(
+                    color = TextPrimary,
+                    fontSize = 15.sp
+                )
+            )
+
+            Spacer(Modifier.height(18.dp))
+
+            // ── Confirm Password ───────────────────────────────────────────
+            FieldLabel("Confirm Password", 13, FontWeight.Medium)
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = confirmPassword,
+                onValueChange = { confirmPassword = it },
+                placeholder = { Text("••••••••", color = TextHint, fontSize = 14.sp) },
+                singleLine = true,
+                visualTransformation = if (confirmVisible) VisualTransformation.None
+                else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    IconButton(onClick = { confirmVisible = !confirmVisible }) {
+                        Icon(
+                            imageVector = if (confirmVisible) Icons.Default.Visibility
+                            else Icons.Default.VisibilityOff,
+                            contentDescription = null,
+                            tint = TextSecondary
+                        )
+                    }
+                },
+                colors = registerTextFieldColors(
+                    // Highlight red border if passwords don't match
+                    focusedBorder = if (confirmPassword.isNotEmpty() && confirmPassword != password)
+                        Color(0xFFE53935) else GoldPrimary,
+                    unfocusedBorder = if (confirmPassword.isNotEmpty() && confirmPassword != password)
+                        Color(0xFFE53935).copy(alpha = 0.6f) else BorderColor
+                ),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = LocalTextStyle.current.copy(
+                    color = TextPrimary,
+                    fontSize = 15.sp
+                )
+            )
+
+            // Passwords don't match warning
+            if (confirmPassword.isNotEmpty() && confirmPassword != password) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "Passwords do not match",
+                    color = Color(0xFFE53935),
+                    fontSize = 12.sp,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }
