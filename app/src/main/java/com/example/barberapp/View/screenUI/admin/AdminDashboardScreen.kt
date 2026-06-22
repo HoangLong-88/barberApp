@@ -25,6 +25,7 @@ import com.example.barberapp.View.component.*
 import com.example.barberapp.ViewModel.*
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.compose.ui.platform.LocalLocale
 
 @Composable
 fun AdminDashboardScreen(
@@ -155,7 +156,7 @@ fun BookingTabContent(viewModel: AdminViewModel) {
     val selectedDateFilter by viewModel.selectedDateFilter
     val searchQuery by viewModel.searchQuery
     
-    val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val sdf = SimpleDateFormat("dd/MM/yyyy", LocalLocale.current.platformLocale)
     val today = Calendar.getInstance().apply { set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0) }.time
     val todayStr = sdf.format(today)
     

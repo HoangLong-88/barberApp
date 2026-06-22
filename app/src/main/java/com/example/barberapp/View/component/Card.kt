@@ -470,7 +470,7 @@ fun BarberDetailsCardInCustomer(barber: Employee?) {
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text       = barber?.name?:"Loading...".first().toString(),
+                    text       = barber?.name?.firstOrNull()?.uppercase()?:"Loading...",
                     color      = TextPrimary,
                     fontWeight = FontWeight.Bold,
                     fontSize   = 18.sp

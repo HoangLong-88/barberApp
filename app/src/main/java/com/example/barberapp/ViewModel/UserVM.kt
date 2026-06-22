@@ -48,44 +48,73 @@ class UserVM : ViewModel() {
         name: String,
         email: String,
         phone: String,
-        password: String,
+        newPassword: String,
+        confirmPassword: String,
         role: String,
         newUri: Uri?,
         onDone: () -> Unit,
     ) {
-        val uid = userRepo.getCurrentUID() ?: return
         val current = userData ?: return
 
-        if (newUri != null && newUri.scheme != "https") {
-            // Theo logic đồng nghiệp: Chuyển ảnh sang Base64
+        val isChangingPassword = confirmPassword.isNotEmpty() && newPassword == confirmPassword
+        val passwordToSave = if (isChangingPassword) newPassword else current.password
+
+        // ── Build updatedUser ──────────────────────────────────────────────────
+        val updatedUser = if (newUri != null && newUri.scheme != "https") {
             val base64Avatar = uriToBase64(context, newUri) ?: ""
-            val updatedUser = current.copy(
-                name = name,
-                email = email,
-                phone = phone,
-                password = password,
-                role = role,
-                avatarUrl = base64Avatar
-            )
-            userRepo.updateProfile(updatedUser) { success ->
-                if (success) fetchUserProfile()
-                onDone()
+            current.copy(name = name, email = email, phone = phone, password = passwordToSave, role = role, avatarUrl = base64Avatar)
+        } else {
+            current.copy(name = name, email = email, phone = phone, password = passwordToSave, role = role)
+        }
+
+        // ── Nếu đổi password → update Firebase Auth trước, rồi mới Firestore ──
+        if (isChangingPassword) {
+            userRepo.updateAuthPassword(newPassword) { success, error ->
+                if (success) {
+                    userRepo.updateProfile(updatedUser) { dbSuccess ->
+                        if (dbSuccess) fetchUserProfile()
+                        onDone()
+                    }
+                } else {
+                    // Auth thất bại → không update Firestore, báo lỗi
+                    android.widget.Toast.makeText(
+                        context,
+                        "Đổi mật khẩu thất bại: $error",
+                        android.widget.Toast.LENGTH_LONG
+                    ).show()
+                    onDone()
+                }
             }
         } else {
-            // Nếu không thay ảnh, chỉ cập nhật các textfield
-            val updatedUser = current.copy(
-                name = name,
-                email = email,
-                phone = phone,
-                password = password,
-                role = role
-            )
+            // Không đổi pass → update Firestore thẳng
             userRepo.updateProfile(updatedUser) { success ->
                 if (success) fetchUserProfile()
                 onDone()
             }
         }
     }
+
+    // ── Overload cho admin (không có confirm password) ─────────────────────────
+    fun saveChanges(
+        context: Context,
+        name: String,
+        email: String,
+        phone: String,
+        password: String,
+        role: String,
+        newUri: Uri?,
+        onDone: () -> Unit,
+    ) = saveChanges(
+        context         = context,
+        name            = name,
+        email           = email,
+        phone           = phone,
+        newPassword     = password,
+        confirmPassword = "",   // empty → isChangingPassword = false → giữ pass cũ
+        role            = role,
+        newUri          = newUri,
+        onDone          = onDone
+    )
 
     fun clearData() {
         userData = null
